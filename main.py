@@ -10,9 +10,8 @@ from telethon import TelegramClient
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
-from androguard.core.bytecodes.apk import APK
 
-# --- DATOS FIJOS (Costa Rica GMT-6) ---
+# --- DATOS FIJOS ---
 ADMIN_ID = 761087529 
 DRIVE_FOLDER_ID = "1Pyst-T_TTycEl2R1vvtfu_cs1_WKHCaB"
 SHEET_ID = "1PcyhKm0lPIVdtXma_3i5VlvzsJnvHfse-qzjDSx4BOo"
@@ -24,23 +23,38 @@ CHANNEL_ID = int(os.environ['TELEGRAM_CHANNEL_ID'])
 SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-def get_best_icon_path(file_path):
-    """Usa AAPT para listar todos los iconos y devuelve el de mayor resolución"""
+def extraer_todo_con_aapt(file_path):
+    """Extrae absolutamente toda la info usando la herramienta oficial de Android"""
+    pkg, ver, label, icon_path = None, None, None, None
     try:
         cmd = ['aapt', 'dump', 'badging', file_path]
         result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore')
-        output = result.stdout
-        # Capturamos iconos de todas las densidades
-        icons = re.findall(r"application-icon-\d+:'([^']+)'", output)
-        default_icon = re.search(r"icon='([^']+)'", output)
-        if default_icon: icons.append(default_icon.group(1))
-        # Filtramos solo imágenes reales (no XML)
-        valid = [i for i in icons if i.lower().endswith(('.png', '.webp', '.jpg'))]
-        return valid[-1] if valid else (os.path.basename(default_icon.group(1)).replace('.xml','') if default_icon else None)
-    except: return None
+        out = result.stdout
+        
+        # 1. Datos técnicos
+        pkg = re.search(r"package: name='([^']+)'", out).group(1)
+        ver = int(re.search(r"versionCode='([^']+)'", out).group(1))
+        
+        # 2. Nombre de la App
+        label_match = re.search(r"application-label:'([^']+)'", out)
+        if not label_match: label_match = re.search(r"application-label-es:'([^']+)'", out)
+        label = label_match.group(1) if label_match else pkg
+
+        # 3. Ruta del Icono (Buscamos la mejor resolución)
+        icons = re.findall(r"application-icon-\d+:'([^']+)'", out)
+        if not icons:
+            icon_std = re.search(r"icon='([^']+)'", out)
+            if icon_std: icons.append(icon_std.group(1))
+        
+        # Filtramos para evitar XMLs (iconos adaptativos) que Telegram no procesa
+        icon_path = next((i for i in reversed(icons) if i.lower().endswith(('.png', '.webp', '.jpg'))), None)
+        
+    except Exception as e:
+        print(f"Error crítico AAPT: {e}")
+    return pkg, ver, label, icon_path
 
 async def main():
-    print("🌍 Iniciando Extractor Nivel Dios...")
+    print("🌍 Iniciando Extractor Blindado v5...")
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
     drive_service = build('drive', 'v3', credentials=creds)
@@ -49,6 +63,7 @@ async def main():
     client = TelegramClient('bot_session', API_ID, API_HASH)
     await client.start(bot_token=BOT_TOKEN)
 
+    # Leemos IDs ya procesados para no repetir
     registros = sheet.get_all_records()
     procesados = [str(r['ID_Drive']) for r in registros if 'ID_Drive' in r and str(r['ID_Drive']).strip()]
 
@@ -61,7 +76,7 @@ async def main():
             file_id, file_name = item['id'], item['name']
             if not file_name.lower().endswith('.apk') or file_id in procesados: continue
 
-            await client.send_message(ADMIN_ID, f"🔎 **Analizando:** `{file_name}`")
+            await client.send_message(ADMIN_ID, f"🕵️ **Procesando:** `{file_name}`")
             
             # Descarga
             request = drive_service.files().get_media(fileId=file_id)
@@ -72,44 +87,46 @@ async def main():
             fh.seek(0)
             with open("temp.apk", "wb") as f: f.write(fh.read())
 
-            apk = APK("temp.apk")
-            pkg, ver, label = apk.get_package(), int(apk.get_androidversion_code()), apk.get_app_name()
-            icon_msg_id, ext_icon = "", "icon_final.png"
+            # Análisis total con AAPT
+            pkg, ver, label, icon_internal_path = extraer_todo_con_aapt("temp.apk")
+            
+            if not pkg:
+                await client.send_message(ADMIN_ID, f"❌ Imposible leer `{file_name}`. Archivo corrupto.")
+                continue
 
-            # --- EXTRACCIÓN AGRESIVA ---
-            hint = get_best_icon_path("temp.apk")
-            try:
-                with zipfile.ZipFile("temp.apk", 'r') as z:
-                    all_files = z.namelist()
-                    target = None
-                    if hint in all_files and hint.lower().endswith(('.png', '.webp')):
-                        target = hint
-                    else:
-                        search = hint if hint else "ic_launcher"
-                        matches = [f for f in all_files if search in f and f.lower().endswith(('.png', '.webp'))]
-                        if matches:
-                            matches.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
-                            target = matches[0]
+            icon_msg_id = ""
+            temp_icon = "extracted_icon.png"
 
-                    if target:
-                        with z.open(target) as s, open(ext_icon, "wb") as t: t.write(s.read())
-                        m_icon = await client.send_file(CHANNEL_ID, ext_icon, caption=f"🖼 Icono de {label}")
-                        icon_msg_id = str(m_icon.id)
-                        await client.send_message(ADMIN_ID, f"✅ Icono extraído de: `{target}`")
-                    else:
-                        await client.send_message(ADMIN_ID, "❌ No se encontró imagen PNG/WebP para el icono.")
-            except Exception as e: await client.send_message(ADMIN_ID, f"⚠️ Error icono: {e}")
+            # Extracción física del icono desde el ZIP
+            if icon_internal_path:
+                try:
+                    with zipfile.ZipFile("temp.apk", 'r') as z:
+                        with z.open(icon_internal_path) as source, open(temp_icon, "wb") as target:
+                            target.write(source.read())
+                    
+                    # Subir foto del icono al canal
+                    msg_foto = await client.send_file(CHANNEL_ID, temp_icon, caption=f"🖼 Icono de {label}")
+                    icon_msg_id = str(msg_foto.id)
+                except Exception as e:
+                    await client.send_message(ADMIN_ID, f"⚠️ No pude sacar el icono de `{label}`: {e}")
 
-            # Subida APK
+            # Subir el APK al canal
             caption = f"✅ **{label}**\n📦 `{pkg}`\n🔢 v{ver}"
-            msg_apk = await client.send_file(CHANNEL_ID, "temp.apk", caption=caption, thumb=ext_icon if os.path.exists(ext_icon) else None)
+            msg_apk = await client.send_file(
+                CHANNEL_ID, 
+                "temp.apk", 
+                caption=caption, 
+                thumb=temp_icon if os.path.exists(temp_icon) else None
+            )
 
-            # Guardar en Excel (A-H)
+            # --- GUARDAR EN GOOGLE SHEETS ---
+            # Asegúrate de que el orden sea: Nombre|Estado|Notas|Ver|Pkg|MsgID|DriveID|IconoURL
             sheet.append_row([label, "Publicado", "Auto", ver, pkg, str(msg_apk.id), file_id, icon_msg_id])
             
+            # Limpieza
             if os.path.exists("temp.apk"): os.remove("temp.apk")
-            if os.path.exists(ext_icon): os.remove(ext_icon)
-            await client.send_message(ADMIN_ID, f"✨ `{label}` completada con éxito.")
+            if os.path.exists(temp_icon): os.remove(temp_icon)
+            await client.send_message(ADMIN_ID, f"✨ `{label}` publicado con éxito.")
 
 if __name__ == "__main__":
     asyncio.run(main())

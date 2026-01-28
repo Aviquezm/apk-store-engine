@@ -1,0 +1,33 @@
+{
+    "name": "Mi Tienda Privada",
+    "description": "Repositorio Autom\u00e1tico",
+    "apps": [
+        {
+            "name": "Shazam",
+            "packageName": "com.shazam.android",
+            "versionCode": 1602500,
+            "versionName": "v1602500",
+            "description": "Actualizado via Telegram Bot",
+            "downloadUrl": "https://t.me/c/3670940859/38",
+            "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
+        },
+        {
+            "name": "Shazam",
+            "packageName": "com.shazam.android",
+            "versionCode": 1602500,
+            "versionName": "v1602500",
+            "description": "Actualizado via Telegram Bot",
+            "downloadUrl": "https://t.me/c/3670940859/39",
+            "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
+        },
+        {
+            "name": "Spotify",
+            "packageName": "com.spotify.music",
+            "versionCode": 137373606,
+            "versionName": "v137373606",
+            "description": "Actualizado via Telegram Bot",
+            "downloadUrl": "https://t.me/c/3670940859/40",
+            "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
+        }
+    ]
+}

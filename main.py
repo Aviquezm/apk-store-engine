@@ -6,7 +6,7 @@ from telethon import TelegramClient
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
-from androguard.core.bytecodes.apk import APK
+from androguard import APK
 
 # 1. Cargar configuración desde los Secrets de GitHub
 # Estos datos son los que ya metiste en la "caja fuerte" de GitHub

@@ -1,14 +1,14 @@
 {
-    "name": "Mi Tienda Privada",
-    "description": "Repositorio Autom\u00e1tico",
+    "name": "Mi Tienda APK Privada",
+    "description": "Repositorio autom\u00e1tico y seguro",
     "apps": [
         {
             "name": "Droid-ify",
             "packageName": "com.looker.droidify",
             "versionCode": 680,
             "versionName": "v680",
-            "description": "Actualizado via Telegram Bot",
-            "downloadUrl": "https://t.me/c/3670940859/49",
+            "description": "ID: com.looker.droidify",
+            "downloadUrl": "https://t.me/c/3670940859/51",
             "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
         },
         {
@@ -16,8 +16,8 @@
             "packageName": "com.machiav3lli.fdroid",
             "versionCode": 1205,
             "versionName": "v1205",
-            "description": "Actualizado via Telegram Bot",
-            "downloadUrl": "https://t.me/c/3670940859/50",
+            "description": "ID: com.machiav3lli.fdroid",
+            "downloadUrl": "https://t.me/c/3670940859/52",
             "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
         }
     ]

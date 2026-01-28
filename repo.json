@@ -10,6 +10,24 @@
             "description": "Actualizado via Telegram Bot",
             "downloadUrl": "https://t.me/c/3670940859/42",
             "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
+        },
+        {
+            "name": "",
+            "packageName": "com.shazam.android",
+            "versionCode": 1602500,
+            "versionName": "v1602500",
+            "description": "Actualizado via Telegram Bot",
+            "downloadUrl": "https://t.me/c/3670940859/43",
+            "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
+        },
+        {
+            "name": "",
+            "packageName": "de.blinkt.openvpn",
+            "versionCode": 217,
+            "versionName": "v217",
+            "description": "Actualizado via Telegram Bot",
+            "downloadUrl": "https://t.me/c/3670940859/44",
+            "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
         }
     ]
 }

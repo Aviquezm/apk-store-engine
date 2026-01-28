@@ -28,6 +28,24 @@
             "description": "Actualizado via Telegram Bot",
             "downloadUrl": "https://t.me/c/3670940859/44",
             "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
+        },
+        {
+            "name": "",
+            "packageName": "com.looker.droidify",
+            "versionCode": 680,
+            "versionName": "v680",
+            "description": "Actualizado via Telegram Bot",
+            "downloadUrl": "https://t.me/c/3670940859/45",
+            "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
+        },
+        {
+            "name": "",
+            "packageName": "com.machiav3lli.fdroid",
+            "versionCode": 1205,
+            "versionName": "v1205",
+            "description": "Actualizado via Telegram Bot",
+            "downloadUrl": "https://t.me/c/3670940859/46",
+            "icon": "https://cdn-icons-png.flaticon.com/512/873/873107.png"
         }
     ]
 }

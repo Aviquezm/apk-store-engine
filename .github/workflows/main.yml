@@ -1,11 +1,11 @@
 name: Tienda APK Automática
 on:
-  workflow_dispatch: # Botón manual
+  workflow_dispatch:
   schedule:
-    - cron: '*/30 * * * *' # ¡AUTOMÁTICO CADA 30 MINUTOS!
+    - cron: '*/30 * * * *' # Ejecutar automáticamente cada 30 min
 
 permissions:
-  contents: write # Permiso para guardar el repo.json
+  contents: write # Permiso para guardar el repo.json y publicarlo
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Instalar herramientas
+      - name: Instalar herramientas Android (AAPT)
         run: |
           sudo apt-get update
           sudo apt-get install -y aapt
@@ -41,8 +41,8 @@ jobs:
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
         run: python generar_json.py
 
-      - name: 3. Publicar cambios (Guardar repo.json)
+      - name: 3. Publicar cambios
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "🔄 Actualizar catálogo (Auto)"
+          commit_message: "🔄 Actualizar catálogo con Iconos"
           file_pattern: repo.json

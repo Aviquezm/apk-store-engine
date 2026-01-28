@@ -26,7 +26,7 @@ async def main():
     drive_service = build('drive', 'v3', credentials=creds)
     
     # Abrimos la hoja por su nombre exacto
-    sheet = client_gs.open("Control Tienda APK").sheet1
+    sheet = client_gs.open_by_key("1PcyhKm0lPIVdtXma_3i5VlvzsJnvHfse-qzjDSx4BOo").sheet1
     filas = sheet.get_all_records()
 
     # --- CONEXIÓN A TELEGRAM (MTProto con Identidad de Bot) ---

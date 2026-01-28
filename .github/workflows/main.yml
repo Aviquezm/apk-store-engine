@@ -1,0 +1,23 @@
+name: Ejecutar Tienda APK
+on:
+  workflow_dispatch: # Permite ejecutarlo manualmente
+  schedule:
+    - cron: '0 * * * *' # Se ejecuta cada hora automáticamente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Instalar librerías
+        run: pip install -r requirements.txt
+      - name: Correr Script
+        env:
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: python main.py

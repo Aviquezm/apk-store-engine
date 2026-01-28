@@ -1,7 +1,7 @@
 telethon
 gspread
 oauth2client
-androguard==3.4.0
+androguard==3.3.5
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib

@@ -1,8 +1,11 @@
-name: Ejecutar Tienda APK
+name: Tienda APK Automática
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Botón manual
   schedule:
-    - cron: '0 * * * *' # Ejecutar cada hora
+    - cron: '*/30 * * * *' # ¡AUTOMÁTICO CADA 30 MINUTOS!
+
+permissions:
+  contents: write # Permiso para guardar el repo.json
 
 jobs:
   build:
@@ -10,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Instalar herramientas Android (AAPT)
+      - name: Instalar herramientas
         run: |
           sudo apt-get update
           sudo apt-get install -y aapt
@@ -20,15 +23,26 @@ jobs:
         with:
           python-version: '3.10'
           
-      - name: Instalar librerías Python
+      - name: Instalar librerías
         run: pip install -r requirements.txt
         
-      - name: Correr Script
+      - name: 1. Procesar APKs (Drive -> Telegram)
         env:
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
-          # Si no agregaste el secreto de la carpeta, usa el ID fijo en el código python
         run: python main.py
+
+      - name: 2. Generar Catálogo (Excel -> JSON)
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+        run: python generar_json.py
+
+      - name: 3. Publicar cambios (Guardar repo.json)
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "🔄 Actualizar catálogo (Auto)"
+          file_pattern: repo.json

@@ -28,6 +28,15 @@
             "description": "ID: com.pranavpandey.matrix",
             "downloadUrl": "https://t.me/c/3670940859/86",
             "icon": "https://t.me/c/3670940859/85"
+        },
+        {
+            "name": "Shazam",
+            "packageName": "com.shazam.android",
+            "versionCode": 1602600,
+            "versionName": "v1602600",
+            "description": "ID: com.shazam.android",
+            "downloadUrl": "https://t.me/c/3670940859/88",
+            "icon": "https://t.me/c/3670940859/87"
         }
     ]
 }

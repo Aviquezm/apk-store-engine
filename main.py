@@ -12,7 +12,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 
-# --- CONFIGURACIÓN DE SEGURIDAD (SECRETS) ---
+# --- CONFIGURACIÓN ---
 ADMIN_ID = int(os.environ['ADMIN_ID'])
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
@@ -21,6 +21,7 @@ API_ID = int(os.environ['TELEGRAM_API_ID'])
 API_HASH = os.environ['TELEGRAM_API_HASH']
 BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 CHANNEL_ID = int(os.environ['TELEGRAM_CHANNEL_ID'])
+
 SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 
 SCOPE = [
@@ -29,78 +30,109 @@ SCOPE = [
 ]
 
 # ---------------------------------------------------------
-# 🔍 CAZA ICONO REAL (VERSIÓN PRO + BONUS)
+# 🔍 FUNCIÓN DEFINITIVA PARA EXTRAER ICONO REAL
 # ---------------------------------------------------------
 def cazar_icono_real(apk_path):
     try:
-        cmd = ['aapt', 'dump', 'badging', apk_path]
         out = subprocess.run(
-            cmd,
+            ['aapt', 'dump', 'badging', apk_path],
             capture_output=True,
             text=True,
             encoding='utf-8',
             errors='ignore'
         ).stdout
 
-        # 1️⃣ Capturar todos los iconos declarados
-        icon_entries = re.findall(r"application-icon-\d+:'([^']+)'", out)
+        icon_xml_match = re.search(
+            r"application-icon-\d+:'([^']+\.xml)'", out
+        )
 
         prioridades = ['xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi', 'mdpi']
-        candidatos = []
 
         with zipfile.ZipFile(apk_path, 'r') as z:
-            nombres = z.namelist()
+            names = z.namelist()
 
-            # 2️⃣ Buscar PNG reales asociados a los iconos
+            # ===============================
+            # 1️⃣ ADAPTIVE ICON (XML)
+            # ===============================
+            if icon_xml_match:
+                xml_path = icon_xml_match.group(1)
+
+                if xml_path in names:
+                    xml_data = z.read(xml_path).decode(errors='ignore')
+
+                    drawables = re.findall(
+                        r'@(?:mipmap|drawable)/([a-zA-Z0-9_]+)',
+                        xml_data
+                    )
+
+                    candidatos = []
+                    for d in drawables:
+                        for n in names:
+                            if (
+                                d in n
+                                and n.lower().endswith('.png')
+                                and 'mipmap' in n.lower()
+                            ):
+                                candidatos.append(n)
+
+                    if candidatos:
+                        candidatos.sort(
+                            key=lambda x: z.getinfo(x).file_size,
+                            reverse=True
+                        )
+                        return candidatos[0]
+
+            # ===============================
+            # 2️⃣ ICONOS CLÁSICOS
+            # ===============================
+            icon_entries = re.findall(
+                r"application-icon-\d+:'([^']+)'", out
+            )
+
+            candidatos = []
             for icon in icon_entries:
                 base = os.path.splitext(os.path.basename(icon))[0]
-
-                for n in nombres:
+                for n in names:
                     if (
                         base in n
-                        and n.lower().endswith(('.png', '.webp'))
-                        and 'drawable' not in n.lower()
+                        and n.lower().endswith('.png')
+                        and 'mipmap' in n.lower()
                     ):
                         candidatos.append(n)
 
-            # 3️⃣ Fallback agresivo si no hay match directo
-            if not candidatos:
-                for n in nombres:
-                    if (
-                        ('launcher' in n.lower() or 'icon' in n.lower())
-                        and n.lower().endswith(('.png', '.webp'))
-                        and 'drawable' not in n.lower()
-                        and 'v26' not in n.lower()
-                    ):
-                        candidatos.append(n)
+            if candidatos:
+                candidatos.sort(
+                    key=lambda x: z.getinfo(x).file_size,
+                    reverse=True
+                )
+                return candidatos[0]
 
-            if not candidatos:
-                return None
+            # ===============================
+            # 3️⃣ FALLBACK REAL (último recurso)
+            # ===============================
+            pngs = [
+                n for n in names
+                if n.lower().endswith('.png')
+                and 'mipmap' in n.lower()
+            ]
 
-            # 4️⃣ Ordenar por densidad + tamaño
-            def score(path):
-                size = z.getinfo(path).file_size
-                density_score = 0
-                for i, p in enumerate(prioridades):
-                    if p in path:
-                        density_score = 10 - i
-                        break
-                return (density_score, size)
-
-            candidatos.sort(key=score, reverse=True)
-            return candidatos[0]
+            if pngs:
+                pngs.sort(
+                    key=lambda x: z.getinfo(x).file_size,
+                    reverse=True
+                )
+                return pngs[0]
 
     except Exception as e:
-        print(f"❌ Error cazando icono: {e}")
+        print(f"❌ Error extrayendo icono: {e}")
 
     return None
-
 
 # ---------------------------------------------------------
 # 🚀 MAIN
 # ---------------------------------------------------------
 async def main():
-    print("🚀 Iniciando Extractor Atómico v8...")
+    print("🚀 Iniciando Extractor Atómico v9...")
 
     creds = ServiceAccountCredentials.from_json_keyfile_dict(
         SERVICE_ACCOUNT_JSON, SCOPE
@@ -133,7 +165,7 @@ async def main():
 
             await client.send_message(
                 ADMIN_ID,
-                f"🕵️ **Analizando:** `{file_name}`"
+                f"🕵️ Analizando `{file_name}`"
             )
 
             temp_apk = "temp.apk"
@@ -141,7 +173,7 @@ async def main():
             DEFAULT_ICON = "default_icon.png"
 
             try:
-                # 📥 DESCARGA APK
+                # 📥 Descargar APK
                 request = drive_service.files().get_media(fileId=file_id)
                 fh = io.BytesIO()
                 downloader = MediaIoBaseDownload(fh, request)
@@ -154,7 +186,7 @@ async def main():
                 with open(temp_apk, "wb") as f:
                     f.write(fh.read())
 
-                # 📦 INFO APK
+                # 📦 Info APK
                 out = subprocess.run(
                     ['aapt', 'dump', 'badging', temp_apk],
                     capture_output=True,
@@ -165,10 +197,10 @@ async def main():
 
                 pkg = re.search(r"package: name='([^']+)'", out).group(1)
                 ver = re.search(r"versionCode='([^']+)'", out).group(1)
-                label_match = re.search(r"application-label:'([^']+)'", out)
-                label = label_match.group(1) if label_match else pkg
+                label_m = re.search(r"application-label:'([^']+)'", out)
+                label = label_m.group(1) if label_m else pkg
 
-                # 🎯 ICONO REAL
+                # 🎯 ICONO
                 ruta_icono = cazar_icono_real(temp_apk)
                 usa_default = True
 
@@ -176,42 +208,37 @@ async def main():
                     with zipfile.ZipFile(temp_apk, 'r') as z:
                         with z.open(ruta_icono) as src, open(final_icon, "wb") as trg:
                             trg.write(src.read())
-
                     usa_default = False
                     await client.send_message(
                         ADMIN_ID,
-                        f"🎯 **Icono REAL:** `{ruta_icono}`"
+                        f"🎯 Icono real: `{ruta_icono}`"
                     )
 
                 if usa_default and os.path.exists(DEFAULT_ICON):
                     shutil.copyfile(DEFAULT_ICON, final_icon)
                     await client.send_message(
                         ADMIN_ID,
-                        f"⚠️ Usando icono default para `{label}`"
+                        f"⚠️ Usando icono default"
                     )
 
-                # 📤 SUBIR A TELEGRAM
+                # 📤 Subir a Telegram
                 icon_msg_id = ""
                 if os.path.exists(final_icon):
                     msg_icon = await client.send_file(
                         CHANNEL_ID,
                         final_icon,
-                        caption=f"🖼 Icono: {label}"
+                        caption=f"🖼 {label}"
                     )
                     icon_msg_id = str(msg_icon.id)
 
                 msg_apk = await client.send_file(
                     CHANNEL_ID,
                     temp_apk,
-                    caption=(
-                        f"✅ **{label}**\n"
-                        f"📦 `{pkg}`\n"
-                        f"🔢 v{ver}"
-                    ),
+                    caption=f"✅ **{label}**\n📦 `{pkg}`\n🔢 v{ver}",
                     thumb=final_icon if os.path.exists(final_icon) else None
                 )
 
-                # 📊 GOOGLE SHEET
+                # 📊 Sheet
                 sheet.append_row([
                     label,
                     "Publicado",
@@ -225,13 +252,13 @@ async def main():
 
                 await client.send_message(
                     ADMIN_ID,
-                    f"✨ `{label}` listo y publicado."
+                    f"✨ `{label}` publicado correctamente"
                 )
 
             except Exception as e:
                 await client.send_message(
                     ADMIN_ID,
-                    f"🔥 Error procesando `{file_name}`:\n`{e}`"
+                    f"🔥 Error: `{e}`"
                 )
 
             finally:
@@ -239,7 +266,6 @@ async def main():
                     os.remove(temp_apk)
                 if os.path.exists(final_icon):
                     os.remove(final_icon)
-
 
 # ---------------------------------------------------------
 # ▶️ RUN

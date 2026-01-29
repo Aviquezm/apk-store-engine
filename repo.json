@@ -3,22 +3,31 @@
     "description": "Repositorio autom\u00e1tico y seguro",
     "apps": [
         {
-            "name": "Droid-ify",
-            "packageName": "com.looker.droidify",
-            "versionCode": 680,
-            "versionName": "v680",
-            "description": "ID: com.looker.droidify",
-            "downloadUrl": "https://t.me/c/3670940859/78",
-            "icon": "https://t.me/c/3670940859/77"
+            "name": "Dead Pixel Fix",
+            "packageName": "com.zoox.deadpixelfix",
+            "versionCode": 52,
+            "versionName": "v52",
+            "description": "ID: com.zoox.deadpixelfix",
+            "downloadUrl": "https://t.me/c/3670940859/82",
+            "icon": "https://t.me/c/3670940859/81"
         },
         {
-            "name": "Neo Store",
-            "packageName": "com.machiav3lli.fdroid",
-            "versionCode": 1205,
-            "versionName": "v1205",
-            "description": "ID: com.machiav3lli.fdroid",
-            "downloadUrl": "https://t.me/c/3670940859/80",
-            "icon": "https://t.me/c/3670940859/79"
+            "name": "OpenVPN for Android",
+            "packageName": "de.blinkt.openvpn",
+            "versionCode": 218,
+            "versionName": "v218",
+            "description": "ID: de.blinkt.openvpn",
+            "downloadUrl": "https://t.me/c/3670940859/84",
+            "icon": "https://t.me/c/3670940859/83"
+        },
+        {
+            "name": "Barquode",
+            "packageName": "com.pranavpandey.matrix",
+            "versionCode": 89,
+            "versionName": "v89",
+            "description": "ID: com.pranavpandey.matrix",
+            "downloadUrl": "https://t.me/c/3670940859/86",
+            "icon": "https://t.me/c/3670940859/85"
         }
     ]
 }

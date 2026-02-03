@@ -3,13 +3,22 @@
     "description": "Repositorio autom\u00e1tico y seguro",
     "apps": [
         {
+            "name": "Shazam",
+            "packageName": "com.shazam.android",
+            "versionCode": 1602600,
+            "versionName": "v1602600",
+            "description": "ID: com.shazam.android",
+            "downloadUrl": "https://t.me/c/3670940859/90",
+            "icon": "https://t.me/c/3670940859/89"
+        },
+        {
             "name": "Dead Pixel Fix",
             "packageName": "com.zoox.deadpixelfix",
             "versionCode": 52,
             "versionName": "v52",
             "description": "ID: com.zoox.deadpixelfix",
-            "downloadUrl": "https://t.me/c/3670940859/82",
-            "icon": "https://t.me/c/3670940859/81"
+            "downloadUrl": "https://t.me/c/3670940859/92",
+            "icon": "https://t.me/c/3670940859/91"
         },
         {
             "name": "OpenVPN for Android",
@@ -17,8 +26,8 @@
             "versionCode": 218,
             "versionName": "v218",
             "description": "ID: de.blinkt.openvpn",
-            "downloadUrl": "https://t.me/c/3670940859/84",
-            "icon": "https://t.me/c/3670940859/83"
+            "downloadUrl": "https://t.me/c/3670940859/94",
+            "icon": "https://t.me/c/3670940859/93"
         },
         {
             "name": "Barquode",
@@ -26,17 +35,8 @@
             "versionCode": 89,
             "versionName": "v89",
             "description": "ID: com.pranavpandey.matrix",
-            "downloadUrl": "https://t.me/c/3670940859/86",
-            "icon": "https://t.me/c/3670940859/85"
-        },
-        {
-            "name": "Shazam",
-            "packageName": "com.shazam.android",
-            "versionCode": 1602600,
-            "versionName": "v1602600",
-            "description": "ID: com.shazam.android",
-            "downloadUrl": "https://t.me/c/3670940859/88",
-            "icon": "https://t.me/c/3670940859/87"
+            "downloadUrl": "https://t.me/c/3670940859/96",
+            "icon": "https://t.me/c/3670940859/95"
         }
     ]
 }

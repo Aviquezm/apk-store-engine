@@ -29,98 +29,101 @@ SCOPE = [
 ]
 
 # ---------------------------------------------------------
-# 🔍 CAZA ICONO REAL (VERSIÓN DEFINITIVA "SIN CENSURA")
+# 🔍 CAZA ICONO REAL (FUERZA BRUTA - SIN ANDROGUARD)
 # ---------------------------------------------------------
 def cazar_icono_real(apk_path):
     try:
-        # 1. Preguntamos a AAPT dónde cree que están los iconos
+        # Usamos AAPT (Herramienta oficial) en lugar de librerías Python
         cmd = ['aapt', 'dump', 'badging', apk_path]
         out = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore').stdout
         
-        # Capturamos todas las rutas que AAPT mencione
+        # Buscar rutas de iconos reportadas por Android
         icon_entries = re.findall(r"application-icon-\d+:'([^']+)'", out)
         default_icon = re.search(r"icon='([^']+)'", out)
         if default_icon: icon_entries.append(default_icon.group(1))
 
-        # Listas de prioridad para desempatar
         prioridades = ['xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi', 'mdpi']
         candidatos = []
 
         with zipfile.ZipFile(apk_path, 'r') as z:
             nombres = z.namelist()
 
-            # ESTRATEGIA A: Buscamos la ruta EXACTA que dijo AAPT
-            # (Validando solo que sea imagen y no XML)
+            # 1. Buscar coincidencia exacta
             for icon_path in icon_entries:
                 if icon_path in nombres and icon_path.lower().endswith(('.png', '.webp', '.jpg')):
-                    return icon_path # ¡Lo encontramos a la primera!
+                    return icon_path 
 
-            # ESTRATEGIA B: Búsqueda por coincidencia de nombre
-            # Recolectamos nombres base (ej: si dice res/xml/ic_launcher.xml -> buscamos "ic_launcher")
+            # 2. Buscar por nombre base (ej: ic_launcher)
             nombres_base = set()
             for icon_path in icon_entries:
                 base = os.path.splitext(os.path.basename(icon_path))[0]
                 nombres_base.add(base)
             
-            # Si aapt no dijo nada útil, agregamos los nombres estándar
             if not nombres_base:
-                nombres_base.update(['ic_launcher', 'icon', 'app_icon'])
+                nombres_base.update(['ic_launcher', 'icon', 'app_icon', 'logo'])
 
             for n in nombres:
-                # El archivo debe ser imagen
-                if not n.lower().endswith(('.png', '.webp', '.jpg')):
-                    continue
-                
-                # IMPORTANTE: Ya NO filtramos "drawable". Buscamos en todas partes.
-                # Solo evitamos basura del sistema
-                if 'build-data' in n or 'META-INF' in n:
-                    continue
+                if not n.lower().endswith(('.png', '.webp', '.jpg')): continue
+                if 'build-data' in n or 'META-INF' in n: continue
 
-                # Chequeamos si el archivo tiene el nombre que buscamos
+                # Búsqueda laxa: Si contiene el nombre, sirve
                 nombre_archivo = os.path.basename(n).split('.')[0]
-                if any(base == nombre_archivo for base in nombres_base): # Coincidencia exacta de nombre
-                    candidatos.append(n)
-                elif any(base in nombre_archivo for base in nombres_base): # Coincidencia parcial
+                if any(base in nombre_archivo for base in nombres_base):
                     candidatos.append(n)
 
-            if not candidatos:
-                return None
+            if not candidatos: return None
 
-            # ESTRATEGIA C: Elegir el MEJOR de los candidatos (El más pesado suele ser el mejor)
+            # 3. Elegir la imagen más pesada/grande
             def score(path):
-                file_size = z.getinfo(path).file_size
-                density_bonus = 0
-                # Damos puntos extra si está en una carpeta de alta densidad
-                for i, p in enumerate(reversed(prioridades)):
-                    if p in path:
-                        density_bonus = (i + 1) * 10000 
-                        break
-                return density_bonus + file_size
+                try:
+                    return z.getinfo(path).file_size
+                except: return 0
 
             candidatos.sort(key=score, reverse=True)
             return candidatos[0]
 
     except Exception as e:
-        print(f"❌ Error cazando icono: {e}")
-
+        print(f"⚠️ Error leve cazando icono: {e}")
     return None
+
+def obtener_info_aapt(apk_path):
+    """Extrae datos usando SOLO aapt para evitar errores de Androguard"""
+    try:
+        cmd = ['aapt', 'dump', 'badging', apk_path]
+        res = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore')
+        out = res.stdout
+        
+        # Package
+        pkg_match = re.search(r"package: name='([^']+)'", out)
+        pkg = pkg_match.group(1) if pkg_match else "com.unknown.app"
+        
+        # Versión
+        ver_match = re.search(r"versionCode='([^']+)'", out)
+        ver = ver_match.group(1) if ver_match else "1"
+        
+        # Nombre (Label)
+        label_match = re.search(r"application-label:'([^']+)'", out)
+        label = label_match.group(1) if label_match else pkg
+        
+        return pkg, ver, label
+    except Exception:
+        return None, None, None
 
 # ---------------------------------------------------------
 # 🚀 MAIN
 # ---------------------------------------------------------
 async def main():
-    print("🚀 Iniciando Extractor Maestro v9...")
+    print("🚀 Iniciando Motor Blindado (Sin Androguard)...")
 
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
     drive_service = build('drive', 'v3', credentials=creds)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
-
+    
     client = TelegramClient('bot_session', API_ID, API_HASH)
     await client.start(bot_token=BOT_TOKEN)
 
     registros = sheet.get_all_records()
-    # Usamos un set para búsqueda rápida
     procesados = {str(r.get('ID_Drive')) for r in registros if r.get('ID_Drive')}
 
     query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
@@ -134,14 +137,13 @@ async def main():
             if not file_name.lower().endswith('.apk'): continue
             if file_id in procesados: continue
 
-            await client.send_message(ADMIN_ID, f"🕵️ **Analizando:** `{file_name}`")
-
+            await client.send_message(ADMIN_ID, f"🛡️ **Procesando:** `{file_name}`")
             temp_apk = "temp.apk"
             final_icon = "icon_final.png"
             DEFAULT_ICON = "default_icon.png"
 
             try:
-                # 1. DESCARGA APK
+                # 1. DESCARGA
                 request = drive_service.files().get_media(fileId=file_id)
                 fh = io.BytesIO()
                 downloader = MediaIoBaseDownload(fh, request)
@@ -150,19 +152,17 @@ async def main():
                 fh.seek(0)
                 with open(temp_apk, "wb") as f: f.write(fh.read())
 
-                # 2. INFO BÁSICA
-                out = subprocess.run(['aapt', 'dump', 'badging', temp_apk], capture_output=True, text=True, encoding='utf-8', errors='ignore').stdout
+                # 2. INFO CON AAPT (INDISPENSABLE PARA NO FALLAR)
+                pkg, ver, label = obtener_info_aapt(temp_apk)
                 
-                pkg_match = re.search(r"package: name='([^']+)'", out)
-                pkg = pkg_match.group(1) if pkg_match else "com.unknown"
-                
-                ver_match = re.search(r"versionCode='([^']+)'", out)
-                ver = ver_match.group(1) if ver_match else "1"
-                
-                label_match = re.search(r"application-label:'([^']+)'", out)
-                label = label_match.group(1) if label_match else pkg
+                if not pkg or pkg == "com.unknown.app":
+                    # Si falla AAPT, es que el archivo está muy corrupto
+                    await client.send_message(ADMIN_ID, f"❌ Archivo corrupto o ilegible: `{file_name}`. Saltando.")
+                    # Lo marcamos como procesado (con error) para que no se encicle
+                    sheet.append_row([file_name, "Error", "Corrupto", "", "", "", file_id, ""])
+                    continue
 
-                # 3. EXTRACCIÓN DE ICONO (REAL O DEFAULT)
+                # 3. EXTRAER ICONO
                 ruta_icono = cazar_icono_real(temp_apk)
                 usa_default = True
 
@@ -172,51 +172,31 @@ async def main():
                             with z.open(ruta_icono) as src, open(final_icon, "wb") as trg:
                                 trg.write(src.read())
                         usa_default = False
-                        await client.send_message(ADMIN_ID, f"🎯 **Icono REAL hallado:** `{ruta_icono}`")
-                    except Exception as e:
-                        print(f"Error extrayendo ruta hallada: {e}")
+                        await client.send_message(ADMIN_ID, f"🎯 Icono: `{ruta_icono}`")
+                    except: pass
 
-                # Si falló la extracción o no encontró nada, usa el default
-                if usa_default:
-                    if os.path.exists(DEFAULT_ICON):
-                        shutil.copyfile(DEFAULT_ICON, final_icon)
-                        await client.send_message(ADMIN_ID, f"⚠️ Usando icono default para `{label}` (No se halló PNG interno)")
-                    else:
-                         await client.send_message(ADMIN_ID, f"❌ ALERTA: No tienes `{DEFAULT_ICON}` en el repo.")
+                if usa_default and os.path.exists(DEFAULT_ICON):
+                    shutil.copyfile(DEFAULT_ICON, final_icon)
 
-                # 4. SUBIR A TELEGRAM
+                # 4. SUBIDAS
                 icon_msg_id = ""
-                # Subimos el icono solo como foto primero (para tener el ID del icono)
                 if os.path.exists(final_icon):
                     msg_icon = await client.send_file(CHANNEL_ID, final_icon, caption=f"🖼 Icono: {label}")
                     icon_msg_id = str(msg_icon.id)
 
-                # Subimos la APK (usando el mismo icono como miniatura visual)
                 msg_apk = await client.send_file(
-                    CHANNEL_ID,
-                    temp_apk,
+                    CHANNEL_ID, temp_apk, 
                     caption=f"✅ **{label}**\n📦 `{pkg}`\n🔢 v{ver}",
                     thumb=final_icon if os.path.exists(final_icon) else None
                 )
 
-                # 5. GUARDAR EN EXCEL (Orden Exacto: A->H)
-                # Nombre | Estado | Notas | Ver | Pkg | MsgID | DriveID | IconoURL
-                sheet.append_row([
-                    label, 
-                    "Publicado", 
-                    "Auto", 
-                    ver, 
-                    pkg, 
-                    str(msg_apk.id), 
-                    file_id, 
-                    icon_msg_id
-                ])
-
-                await client.send_message(ADMIN_ID, f"✨ `{label}` listo y publicado.")
+                # 5. GUARDAR
+                sheet.append_row([label, "Publicado", "Auto", ver, pkg, str(msg_apk.id), file_id, icon_msg_id])
+                await client.send_message(ADMIN_ID, f"✨ `{label}` publicado.")
 
             except Exception as e:
-                await client.send_message(ADMIN_ID, f"🔥 Error procesando `{file_name}`:\n`{str(e)}`")
-
+                await client.send_message(ADMIN_ID, f"🔥 Error grave en `{file_name}`: {e}")
+            
             finally:
                 if os.path.exists(temp_apk): os.remove(temp_apk)
                 if os.path.exists(final_icon): os.remove(final_icon)

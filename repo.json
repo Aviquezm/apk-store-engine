@@ -37,6 +37,15 @@
             "description": "ID: com.pranavpandey.matrix",
             "downloadUrl": "https://t.me/c/3670940859/96",
             "icon": "https://t.me/c/3670940859/95"
+        },
+        {
+            "name": "Fasting Tracker",
+            "packageName": "bodyfast.zero.fastingtracker.weightloss",
+            "versionCode": 133,
+            "versionName": "v133",
+            "description": "ID: bodyfast.zero.fastingtracker.weightloss",
+            "downloadUrl": "https://t.me/c/3670940859/98",
+            "icon": "https://t.me/c/3670940859/97"
         }
     ]
 }

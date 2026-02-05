@@ -1,12 +1,12 @@
 name: Tienda APK Automática (Dropbox)
 
 on:
-  workflow_dispatch: # Permite ejecutarlo manualmente con un botón
+  workflow_dispatch: 
   schedule:
-    - cron: '*/30 * * * *' # Se ejecuta cada 30 minutos
+    - cron: '*/30 * * * *' 
 
 permissions:
-  contents: write # INDISPENSABLE: Da permiso para guardar el archivo final
+  contents: write 
 
 jobs:
   build:
@@ -15,44 +15,31 @@ jobs:
       - name: 1. Checkout del código
         uses: actions/checkout@v3
 
-      - name: 2. Instalar herramientas Android (AAPT)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y aapt
-
-      - name: 3. Configurar Python
+      - name: 2. Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: 4. Instalar librerías necesarias
+      - name: 3. Instalar librerías necesarias
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 5. Ejecutar Motor Dropbox
+      - name: 4. Ejecutar Motor Principal (Drive -> Dropbox -> index.json)
         env:
-          # Secretos de Google
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           ADMIN_ID: ${{ secrets.ADMIN_ID }}
           DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
-          # Secretos de Dropbox
           DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
           DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
           DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
         run: python main.py
 
-      - name: 6. Generar Catálogo (Excel -> JSON)
-        env:
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          SHEET_ID: ${{ secrets.SHEET_ID }}
-          # Ya no necesitamos TELEGRAM_CHANNEL_ID aquí
-        run: python generar_json.py
-
-      - name: 7. Publicar cambios (El paso VITAL)
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "☁️ Actualización Dropbox [Skip CI]"
-          # AQUÍ ESTABA EL ERROR: Debe ser obtainium.json
-          file_pattern: obtainium.json
+      - name: 5. Guardar Cambios en GitHub (Indispensable para Droid-ify)
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          git add index.json
+          git commit -m "🚀 Repo actualizado: $(date +'%Y-%m-%d %H:%M')" || echo "Sin cambios que guardar"
+          git push

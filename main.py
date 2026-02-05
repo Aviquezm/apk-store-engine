@@ -7,199 +7,191 @@ import subprocess
 import re
 import zipfile
 import shutil
-from telethon import TelegramClient
+import dropbox
+from dropbox.files import WriteMode
+from dropbox.exceptions import ApiError
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 
-# --- CONFIGURACIÓN DE SEGURIDAD (SECRETS) ---
+# --- CONFIGURACIÓN ---
 ADMIN_ID = int(os.environ['ADMIN_ID'])
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
 
-API_ID = int(os.environ['TELEGRAM_API_ID'])
-API_HASH = os.environ['TELEGRAM_API_HASH']
-BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
-CHANNEL_ID = int(os.environ['TELEGRAM_CHANNEL_ID'])
+# Credenciales Dropbox (Sistema de Token Infinito)
+DBX_KEY = os.environ['DROPBOX_APP_KEY']
+DBX_SECRET = os.environ['DROPBOX_APP_SECRET']
+DBX_REFRESH_TOKEN = os.environ['DROPBOX_REFRESH_TOKEN']
+
 SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
-
-SCOPE = [
-    "https://spreadsheets.google.com/feeds",
-    "https://www.googleapis.com/auth/drive"
-]
+SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 🔍 CAZA ICONO REAL (FUERZA BRUTA - SIN ANDROGUARD)
+# FUNCIONES AUXILIARES
 # ---------------------------------------------------------
-def cazar_icono_real(apk_path):
-    try:
-        # Usamos AAPT (Herramienta oficial) en lugar de librerías Python
-        cmd = ['aapt', 'dump', 'badging', apk_path]
-        out = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore').stdout
-        
-        # Buscar rutas de iconos reportadas por Android
-        icon_entries = re.findall(r"application-icon-\d+:'([^']+)'", out)
-        default_icon = re.search(r"icon='([^']+)'", out)
-        if default_icon: icon_entries.append(default_icon.group(1))
-
-        prioridades = ['xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi', 'mdpi']
-        candidatos = []
-
-        with zipfile.ZipFile(apk_path, 'r') as z:
-            nombres = z.namelist()
-
-            # 1. Buscar coincidencia exacta
-            for icon_path in icon_entries:
-                if icon_path in nombres and icon_path.lower().endswith(('.png', '.webp', '.jpg')):
-                    return icon_path 
-
-            # 2. Buscar por nombre base (ej: ic_launcher)
-            nombres_base = set()
-            for icon_path in icon_entries:
-                base = os.path.splitext(os.path.basename(icon_path))[0]
-                nombres_base.add(base)
-            
-            if not nombres_base:
-                nombres_base.update(['ic_launcher', 'icon', 'app_icon', 'logo'])
-
-            for n in nombres:
-                if not n.lower().endswith(('.png', '.webp', '.jpg')): continue
-                if 'build-data' in n or 'META-INF' in n: continue
-
-                # Búsqueda laxa: Si contiene el nombre, sirve
-                nombre_archivo = os.path.basename(n).split('.')[0]
-                if any(base in nombre_archivo for base in nombres_base):
-                    candidatos.append(n)
-
-            if not candidatos: return None
-
-            # 3. Elegir la imagen más pesada/grande
-            def score(path):
-                try:
-                    return z.getinfo(path).file_size
-                except: return 0
-
-            candidatos.sort(key=score, reverse=True)
-            return candidatos[0]
-
-    except Exception as e:
-        print(f"⚠️ Error leve cazando icono: {e}")
-    return None
-
 def obtener_info_aapt(apk_path):
-    """Extrae datos usando SOLO aapt para evitar errores de Androguard"""
     try:
         cmd = ['aapt', 'dump', 'badging', apk_path]
         res = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore')
-        out = res.stdout
-        
-        # Package
-        pkg_match = re.search(r"package: name='([^']+)'", out)
-        pkg = pkg_match.group(1) if pkg_match else "com.unknown.app"
-        
-        # Versión
-        ver_match = re.search(r"versionCode='([^']+)'", out)
-        ver = ver_match.group(1) if ver_match else "1"
-        
-        # Nombre (Label)
-        label_match = re.search(r"application-label:'([^']+)'", out)
-        label = label_match.group(1) if label_match else pkg
-        
+        pkg = re.search(r"package: name='([^']+)'", res.stdout).group(1)
+        ver = re.search(r"versionCode='([^']+)'", res.stdout).group(1)
+        label_m = re.search(r"application-label:'([^']+)'", res.stdout)
+        label = label_m.group(1) if label_m else pkg
         return pkg, ver, label
-    except Exception:
-        return None, None, None
+    except: return None, None, None
+
+def cazar_icono_real(apk_path):
+    # Lógica simplificada de extracción
+    try:
+        cmd = ['aapt', 'dump', 'badging', apk_path]
+        out = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore').stdout
+        icon_entries = re.findall(r"application-icon-\d+:'([^']+)'", out)
+        default_icon = re.search(r"icon='([^']+)'", out)
+        if default_icon: icon_entries.append(default_icon.group(1))
+        
+        with zipfile.ZipFile(apk_path, 'r') as z:
+            nombres = z.namelist()
+            for icon_path in icon_entries:
+                if icon_path in nombres and icon_path.lower().endswith(('.png','.webp')): return icon_path
+            # Búsqueda laxa
+            candidatos = [n for n in nombres if ('launcher' in n or 'icon' in n) and n.lower().endswith(('.png','.webp'))]
+            if candidatos:
+                candidatos.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
+                return candidatos[0]
+    except: pass
+    return None
 
 # ---------------------------------------------------------
-# 🚀 MAIN
+# LÓGICA DROPBOX (Limpieza y Subida)
 # ---------------------------------------------------------
-async def main():
-    print("🚀 Iniciando Motor Blindado (Sin Androguard)...")
+def conectar_dropbox():
+    """Conecta usando el Refresh Token para que nunca caduque"""
+    return dropbox.Dropbox(
+        app_key=DBX_KEY,
+        app_secret=DBX_SECRET,
+        oauth2_refresh_token=DBX_REFRESH_TOKEN
+    )
 
+def limpiar_versiones_viejas(dbx, label_app):
+    """Busca y borra archivos antiguos de la misma app para ahorrar espacio"""
+    try:
+        archivos = dbx.files_list_folder('').entries
+        for archivo in archivos:
+            # Si el archivo se llama igual (ej: 'Spotify') pero es versión vieja...
+            if isinstance(archivo, dropbox.files.FileMetadata):
+                # Comparamos el inicio del nombre (ej: "Spotify_v")
+                nombre_base = label_app.replace(" ", "_")
+                if archivo.name.startswith(nombre_base + "_v"):
+                    print(f"🗑️ Borrando versión vieja: {archivo.name}")
+                    dbx.files_delete_v2(archivo.path_lower)
+    except Exception as e:
+        print(f"Nota sobre limpieza: {e}")
+
+def subir_y_obtener_link(dbx, file_path, dest_filename):
+    """Sube y devuelve link directo (dl=1)"""
+    dest_path = f"/{dest_filename}"
+    
+    # Subir
+    with open(file_path, "rb") as f:
+        dbx.files_upload(f.read(), dest_path, mode=WriteMode('overwrite'))
+    
+    # Crear Link
+    try:
+        shared_link = dbx.sharing_create_shared_link_with_settings(dest_path)
+        url = shared_link.url
+    except ApiError:
+        # Si ya existe, lo recuperamos
+        links = dbx.sharing_list_shared_links(path=dest_path, direct_only=True).links
+        if links: url = links[0].url
+        else: return None
+        
+    # Convertir a descarga directa
+    return url.replace("?dl=0", "?dl=1").replace("&dl=0", "&dl=1")
+
+# ---------------------------------------------------------
+# MAIN
+# ---------------------------------------------------------
+def main():
+    print("🚀 Iniciando Motor Dropbox (Con Auto-Limpieza)...")
+    
+    # 1. Conexiones
+    dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
     drive_service = build('drive', 'v3', credentials=creds)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
-    client = TelegramClient('bot_session', API_ID, API_HASH)
-    await client.start(bot_token=BOT_TOKEN)
-
     registros = sheet.get_all_records()
     procesados = {str(r.get('ID_Drive')) for r in registros if r.get('ID_Drive')}
-
+    
+    # Buscamos APKs nuevas en Drive
     query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
     items = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
 
-    async with client:
-        for item in items:
-            file_id = item['id']
-            file_name = item['name']
+    for item in items:
+        file_id, file_name = item['id'], item['name']
+        if not file_name.lower().endswith('.apk'): continue
+        if file_id in procesados: continue
 
-            if not file_name.lower().endswith('.apk'): continue
-            if file_id in procesados: continue
+        print(f"⚙️ Procesando: {file_name}")
+        temp_apk, final_icon = "temp.apk", "icon_final.png"
+        
+        try:
+            # A. Descargar de Drive
+            request = drive_service.files().get_media(fileId=file_id)
+            fh = io.BytesIO()
+            downloader = MediaIoBaseDownload(fh, request)
+            done = False
+            while not done: _, done = downloader.next_chunk()
+            fh.seek(0)
+            with open(temp_apk, "wb") as f: f.write(fh.read())
 
-            await client.send_message(ADMIN_ID, f"🛡️ **Procesando:** `{file_name}`")
-            temp_apk = "temp.apk"
-            final_icon = "icon_final.png"
-            DEFAULT_ICON = "default_icon.png"
-
-            try:
-                # 1. DESCARGA
-                request = drive_service.files().get_media(fileId=file_id)
-                fh = io.BytesIO()
-                downloader = MediaIoBaseDownload(fh, request)
-                done = False
-                while not done: _, done = downloader.next_chunk()
-                fh.seek(0)
-                with open(temp_apk, "wb") as f: f.write(fh.read())
-
-                # 2. INFO CON AAPT (INDISPENSABLE PARA NO FALLAR)
-                pkg, ver, label = obtener_info_aapt(temp_apk)
-                
-                if not pkg or pkg == "com.unknown.app":
-                    # Si falla AAPT, es que el archivo está muy corrupto
-                    await client.send_message(ADMIN_ID, f"❌ Archivo corrupto o ilegible: `{file_name}`. Saltando.")
-                    # Lo marcamos como procesado (con error) para que no se encicle
-                    sheet.append_row([file_name, "Error", "Corrupto", "", "", "", file_id, ""])
-                    continue
-
-                # 3. EXTRAER ICONO
-                ruta_icono = cazar_icono_real(temp_apk)
-                usa_default = True
-
-                if ruta_icono:
-                    try:
-                        with zipfile.ZipFile(temp_apk, 'r') as z:
-                            with z.open(ruta_icono) as src, open(final_icon, "wb") as trg:
-                                trg.write(src.read())
-                        usa_default = False
-                        await client.send_message(ADMIN_ID, f"🎯 Icono: `{ruta_icono}`")
-                    except: pass
-
-                if usa_default and os.path.exists(DEFAULT_ICON):
-                    shutil.copyfile(DEFAULT_ICON, final_icon)
-
-                # 4. SUBIDAS
-                icon_msg_id = ""
-                if os.path.exists(final_icon):
-                    msg_icon = await client.send_file(CHANNEL_ID, final_icon, caption=f"🖼 Icono: {label}")
-                    icon_msg_id = str(msg_icon.id)
-
-                msg_apk = await client.send_file(
-                    CHANNEL_ID, temp_apk, 
-                    caption=f"✅ **{label}**\n📦 `{pkg}`\n🔢 v{ver}",
-                    thumb=final_icon if os.path.exists(final_icon) else None
-                )
-
-                # 5. GUARDAR
-                sheet.append_row([label, "Publicado", "Auto", ver, pkg, str(msg_apk.id), file_id, icon_msg_id])
-                await client.send_message(ADMIN_ID, f"✨ `{label}` publicado.")
-
-            except Exception as e:
-                await client.send_message(ADMIN_ID, f"🔥 Error grave en `{file_name}`: {e}")
+            # B. Analizar
+            pkg, ver, label = obtener_info_aapt(temp_apk)
+            if not pkg: continue
             
-            finally:
-                if os.path.exists(temp_apk): os.remove(temp_apk)
-                if os.path.exists(final_icon): os.remove(final_icon)
+            # C. Extraer Icono (Para subirlo también y tener link directo)
+            ruta_icono = cazar_icono_real(temp_apk)
+            icon_filename = f"{pkg}_icon.png"
+            if ruta_icono:
+                with zipfile.ZipFile(temp_apk, 'r') as z:
+                    with z.open(ruta_icono) as src, open(icon_filename, "wb") as trg:
+                        trg.write(src.read())
+            else:
+                shutil.copy("default_icon.png", icon_filename)
+
+            # D. SUBIDA INTELIGENTE A DROPBOX
+            print("🧹 Limpiando versiones viejas...")
+            limpiar_versiones_viejas(dbx, label)
+            
+            print("☁️ Subiendo archivos nuevos...")
+            nombre_apk_final = f"{label.replace(' ', '_')}_v{ver}.apk"
+            
+            link_apk = subir_y_obtener_link(dbx, temp_apk, nombre_apk_final)
+            link_icon = subir_y_obtener_link(dbx, icon_filename, icon_filename)
+            
+            print(f"✅ Éxito! Link: {link_apk}")
+
+            # E. Guardar en Excel
+            # IMPORTANTE: Guardamos el LINK DIRECTO en la columna 'Notas' (Columna C)
+            # Estructura: [Nombre, Estado, Link_Dropbox, Version, Pkg, Link_Icono, DriveID, "Dropbox"]
+            sheet.append_row([
+                label, 
+                "Publicado", 
+                link_apk,     # Columna C (Notas) ahora guarda el Link APK
+                ver, 
+                pkg, 
+                link_icon,    # Columna F (MsgID) ahora guarda Link Icono
+                file_id, 
+                "Dropbox"
+            ])
+
+        except Exception as e:
+            print(f"❌ Error: {e}")
+        finally:
+            if os.path.exists(temp_apk): os.remove(temp_apk)
+            if os.path.exists(icon_filename): os.remove(icon_filename)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

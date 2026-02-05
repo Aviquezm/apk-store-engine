@@ -4,6 +4,7 @@ import io
 import shutil
 import dropbox
 import gspread
+import zipfile
 from datetime import datetime
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError
@@ -12,23 +13,20 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from pyaxmlparser import APK 
 
-# --- CONFIGURACIÓN (TODO VIENE DE SECRETS) ---
+# --- CONFIGURACIÓN ---
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
-# Ahora la URL también es un secreto
-REPO_URL = os.environ.get('REPO_URL', 'https://tu-usuario.github.io/repo/') 
+REPO_URL = os.environ.get('REPO_URL', 'https://aviquezm.github.io/apk-store-engine/')
 
-# Credenciales Dropbox
 DBX_KEY = os.environ['DROPBOX_APP_KEY']
 DBX_SECRET = os.environ['DROPBOX_APP_SECRET']
 DBX_REFRESH_TOKEN = os.environ['DROPBOX_REFRESH_TOKEN']
 
-# Credenciales Google
 SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 1. FUNCIÓN DE ANÁLISIS
+# 1. FUNCIÓN DE ANÁLISIS (MODO CAZADOR REBELDE)
 # ---------------------------------------------------------
 def analizar_apk(apk_path):
     try:
@@ -39,8 +37,22 @@ def analizar_apk(apk_path):
         app_name = apk.application
         
         icon_filename = f"icon_{package_name}.png"
-        icon_data = apk.icon_data
+        icon_data = apk.icon_data # Intento normal
         
+        # PLAN B: Si pyaxmlparser falla (caso Shazam)
+        if not icon_data:
+            print(f"🕵️ Buscando icono rebelde en {app_name}...")
+            with zipfile.ZipFile(apk_path, 'r') as z:
+                # Buscamos archivos con nombres comunes de iconos
+                candidatos = [n for n in z.namelist() if 'ic_launcher' in n or 'app_icon' in n]
+                # Priorizamos los que son PNG o WebP y de carpetas de alta resolución
+                candidatos = [c for c in candidatos if c.endswith(('.png', '.webp')) and 'res/' in c]
+                if candidatos:
+                    # Ordenamos para intentar agarrar el de mejor calidad (usualmente el más pesado)
+                    candidatos.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
+                    icon_data = z.read(candidatos[0])
+                    print(f"🎯 Icono encontrado manualmente en: {candidatos[0]}")
+
         if icon_data:
             with open(icon_filename, "wb") as f:
                 f.write(icon_data)
@@ -58,12 +70,8 @@ def analizar_apk(apk_path):
         print(f"❌ Error analizando APK: {e}")
         return None
 
-# ... (El resto de funciones conectar_dropbox, subir_a_dropbox y actualizar_index_json se mantienen igual) ...
-
-# IMPORTANTE: Asegúrate de que las funciones usarán la variable REPO_URL definida arriba.
-
 # ---------------------------------------------------------
-# 2. LÓGICA DROPBOX (Igual que antes)
+# 2. LÓGICA DROPBOX
 # ---------------------------------------------------------
 def conectar_dropbox():
     return dropbox.Dropbox(
@@ -86,19 +94,11 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1").replace("&dl=0", "&dl=1")
 
 # ---------------------------------------------------------
-# 3. GENERADOR DE REPO
+# 3. GENERADOR DE REPO (CON ANTI-DUPLICADOS)
 # ---------------------------------------------------------
 def actualizar_index_json(nuevo_dato):
     archivo_repo = "index.json"
-    datos_repo = {
-        "repo": {
-            "name": "Mi Tienda Privada",
-            "description": "APKs desde Google Drive",
-            "address": REPO_URL,
-            "icon": f"{REPO_URL}icon.png" 
-        },
-        "apps": []
-    }
+    datos_repo = {"repo": {"name": "Mi Tienda Privada", "description": "APKs desde Google Drive", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"}, "apps": []}
 
     if os.path.exists(archivo_repo):
         try:
@@ -121,7 +121,9 @@ def actualizar_index_json(nuevo_dato):
             app["icon"] = nuevo_dato["link_icon"]
             app["suggestedVersionName"] = nuevo_dato["ver_name"]
             app["suggestedVersionCode"] = str(nuevo_dato["ver_code"])
-            app["versions"].insert(0, nueva_entry)
+            # EVITAR DUPLICADOS DE VERSIÓN
+            if not any(v["versionCode"] == str(nuevo_dato["ver_code"]) for v in app["versions"]):
+                app["versions"].insert(0, nueva_entry)
             break
     
     if not app_encontrada:
@@ -144,7 +146,7 @@ def actualizar_index_json(nuevo_dato):
 # 4. MAIN
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor Seguro...")
+    print("🚀 Iniciando Motor (Modo Cazador de Iconos)...")
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
@@ -164,7 +166,6 @@ def main():
 
         print(f"⚙️ Procesando: {file_name}")
         temp_apk = "temp.apk"
-        
         try:
             request = drive_service.files().get_media(fileId=file_id)
             fh = io.BytesIO()
@@ -191,10 +192,7 @@ def main():
                 "link_apk": link_apk, "link_icon": link_icon
             })
 
-            sheet.append_row([
-                info['name'], "Publicado", link_apk, info['ver_name'], 
-                info['pkg'], link_icon, file_id, "Dropbox/Repo"
-            ])
+            sheet.append_row([info['name'], "Publicado", link_apk, info['ver_name'], info['pkg'], link_icon, file_id, "Dropbox/Repo"])
             print(f"✅ Éxito: {info['name']}")
 
         except Exception as e:

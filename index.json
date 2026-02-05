@@ -1,0 +1,78 @@
+{
+    "repo": {
+        "name": "Mi Tienda Privada",
+        "description": "APKs desde Google Drive",
+        "address": "https://aviquezm.github.io/apk-store-engine/",
+        "icon": "https://aviquezm.github.io/apk-store-engine/icon.png"
+    },
+    "apps": [
+        {
+            "name": "Calz",
+            "packageName": "com.wachanga.calories",
+            "suggestedVersionName": "1.28.0",
+            "suggestedVersionCode": "490",
+            "icon": "https://www.dropbox.com/scl/fi/u1ujp2x5d8s45c691wv85/icon_com.wachanga.calories.png?rlkey=q6d0c7101uo7yf1a6ekk1ulba&dl=1",
+            "web": "https://www.dropbox.com/scl/fi/5cuiubajkefb9ty60ao45/Calz_v1.28.0.apk?rlkey=jhyxn1gwj30yjc4bvr5ps0jwm&dl=1",
+            "versions": [
+                {
+                    "versionName": "1.28.0",
+                    "versionCode": "490",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/5cuiubajkefb9ty60ao45/Calz_v1.28.0.apk?rlkey=jhyxn1gwj30yjc4bvr5ps0jwm&dl=1",
+                    "size": 0,
+                    "added": "2026-02-05"
+                }
+            ]
+        },
+        {
+            "name": "Shazam",
+            "packageName": "com.shazam.android",
+            "suggestedVersionName": "16.26.0-260122",
+            "suggestedVersionCode": "1602600",
+            "icon": "https://via.placeholder.com/150",
+            "web": "https://www.dropbox.com/scl/fi/7d9b3hm3esuaosj2ncc55/Shazam_v16.26.0-260122.apk?rlkey=1u6j8ymrnn4r1n5fxahoqgkl4&dl=1",
+            "versions": [
+                {
+                    "versionName": "16.26.0-260122",
+                    "versionCode": "1602600",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/7d9b3hm3esuaosj2ncc55/Shazam_v16.26.0-260122.apk?rlkey=1u6j8ymrnn4r1n5fxahoqgkl4&dl=1",
+                    "size": 0,
+                    "added": "2026-02-05"
+                }
+            ]
+        },
+        {
+            "name": "Dead Pixel Fix",
+            "packageName": "com.zoox.deadpixelfix",
+            "suggestedVersionName": "3.11",
+            "suggestedVersionCode": "52",
+            "icon": "https://www.dropbox.com/scl/fi/bpu3rqazsbvoe3ldpm000/icon_com.zoox.deadpixelfix.png?rlkey=bfxfudqqrn1enixbg852osx97&dl=1",
+            "web": "https://www.dropbox.com/scl/fi/bgrrrbvblsf8qxhcqwrr8/Dead_Pixel_Fix_v3.11.apk?rlkey=8vxqxh8b920x8fbx1jahg9852&dl=1",
+            "versions": [
+                {
+                    "versionName": "3.11",
+                    "versionCode": "52",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/bgrrrbvblsf8qxhcqwrr8/Dead_Pixel_Fix_v3.11.apk?rlkey=8vxqxh8b920x8fbx1jahg9852&dl=1",
+                    "size": 0,
+                    "added": "2026-02-05"
+                }
+            ]
+        },
+        {
+            "name": "Barquode",
+            "packageName": "com.pranavpandey.matrix",
+            "suggestedVersionName": "8.2.1",
+            "suggestedVersionCode": "89",
+            "icon": "https://www.dropbox.com/scl/fi/uhk3kpfq69qgyy3o23wcc/icon_com.pranavpandey.matrix.png?rlkey=8l07lmt4smpl5kygroc4b6jg2&dl=1",
+            "web": "https://www.dropbox.com/scl/fi/2xgrebrv7ax05981yh7ek/Barquode_v8.2.1.apk?rlkey=8a9998z0qwfyvn92aw5gjf6tz&dl=1",
+            "versions": [
+                {
+                    "versionName": "8.2.1",
+                    "versionCode": "89",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/2xgrebrv7ax05981yh7ek/Barquode_v8.2.1.apk?rlkey=8a9998z0qwfyvn92aw5gjf6tz&dl=1",
+                    "size": 0,
+                    "added": "2026-02-05"
+                }
+            ]
+        }
+    ]
+}

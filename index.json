@@ -20,6 +20,13 @@
                     "downloadURL": "https://www.dropbox.com/scl/fi/5cuiubajkefb9ty60ao45/Calz_v1.28.0.apk?rlkey=jhyxn1gwj30yjc4bvr5ps0jwm&dl=1",
                     "size": 0,
                     "added": "2026-02-05"
+                },
+                {
+                    "versionName": "1.28.0",
+                    "versionCode": "490",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/5cuiubajkefb9ty60ao45/Calz_v1.28.0.apk?rlkey=jhyxn1gwj30yjc4bvr5ps0jwm&dl=1",
+                    "size": 0,
+                    "added": "2026-02-05"
                 }
             ]
         },
@@ -31,6 +38,13 @@
             "icon": "https://via.placeholder.com/150",
             "web": "https://www.dropbox.com/scl/fi/7d9b3hm3esuaosj2ncc55/Shazam_v16.26.0-260122.apk?rlkey=1u6j8ymrnn4r1n5fxahoqgkl4&dl=1",
             "versions": [
+                {
+                    "versionName": "16.26.0-260122",
+                    "versionCode": "1602600",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/7d9b3hm3esuaosj2ncc55/Shazam_v16.26.0-260122.apk?rlkey=1u6j8ymrnn4r1n5fxahoqgkl4&dl=1",
+                    "size": 0,
+                    "added": "2026-02-05"
+                },
                 {
                     "versionName": "16.26.0-260122",
                     "versionCode": "1602600",
@@ -54,6 +68,13 @@
                     "downloadURL": "https://www.dropbox.com/scl/fi/bgrrrbvblsf8qxhcqwrr8/Dead_Pixel_Fix_v3.11.apk?rlkey=8vxqxh8b920x8fbx1jahg9852&dl=1",
                     "size": 0,
                     "added": "2026-02-05"
+                },
+                {
+                    "versionName": "3.11",
+                    "versionCode": "52",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/bgrrrbvblsf8qxhcqwrr8/Dead_Pixel_Fix_v3.11.apk?rlkey=8vxqxh8b920x8fbx1jahg9852&dl=1",
+                    "size": 0,
+                    "added": "2026-02-05"
                 }
             ]
         },
@@ -65,6 +86,13 @@
             "icon": "https://www.dropbox.com/scl/fi/uhk3kpfq69qgyy3o23wcc/icon_com.pranavpandey.matrix.png?rlkey=8l07lmt4smpl5kygroc4b6jg2&dl=1",
             "web": "https://www.dropbox.com/scl/fi/2xgrebrv7ax05981yh7ek/Barquode_v8.2.1.apk?rlkey=8a9998z0qwfyvn92aw5gjf6tz&dl=1",
             "versions": [
+                {
+                    "versionName": "8.2.1",
+                    "versionCode": "89",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/2xgrebrv7ax05981yh7ek/Barquode_v8.2.1.apk?rlkey=8a9998z0qwfyvn92aw5gjf6tz&dl=1",
+                    "size": 0,
+                    "added": "2026-02-05"
+                },
                 {
                     "versionName": "8.2.1",
                     "versionCode": "89",

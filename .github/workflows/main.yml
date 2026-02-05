@@ -1,12 +1,12 @@
-name: Tienda APK Automática
+name: Tienda APK Automática (Dropbox)
 
 on:
   workflow_dispatch: # Permite ejecutarlo manualmente con un botón
   schedule:
-    - cron: '*/30 * * * *' # Se ejecuta solo cada 30 minutos
+    - cron: '*/30 * * * *' # Se ejecuta cada 30 minutos
 
 permissions:
-  contents: write # Necesario para guardar y publicar el repo.json
+  contents: write # INDISPENSABLE: Da permiso para guardar el archivo final
 
 jobs:
   build:
@@ -32,12 +32,12 @@ jobs:
 
       - name: 5. Ejecutar Motor Dropbox
         env:
-          # Secretos de siempre
+          # Secretos de Google
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           ADMIN_ID: ${{ secrets.ADMIN_ID }}
           DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
-          # NUEVOS SECRETOS DE DROPBOX
+          # Secretos de Dropbox
           DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
           DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
           DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
@@ -46,12 +46,13 @@ jobs:
       - name: 6. Generar Catálogo (Excel -> JSON)
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
+          # Ya no necesitamos TELEGRAM_CHANNEL_ID aquí
         run: python generar_json.py
 
-      - name: 7. Publicar cambios en GitHub Pages
+      - name: 7. Publicar cambios (El paso VITAL)
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "🔄 Actualización automática del catálogo [Skip CI]"
-          file_pattern: repo.json
+          commit_message: "☁️ Actualización Dropbox [Skip CI]"
+          # AQUÍ ESTABA EL ERROR: Debe ser obtainium.json
+          file_pattern: obtainium.json

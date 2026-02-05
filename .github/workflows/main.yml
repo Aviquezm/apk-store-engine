@@ -36,10 +36,14 @@ jobs:
           DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
         run: python main.py
 
-      - name: 5. Guardar Cambios en GitHub (Indispensable para Droid-ify)
+      - name: 5. Guardar Cambios en GitHub
         run: |
           git config --global user.name "GitHub Action Bot"
           git config --global user.email "action@github.com"
-          git add index.json
-          git commit -m "🚀 Repo actualizado: $(date +'%Y-%m-%d %H:%M')" || echo "Sin cambios que guardar"
-          git push
+          if [ -f index.json ]; then
+            git add index.json
+            git commit -m "🚀 Actualización de repositorio" || echo "Sin cambios"
+            git push
+          else
+            echo "El archivo index.json no existe aún porque no se procesaron APKs nuevas."
+          fi

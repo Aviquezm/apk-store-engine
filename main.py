@@ -1,121 +1,160 @@
 import os
 import json
-import gspread
 import io
-import asyncio
-import subprocess
-import re
-import zipfile
 import shutil
 import dropbox
+import gspread
+from datetime import datetime
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
+from androguard.core.bytecodes.apk import APK # USAMOS ESTO EN LUGAR DE AAPT
 
 # --- CONFIGURACIÓN ---
-ADMIN_ID = int(os.environ['ADMIN_ID'])
+# Variables de entorno cargadas desde GitHub Secrets
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
+REPO_URL = "https://aviquezm.github.io/apk-store-engine/" # TU URL DE GITHUB PAGES
 
-# Credenciales Dropbox (Sistema de Token Infinito)
+# Credenciales Dropbox
 DBX_KEY = os.environ['DROPBOX_APP_KEY']
 DBX_SECRET = os.environ['DROPBOX_APP_SECRET']
 DBX_REFRESH_TOKEN = os.environ['DROPBOX_REFRESH_TOKEN']
 
+# Credenciales Google
 SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# FUNCIONES AUXILIARES
+# 1. FUNCIONES AUXILIARES (MODIFICADO PARA ANDROGUARD)
 # ---------------------------------------------------------
-def obtener_info_aapt(apk_path):
+def analizar_apk(apk_path):
+    """Extrae info y el icono usando Androguard (Funciona en la nube)"""
     try:
-        cmd = ['aapt', 'dump', 'badging', apk_path]
-        res = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore')
-        pkg = re.search(r"package: name='([^']+)'", res.stdout).group(1)
-        ver = re.search(r"versionCode='([^']+)'", res.stdout).group(1)
-        label_m = re.search(r"application-label:'([^']+)'", res.stdout)
-        label = label_m.group(1) if label_m else pkg
-        return pkg, ver, label
-    except: return None, None, None
-
-def cazar_icono_real(apk_path):
-    # Lógica simplificada de extracción
-    try:
-        cmd = ['aapt', 'dump', 'badging', apk_path]
-        out = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore').stdout
-        icon_entries = re.findall(r"application-icon-\d+:'([^']+)'", out)
-        default_icon = re.search(r"icon='([^']+)'", out)
-        if default_icon: icon_entries.append(default_icon.group(1))
+        apk = APK(apk_path)
+        package_name = apk.get_package()
+        version_name = apk.get_androidversion_name()
+        version_code = apk.get_androidversion_code()
+        app_name = apk.get_app_name()
         
-        with zipfile.ZipFile(apk_path, 'r') as z:
-            nombres = z.namelist()
-            for icon_path in icon_entries:
-                if icon_path in nombres and icon_path.lower().endswith(('.png','.webp')): return icon_path
-            # Búsqueda laxa
-            candidatos = [n for n in nombres if ('launcher' in n or 'icon' in n) and n.lower().endswith(('.png','.webp'))]
-            if candidatos:
-                candidatos.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
-                return candidatos[0]
-    except: pass
-    return None
+        # Extraer icono a archivo físico
+        icon_data = apk.get_icon()
+        icon_filename = f"icon_{package_name}.png"
+        
+        if icon_data:
+            with open(icon_filename, "wb") as f:
+                f.write(icon_data)
+        else:
+            icon_filename = None # O manejar un default
+
+        return {
+            "pkg": package_name,
+            "ver_name": version_name,
+            "ver_code": version_code,
+            "name": app_name,
+            "icon_file": icon_filename
+        }
+    except Exception as e:
+        print(f"Error analizando APK: {e}")
+        return None
 
 # ---------------------------------------------------------
-# LÓGICA DROPBOX (Limpieza y Subida)
+# 2. LÓGICA DROPBOX
 # ---------------------------------------------------------
 def conectar_dropbox():
-    """Conecta usando el Refresh Token para que nunca caduque"""
     return dropbox.Dropbox(
         app_key=DBX_KEY,
         app_secret=DBX_SECRET,
         oauth2_refresh_token=DBX_REFRESH_TOKEN
     )
 
-def limpiar_versiones_viejas(dbx, label_app):
-    """Busca y borra archivos antiguos de la misma app para ahorrar espacio"""
-    try:
-        archivos = dbx.files_list_folder('').entries
-        for archivo in archivos:
-            # Si el archivo se llama igual (ej: 'Spotify') pero es versión vieja...
-            if isinstance(archivo, dropbox.files.FileMetadata):
-                # Comparamos el inicio del nombre (ej: "Spotify_v")
-                nombre_base = label_app.replace(" ", "_")
-                if archivo.name.startswith(nombre_base + "_v"):
-                    print(f"🗑️ Borrando versión vieja: {archivo.name}")
-                    dbx.files_delete_v2(archivo.path_lower)
-    except Exception as e:
-        print(f"Nota sobre limpieza: {e}")
-
-def subir_y_obtener_link(dbx, file_path, dest_filename):
+def subir_a_dropbox(dbx, file_path, dest_filename):
     """Sube y devuelve link directo (dl=1)"""
     dest_path = f"/{dest_filename}"
-    
-    # Subir
     with open(file_path, "rb") as f:
         dbx.files_upload(f.read(), dest_path, mode=WriteMode('overwrite'))
     
-    # Crear Link
     try:
         shared_link = dbx.sharing_create_shared_link_with_settings(dest_path)
         url = shared_link.url
     except ApiError:
-        # Si ya existe, lo recuperamos
         links = dbx.sharing_list_shared_links(path=dest_path, direct_only=True).links
         if links: url = links[0].url
         else: return None
         
-    # Convertir a descarga directa
     return url.replace("?dl=0", "?dl=1").replace("&dl=0", "&dl=1")
+
+# ---------------------------------------------------------
+# 3. GENERADOR DE REPO (LO NUEVO)
+# ---------------------------------------------------------
+def actualizar_index_json(nuevo_dato):
+    """Lee el index.json actual, agrega la app y guarda"""
+    archivo_repo = "index.json"
+    
+    # Estructura base si no existe el archivo
+    datos_repo = {
+        "repo": {
+            "name": "Mi Tienda Privada",
+            "description": "APKs desde Google Drive",
+            "address": REPO_URL,
+            "icon": f"{REPO_URL}icon.png" 
+        },
+        "apps": []
+    }
+
+    if os.path.exists(archivo_repo):
+        try:
+            with open(archivo_repo, "r") as f:
+                datos_repo = json.load(f)
+        except: pass # Si falla, usamos la base vacía
+
+    # Buscar si la app ya existe para actualizarla, o crearla si es nueva
+    app_encontrada = False
+    nueva_entry = {
+        "versionName": nuevo_dato["ver_name"],
+        "versionCode": str(nuevo_dato["ver_code"]),
+        "downloadURL": nuevo_dato["link_apk"],
+        "size": 0, # Opcional
+        "added": datetime.now().strftime("%Y-%m-%d") # Importante para que Droid-ify vea que es nuevo
+    }
+
+    for app in datos_repo["apps"]:
+        if app["packageName"] == nuevo_dato["pkg"]:
+            app_encontrada = True
+            # Actualizamos datos generales
+            app["icon"] = nuevo_dato["link_icon"] # Usamos el link de Dropbox
+            app["suggestedVersionName"] = nuevo_dato["ver_name"]
+            app["suggestedVersionCode"] = str(nuevo_dato["ver_code"])
+            # Agregamos la versión a la lista de versiones
+            app["versions"].insert(0, nueva_entry) # Poner la más nueva primero
+            break
+    
+    if not app_encontrada:
+        # Estructura de app nueva para Droid-ify
+        app_completa = {
+            "name": nuevo_dato["name"],
+            "packageName": nuevo_dato["pkg"],
+            "suggestedVersionName": nuevo_dato["ver_name"],
+            "suggestedVersionCode": str(nuevo_dato["ver_code"]),
+            "icon": nuevo_dato["link_icon"], # Link de Dropbox
+            "web": nuevo_dato["link_apk"],
+            "versions": [nueva_entry]
+        }
+        datos_repo["apps"].append(app_completa)
+
+    # Guardar cambios
+    with open(archivo_repo, "w") as f:
+        json.dump(datos_repo, f, indent=4)
+    print("✅ index.json actualizado para Droid-ify")
 
 # ---------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor Dropbox (Con Auto-Limpieza)...")
+    print("🚀 Iniciando Motor...")
     
-    # 1. Conexiones
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
@@ -125,9 +164,10 @@ def main():
     registros = sheet.get_all_records()
     procesados = {str(r.get('ID_Drive')) for r in registros if r.get('ID_Drive')}
     
-    # Buscamos APKs nuevas en Drive
     query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
     items = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
+
+    nuevos_procesados = False
 
     for item in items:
         file_id, file_name = item['id'], item['name']
@@ -135,10 +175,10 @@ def main():
         if file_id in procesados: continue
 
         print(f"⚙️ Procesando: {file_name}")
-        temp_apk, final_icon = "temp.apk", "icon_final.png"
+        temp_apk = "temp.apk"
         
         try:
-            # A. Descargar de Drive
+            # A. Descargar
             request = drive_service.files().get_media(fileId=file_id)
             fh = io.BytesIO()
             downloader = MediaIoBaseDownload(fh, request)
@@ -147,51 +187,43 @@ def main():
             fh.seek(0)
             with open(temp_apk, "wb") as f: f.write(fh.read())
 
-            # B. Analizar
-            pkg, ver, label = obtener_info_aapt(temp_apk)
-            if not pkg: continue
+            # B. Analizar (con Androguard)
+            info = analizar_apk(temp_apk)
+            if not info: continue
             
-            # C. Extraer Icono (Para subirlo también y tener link directo)
-            ruta_icono = cazar_icono_real(temp_apk)
-            icon_filename = f"{pkg}_icon.png"
-            if ruta_icono:
-                with zipfile.ZipFile(temp_apk, 'r') as z:
-                    with z.open(ruta_icono) as src, open(icon_filename, "wb") as trg:
-                        trg.write(src.read())
-            else:
-                shutil.copy("default_icon.png", icon_filename)
+            # C. Subir a Dropbox (APK e Icono)
+            nombre_final = f"{info['name'].replace(' ', '_')}_v{info['ver_name']}.apk"
+            link_apk = subir_a_dropbox(dbx, temp_apk, nombre_final)
+            
+            link_icon = "https://via.placeholder.com/150" # Default por si falla
+            if info['icon_file']:
+                link_icon = subir_a_dropbox(dbx, info['icon_file'], f"icon_{info['pkg']}.png")
+                os.remove(info['icon_file'])
 
-            # D. SUBIDA INTELIGENTE A DROPBOX
-            print("🧹 Limpiando versiones viejas...")
-            limpiar_versiones_viejas(dbx, label)
-            
-            print("☁️ Subiendo archivos nuevos...")
-            nombre_apk_final = f"{label.replace(' ', '_')}_v{ver}.apk"
-            
-            link_apk = subir_y_obtener_link(dbx, temp_apk, nombre_apk_final)
-            link_icon = subir_y_obtener_link(dbx, icon_filename, icon_filename)
-            
-            print(f"✅ Éxito! Link: {link_apk}")
+            # D. Actualizar index.json (Para Droid-ify)
+            datos_para_repo = {
+                "pkg": info['pkg'],
+                "name": info['name'],
+                "ver_name": info['ver_name'],
+                "ver_code": info['ver_code'],
+                "link_apk": link_apk,
+                "link_icon": link_icon
+            }
+            actualizar_index_json(datos_para_repo)
+            nuevos_procesados = True
 
-            # E. Guardar en Excel
-            # IMPORTANTE: Guardamos el LINK DIRECTO en la columna 'Notas' (Columna C)
-            # Estructura: [Nombre, Estado, Link_Dropbox, Version, Pkg, Link_Icono, DriveID, "Dropbox"]
+            # E. Guardar en Excel (Tu log original)
             sheet.append_row([
-                label, 
-                "Publicado", 
-                link_apk,     # Columna C (Notas) ahora guarda el Link APK
-                ver, 
-                pkg, 
-                link_icon,    # Columna F (MsgID) ahora guarda Link Icono
-                file_id, 
-                "Dropbox"
+                info['name'], "Publicado", link_apk, info['ver_name'], 
+                info['pkg'], link_icon, file_id, "Dropbox/Repo"
             ])
+            
+            print(f"✅ Completado: {info['name']}")
 
         except Exception as e:
             print(f"❌ Error: {e}")
         finally:
             if os.path.exists(temp_apk): os.remove(temp_apk)
-            if os.path.exists(icon_filename): os.remove(icon_filename)
 
 if __name__ == "__main__":
     main()

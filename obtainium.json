@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "id": "com.wachanga.calories",
+        "name": "Calz",
+        "version": "v490",
+        "url": "https://www.dropbox.com/scl/fi/v2i8m3sxw2prxcez762pj/Calz_v490.apk?rlkey=e5dtfruipn0qj5qpg5gctf0wt&dl=1",
+        "icon": "https://www.dropbox.com/scl/fi/ox90u7irm1ucbwiv8qlhu/com.wachanga.calories_icon.png?rlkey=yhgjorshg2acywwhclf4d6h5j&dl=1",
+        "pinned": false,
+        "categories": [],
+        "env": {},
+        "provider": "HTML",
+        "about": "Descarga directa desde Dropbox Personal"
+    }
+]

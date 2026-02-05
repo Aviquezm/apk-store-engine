@@ -30,16 +30,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 5. Ejecutar Procesador (Drive -> Telegram -> Excel)
+      - name: 5. Ejecutar Motor Dropbox
         env:
-          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          # Secretos de siempre
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
           ADMIN_ID: ${{ secrets.ADMIN_ID }}
           DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
+          # NUEVOS SECRETOS DE DROPBOX
+          DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+          DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
+          DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
         run: python main.py
 
       - name: 6. Generar Catálogo (Excel -> JSON)

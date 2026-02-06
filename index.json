@@ -33,11 +33,18 @@
         {
             "name": "Shazam",
             "packageName": "com.shazam.android",
-            "suggestedVersionName": "16.26.0-260122",
-            "suggestedVersionCode": "1602600",
-            "icon": "https://www.dropbox.com/scl/fi/agucrycb5ns38gy10pqh6/icon_com.shazam.android.png?rlkey=d7ovhems9wunkrp9ex1hrbwcm&dl=1",
+            "suggestedVersionName": "16.25.0-260115",
+            "suggestedVersionCode": "1602500",
+            "icon": "https://www.dropbox.com/scl/fi/agt4pnlyou4w4gl7up69h/icon_com.shazam.android.png?rlkey=78b4jed7dia6i592244zbsts3&dl=1",
             "web": "https://www.dropbox.com/scl/fi/7d9b3hm3esuaosj2ncc55/Shazam_v16.26.0-260122.apk?rlkey=1u6j8ymrnn4r1n5fxahoqgkl4&dl=1",
             "versions": [
+                {
+                    "versionName": "16.25.0-260115",
+                    "versionCode": "1602500",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/68dezsg7ab1t6pqhc2xbm/Shazam_v16.25.0-260115.apk?rlkey=1jmn9y4ccccbh6yio0enivjmi&dl=1",
+                    "size": 0,
+                    "added": "2026-02-06"
+                },
                 {
                     "versionName": "16.26.0-260122",
                     "versionCode": "1602600",
@@ -114,6 +121,23 @@
                     "versionName": "4.14.34",
                     "versionCode": "10326790",
                     "downloadURL": "https://www.dropbox.com/scl/fi/hvrmdhw71xa6i2qvydawr/AdGuard_v4.14.34.apk?rlkey=ptwp7zrp26pspqtxqk88g52e8&dl=1",
+                    "size": 0,
+                    "added": "2026-02-06"
+                }
+            ]
+        },
+        {
+            "name": "Droid-ify",
+            "packageName": "com.looker.droidify",
+            "suggestedVersionName": "0.6.8",
+            "suggestedVersionCode": "680",
+            "icon": "https://www.dropbox.com/scl/fi/1b5kyzwjtd5brijyavzx1/icon_com.looker.droidify.png?rlkey=u71n0p0bbcgnpqcb8puafpjvn&dl=1",
+            "web": "https://www.dropbox.com/scl/fi/8iv1mwqnfda9z7e2jc1ob/Droid-ify_v0.6.8.apk?rlkey=pmgd4xwl9xbtiwgv113grrsas&dl=1",
+            "versions": [
+                {
+                    "versionName": "0.6.8",
+                    "versionCode": "680",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/8iv1mwqnfda9z7e2jc1ob/Droid-ify_v0.6.8.apk?rlkey=pmgd4xwl9xbtiwgv113grrsas&dl=1",
                     "size": 0,
                     "added": "2026-02-06"
                 }

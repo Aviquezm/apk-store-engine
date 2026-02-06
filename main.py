@@ -6,7 +6,7 @@ import dropbox
 import gspread
 import zipfile
 from datetime import datetime
-from PIL import Image # Librería para análisis visual
+from PIL import Image
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError
 from oauth2client.service_account import ServiceAccountCredentials
@@ -27,74 +27,81 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 1. MOTOR DE BÚSQUEDA VISUAL (Fuerza Bruta)
+# 1. MOTOR DE EXTRACCIÓN EXTREMA (Legacy Finder)
 # ---------------------------------------------------------
-def buscar_icono_por_fuerza_bruta(apk_path):
-    """
-    Escanea TODO el APK buscando la imagen cuadrada más grande y pesada.
-    """
-    mejor_icono_data = None
-    max_peso = 0
-
+def extraer_icono_real_completo(apk_path):
+    """Busca el icono de legado (el logo completo) ignorando las capas separadas."""
     try:
+        apk_obj = APK(apk_path)
+        # El nombre que buscamos suele ser 'ic_launcher' o 'ic_launcher_round'
+        posibles_nombres = [
+            os.path.basename(apk_obj.icon_info.get('path', 'ic_launcher')).split('.')[0],
+            "ic_launcher",
+            "ic_launcher_round",
+            "app_icon"
+        ]
+        
+        mejor_icono_data = None
+        max_peso = 0
+
         with zipfile.ZipFile(apk_path, 'r') as z:
-            for nombre in z.namelist():
-                # Solo nos interesan imágenes PNG o WebP
-                if nombre.lower().endswith(('.png', '.webp')) and 'res/' in nombre:
+            nombres_archivos = z.namelist()
+            
+            for nombre_ref in posibles_nombres:
+                # Buscamos en mipmap (donde están los logos oficiales)
+                # Filtramos para que NO contenga 'foreground' ni 'background'
+                candidatos = [n for n in nombres_archivos if nombre_ref in n 
+                              and n.lower().endswith(('.png', '.webp')) 
+                              and 'foreground' not in n.lower() 
+                              and 'background' not in n.lower()]
+                
+                for c in candidatos:
                     try:
-                        data = z.read(nombre)
+                        data = z.read(c)
                         img = Image.open(io.BytesIO(data))
-                        ancho, alto = img.size
-                        
-                        # CONDICIÓN: Debe ser cuadrada (1:1) y de un tamaño decente
-                        if ancho == alto and 90 <= ancho <= 700:
-                            peso = z.getinfo(nombre).file_size
-                            # Nos quedamos con la más pesada (suele ser la de mayor calidad)
+                        w, h = img.size
+                        # Un logo real de alta calidad suele ser de 144x144 para arriba
+                        if w == h and w >= 144:
+                            peso = z.getinfo(c).file_size
                             if peso > max_peso:
                                 max_peso = peso
                                 mejor_icono_data = data
-                                print(f"🔍 Candidato encontrado: {nombre} ({ancho}x{alto})")
-                    except:
-                        continue
+                                print(f"💎 Logo completo detectado: {c} ({w}x{h})")
+                    except: continue
+                
+                if mejor_icono_data: break # Si ya encontramos el oficial, paramos
+                
         return mejor_icono_data
     except Exception as e:
-        print(f"⚠️ Error en búsqueda visual: {e}")
-        return None
-
-def analizar_apk(apk_path):
-    try:
-        apk = APK(apk_path)
-        package_name = apk.package
-        
-        # Primero intentamos la extracción normal
-        icon_data = apk.icon_data
-        
-        # Si falla o es XML, activamos el ESCÁNER VISUAL
-        if not icon_data:
-            print(f"🚀 Activando escáner visual para {apk.application}...")
-            icon_data = buscar_icono_por_fuerza_bruta(apk_path)
-        
-        icon_filename = f"icon_{package_name}.png"
-        
-        if icon_data:
-            with open(icon_filename, "wb") as f:
-                f.write(icon_data)
-        else:
-            icon_filename = None 
-
-        return {
-            "pkg": package_name,
-            "ver_name": apk.version_name,
-            "ver_code": apk.version_code,
-            "name": apk.application,
-            "icon_file": icon_filename
-        }
-    except Exception as e:
-        print(f"❌ Error crítico: {e}")
+        print(f"⚠️ Error en búsqueda extrema: {e}")
         return None
 
 # ---------------------------------------------------------
-# 2. LÓGICA DROPBOX
+# 2. SINCRONIZADOR EXCEL -> JSON
+# ---------------------------------------------------------
+def sincronizar_json_desde_excel(sheet):
+    print("🔄 Sincronizando repositorio con el Excel...")
+    registros = sheet.get_all_records()
+    nuevo_index = {
+        "repo": {"name": "Mi Tienda Privada", "description": "Repositorio VIP", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"},
+        "apps": []
+    }
+    apps_dict = {}
+    for r in registros:
+        pkg = r.get('Pkg')
+        if not pkg: continue
+        entry = {"versionName": str(r.get('Version')), "versionCode": str(r.get('MsgID_O_VersionCode', '0')), "downloadURL": r.get('Link_Dropbox_APK'), "added": datetime.now().strftime("%Y-%m-%d")}
+        if pkg not in apps_dict:
+            apps_dict[pkg] = {"name": r.get('Nombre'), "packageName": pkg, "suggestedVersionName": str(r.get('Version')), "icon": r.get('Link_Icono'), "versions": [entry]}
+        else:
+            if not any(v['versionName'] == entry['versionName'] for v in apps_dict[pkg]['versions']):
+                apps_dict[pkg]['versions'].insert(0, entry)
+    nuevo_index["apps"] = list(apps_dict.values())
+    with open("index.json", "w") as f:
+        json.dump(nuevo_index, f, indent=4)
+
+# ---------------------------------------------------------
+# 3. DROPBOX Y MAIN
 # ---------------------------------------------------------
 def conectar_dropbox():
     return dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
@@ -108,63 +115,11 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
         url = shared_link.url
     except ApiError:
         links = dbx.sharing_list_shared_links(path=dest_path, direct_only=True).links
-        if links: url = links[0].url
-        else: return None
-    return url.replace("?dl=0", "?dl=1").replace("&dl=0", "&dl=1")
+        url = links[0].url if links else None
+    return url.replace("?dl=0", "?dl=1") if url else None
 
-# ---------------------------------------------------------
-# 3. GENERADOR DE REPO
-# ---------------------------------------------------------
-def actualizar_index_json(nuevo_dato):
-    archivo_repo = "index.json"
-    datos_repo = {"repo": {"name": "Mi Tienda Privada", "description": "APKs desde Google Drive", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"}, "apps": []}
-
-    if os.path.exists(archivo_repo):
-        try:
-            with open(archivo_repo, "r") as f:
-                datos_repo = json.load(f)
-        except: pass
-
-    app_encontrada = False
-    nueva_entry = {
-        "versionName": nuevo_dato["ver_name"],
-        "versionCode": str(nuevo_dato["ver_code"]),
-        "downloadURL": nuevo_dato["link_apk"],
-        "size": 0,
-        "added": datetime.now().strftime("%Y-%m-%d")
-    }
-
-    for app in datos_repo["apps"]:
-        if app["packageName"] == nuevo_dato["pkg"]:
-            app_encontrada = True
-            app["icon"] = nuevo_dato["link_icon"]
-            app["suggestedVersionName"] = nuevo_dato["ver_name"]
-            app["suggestedVersionCode"] = str(nuevo_dato["ver_code"])
-            if not any(v["versionCode"] == str(nuevo_dato["ver_code"]) for v in app["versions"]):
-                app["versions"].insert(0, nueva_entry)
-            break
-    
-    if not app_encontrada:
-        app_completa = {
-            "name": nuevo_dato["name"],
-            "packageName": nuevo_dato["pkg"],
-            "suggestedVersionName": nuevo_dato["ver_name"],
-            "suggestedVersionCode": str(nuevo_dato["ver_code"]),
-            "icon": nuevo_dato["link_icon"],
-            "web": nuevo_dato["link_apk"],
-            "versions": [nueva_entry]
-        }
-        datos_repo["apps"].append(app_completa)
-
-    with open(archivo_repo, "w") as f:
-        json.dump(datos_repo, f, indent=4)
-    print("✅ index.json actualizado")
-
-# ---------------------------------------------------------
-# 4. MAIN
-# ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor (Modo Fuerza Bruta Visual)...")
+    print("🚀 Iniciando Motor de Extracción Extrema...")
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
@@ -179,8 +134,7 @@ def main():
 
     for item in items:
         file_id, file_name = item['id'], item['name']
-        if not file_name.lower().endswith('.apk'): continue
-        if file_id in procesados: continue
+        if not file_name.lower().endswith('.apk') or file_id in procesados: continue
 
         print(f"⚙️ Procesando: {file_name}")
         temp_apk = "temp.apk"
@@ -193,30 +147,26 @@ def main():
             fh.seek(0)
             with open(temp_apk, "wb") as f: f.write(fh.read())
 
-            info = analizar_apk(temp_apk)
-            if not info or not info['pkg']: continue
+            apk_info = APK(temp_apk)
+            icon_data = extraer_icono_real_completo(temp_apk) # Nuevo motor
+            icon_filename = f"icon_{apk_info.package}.png"
             
-            nombre_final = f"{info['name'].replace(' ', '_')}_v{info['ver_name']}.apk"
-            link_apk = subir_a_dropbox(dbx, temp_apk, nombre_final)
+            link_apk = subir_a_dropbox(dbx, temp_apk, f"{apk_info.application}_v{apk_info.version_name}.apk")
             
             link_icon = "https://via.placeholder.com/150"
-            if info['icon_file'] and os.path.exists(info['icon_file']):
-                link_icon = subir_a_dropbox(dbx, info['icon_file'], f"icon_{info['pkg']}.png")
-                os.remove(info['icon_file'])
+            if icon_data:
+                with open(icon_filename, "wb") as f: f.write(icon_data)
+                link_icon = subir_a_dropbox(dbx, icon_filename, icon_filename)
+                os.remove(icon_filename)
 
-            actualizar_index_json({
-                "pkg": info['pkg'], "name": info['name'],
-                "ver_name": info['ver_name'], "ver_code": info['ver_code'],
-                "link_apk": link_apk, "link_icon": link_icon
-            })
+            sheet.append_row([apk_info.application, "Publicado", link_apk, apk_info.version_name, apk_info.package, link_icon, file_id, str(apk_info.version_code)])
+            print(f"✅ Éxito: {apk_info.application}")
 
-            sheet.append_row([info['name'], "Publicado", link_apk, info['ver_name'], info['pkg'], link_icon, file_id, "Dropbox/Repo"])
-            print(f"✅ Éxito: {info['name']}")
-
-        except Exception as e:
-            print(f"❌ Error: {e}")
+        except Exception as e: print(f"❌ Error: {e}")
         finally:
             if os.path.exists(temp_apk): os.remove(temp_apk)
+
+    sincronizar_json_desde_excel(sheet)
 
 if __name__ == "__main__":
     main()

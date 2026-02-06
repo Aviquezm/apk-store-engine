@@ -6,6 +6,7 @@ import dropbox
 import gspread
 import zipfile
 from datetime import datetime
+from PIL import Image # Librería para análisis visual
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError
 from oauth2client.service_account import ServiceAccountCredentials
@@ -13,61 +14,51 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from pyaxmlparser import APK 
 
-# --- CONFIGURACIÓN SEGURA ---
+# --- CONFIGURACIÓN ---
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
 REPO_URL = os.environ.get('REPO_URL', 'https://aviquezm.github.io/apk-store-engine/') 
 
-# Credenciales Dropbox
 DBX_KEY = os.environ['DROPBOX_APP_KEY']
 DBX_SECRET = os.environ['DROPBOX_APP_SECRET']
 DBX_REFRESH_TOKEN = os.environ['DROPBOX_REFRESH_TOKEN']
 
-# Credenciales Google
 SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 1. ESCÁNER DE RECURSOS PROFUNDO (Anti-Shazam)
+# 1. MOTOR DE BÚSQUEDA VISUAL (Fuerza Bruta)
 # ---------------------------------------------------------
-def extraer_icono_profundo(apk_path, package_name):
+def buscar_icono_por_fuerza_bruta(apk_path):
     """
-    Busca quirúrgicamente el icono de mejor calidad ignorando archivos XML.
+    Escanea TODO el APK buscando la imagen cuadrada más grande y pesada.
     """
+    mejor_icono_data = None
+    max_peso = 0
+
     try:
         with zipfile.ZipFile(apk_path, 'r') as z:
-            nombres = z.namelist()
-            apk_obj = APK(apk_path)
-            icono_path_bruto = apk_obj.icon_info.get('path')
-            
-            candidatos = []
-            if icono_path_bruto:
-                # Extraemos el nombre base (ej: 'ic_launcher')
-                base_name = os.path.basename(icono_path_bruto).split('.')[0]
-                # Buscamos archivos que se llamen igual pero sean imágenes reales
-                candidatos = [n for n in nombres if base_name in n and n.lower().endswith(('.png', '.webp'))]
-
-            # Si no hay candidatos directos, buscamos patrones universales
-            if not candidatos:
-                patrones = ['ic_launcher', 'app_icon', 'icon']
-                for p in patrones:
-                    candidatos += [n for n in nombres if p in n.lower() and n.lower().endswith(('.png', '.webp'))]
-
-            if candidatos:
-                # Eliminamos duplicados y ordenamos por tamaño de archivo (mayor peso = mejor calidad)
-                candidatos = list(set(candidatos))
-                candidatos.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
-                
-                # Priorizamos carpetas de alta densidad (xxxhdpi)
-                prioridad = [n for n in candidatos if any(dpi in n for dpi in ['xxxhdpi', 'xxhdpi', 'xhdpi'])]
-                ganador = prioridad[0] if prioridad else candidatos[0]
-                
-                print(f"🎯 Icono de alta calidad encontrado: {ganador} ({z.getinfo(ganador).file_size} bytes)")
-                return z.read(ganador)
-                
-        return None
+            for nombre in z.namelist():
+                # Solo nos interesan imágenes PNG o WebP
+                if nombre.lower().endswith(('.png', '.webp')) and 'res/' in nombre:
+                    try:
+                        data = z.read(nombre)
+                        img = Image.open(io.BytesIO(data))
+                        ancho, alto = img.size
+                        
+                        # CONDICIÓN: Debe ser cuadrada (1:1) y de un tamaño decente
+                        if ancho == alto and 90 <= ancho <= 700:
+                            peso = z.getinfo(nombre).file_size
+                            # Nos quedamos con la más pesada (suele ser la de mayor calidad)
+                            if peso > max_peso:
+                                max_peso = peso
+                                mejor_icono_data = data
+                                print(f"🔍 Candidato encontrado: {nombre} ({ancho}x{alto})")
+                    except:
+                        continue
+        return mejor_icono_data
     except Exception as e:
-        print(f"⚠️ Error en extracción profunda: {e}")
+        print(f"⚠️ Error en búsqueda visual: {e}")
         return None
 
 def analizar_apk(apk_path):
@@ -75,8 +66,14 @@ def analizar_apk(apk_path):
         apk = APK(apk_path)
         package_name = apk.package
         
-        # Invocamos al nuevo motor de extracción profunda
-        icon_data = extraer_icono_profundo(apk_path, package_name)
+        # Primero intentamos la extracción normal
+        icon_data = apk.icon_data
+        
+        # Si falla o es XML, activamos el ESCÁNER VISUAL
+        if not icon_data:
+            print(f"🚀 Activando escáner visual para {apk.application}...")
+            icon_data = buscar_icono_por_fuerza_bruta(apk_path)
+        
         icon_filename = f"icon_{package_name}.png"
         
         if icon_data:
@@ -93,7 +90,7 @@ def analizar_apk(apk_path):
             "icon_file": icon_filename
         }
     except Exception as e:
-        print(f"❌ Error analizando APK: {e}")
+        print(f"❌ Error crítico: {e}")
         return None
 
 # ---------------------------------------------------------
@@ -116,7 +113,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1").replace("&dl=0", "&dl=1")
 
 # ---------------------------------------------------------
-# 3. GENERADOR DE REPO (CON ANTI-DUPLICADOS)
+# 3. GENERADOR DE REPO
 # ---------------------------------------------------------
 def actualizar_index_json(nuevo_dato):
     archivo_repo = "index.json"
@@ -143,7 +140,6 @@ def actualizar_index_json(nuevo_dato):
             app["icon"] = nuevo_dato["link_icon"]
             app["suggestedVersionName"] = nuevo_dato["ver_name"]
             app["suggestedVersionCode"] = str(nuevo_dato["ver_code"])
-            # Filtro para no repetir la misma versión en la lista
             if not any(v["versionCode"] == str(nuevo_dato["ver_code"]) for v in app["versions"]):
                 app["versions"].insert(0, nueva_entry)
             break
@@ -168,7 +164,7 @@ def actualizar_index_json(nuevo_dato):
 # 4. MAIN
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor (Modo Extracción Profunda)...")
+    print("🚀 Iniciando Motor (Modo Fuerza Bruta Visual)...")
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)

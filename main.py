@@ -13,46 +13,72 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from pyaxmlparser import APK 
 
-# --- CONFIGURACIÓN ---
+# --- CONFIGURACIÓN SEGURA ---
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
-REPO_URL = os.environ.get('REPO_URL', 'https://aviquezm.github.io/apk-store-engine/')
+REPO_URL = os.environ.get('REPO_URL', 'https://aviquezm.github.io/apk-store-engine/') 
 
+# Credenciales Dropbox
 DBX_KEY = os.environ['DROPBOX_APP_KEY']
 DBX_SECRET = os.environ['DROPBOX_APP_SECRET']
 DBX_REFRESH_TOKEN = os.environ['DROPBOX_REFRESH_TOKEN']
 
+# Credenciales Google
 SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 1. FUNCIÓN DE ANÁLISIS (MODO CAZADOR REBELDE)
+# 1. ESCÁNER DE RECURSOS PROFUNDO (Anti-Shazam)
 # ---------------------------------------------------------
+def extraer_icono_profundo(apk_path, package_name):
+    """
+    Busca quirúrgicamente el icono de mejor calidad ignorando archivos XML.
+    """
+    try:
+        with zipfile.ZipFile(apk_path, 'r') as z:
+            nombres = z.namelist()
+            apk_obj = APK(apk_path)
+            icono_path_bruto = apk_obj.icon_info.get('path')
+            
+            candidatos = []
+            if icono_path_bruto:
+                # Extraemos el nombre base (ej: 'ic_launcher')
+                base_name = os.path.basename(icono_path_bruto).split('.')[0]
+                # Buscamos archivos que se llamen igual pero sean imágenes reales
+                candidatos = [n for n in nombres if base_name in n and n.lower().endswith(('.png', '.webp'))]
+
+            # Si no hay candidatos directos, buscamos patrones universales
+            if not candidatos:
+                patrones = ['ic_launcher', 'app_icon', 'icon']
+                for p in patrones:
+                    candidatos += [n for n in nombres if p in n.lower() and n.lower().endswith(('.png', '.webp'))]
+
+            if candidatos:
+                # Eliminamos duplicados y ordenamos por tamaño de archivo (mayor peso = mejor calidad)
+                candidatos = list(set(candidatos))
+                candidatos.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
+                
+                # Priorizamos carpetas de alta densidad (xxxhdpi)
+                prioridad = [n for n in candidatos if any(dpi in n for dpi in ['xxxhdpi', 'xxhdpi', 'xhdpi'])]
+                ganador = prioridad[0] if prioridad else candidatos[0]
+                
+                print(f"🎯 Icono de alta calidad encontrado: {ganador} ({z.getinfo(ganador).file_size} bytes)")
+                return z.read(ganador)
+                
+        return None
+    except Exception as e:
+        print(f"⚠️ Error en extracción profunda: {e}")
+        return None
+
 def analizar_apk(apk_path):
     try:
         apk = APK(apk_path)
         package_name = apk.package
-        version_name = apk.version_name
-        version_code = apk.version_code
-        app_name = apk.application
         
+        # Invocamos al nuevo motor de extracción profunda
+        icon_data = extraer_icono_profundo(apk_path, package_name)
         icon_filename = f"icon_{package_name}.png"
-        icon_data = apk.icon_data # Intento normal
         
-        # PLAN B: Si pyaxmlparser falla (caso Shazam)
-        if not icon_data:
-            print(f"🕵️ Buscando icono rebelde en {app_name}...")
-            with zipfile.ZipFile(apk_path, 'r') as z:
-                # Buscamos archivos con nombres comunes de iconos
-                candidatos = [n for n in z.namelist() if 'ic_launcher' in n or 'app_icon' in n]
-                # Priorizamos los que son PNG o WebP y de carpetas de alta resolución
-                candidatos = [c for c in candidatos if c.endswith(('.png', '.webp')) and 'res/' in c]
-                if candidatos:
-                    # Ordenamos para intentar agarrar el de mejor calidad (usualmente el más pesado)
-                    candidatos.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
-                    icon_data = z.read(candidatos[0])
-                    print(f"🎯 Icono encontrado manualmente en: {candidatos[0]}")
-
         if icon_data:
             with open(icon_filename, "wb") as f:
                 f.write(icon_data)
@@ -61,9 +87,9 @@ def analizar_apk(apk_path):
 
         return {
             "pkg": package_name,
-            "ver_name": version_name,
-            "ver_code": version_code,
-            "name": app_name,
+            "ver_name": apk.version_name,
+            "ver_code": apk.version_code,
+            "name": apk.application,
             "icon_file": icon_filename
         }
     except Exception as e:
@@ -74,11 +100,7 @@ def analizar_apk(apk_path):
 # 2. LÓGICA DROPBOX
 # ---------------------------------------------------------
 def conectar_dropbox():
-    return dropbox.Dropbox(
-        app_key=DBX_KEY,
-        app_secret=DBX_SECRET,
-        oauth2_refresh_token=DBX_REFRESH_TOKEN
-    )
+    return dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
 
 def subir_a_dropbox(dbx, file_path, dest_filename):
     dest_path = f"/{dest_filename}"
@@ -121,7 +143,7 @@ def actualizar_index_json(nuevo_dato):
             app["icon"] = nuevo_dato["link_icon"]
             app["suggestedVersionName"] = nuevo_dato["ver_name"]
             app["suggestedVersionCode"] = str(nuevo_dato["ver_code"])
-            # EVITAR DUPLICADOS DE VERSIÓN
+            # Filtro para no repetir la misma versión en la lista
             if not any(v["versionCode"] == str(nuevo_dato["ver_code"]) for v in app["versions"]):
                 app["versions"].insert(0, nueva_entry)
             break
@@ -146,7 +168,7 @@ def actualizar_index_json(nuevo_dato):
 # 4. MAIN
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor (Modo Cazador de Iconos)...")
+    print("🚀 Iniciando Motor (Modo Extracción Profunda)...")
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)

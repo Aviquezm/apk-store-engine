@@ -142,6 +142,23 @@
                     "added": "2026-02-06"
                 }
             ]
+        },
+        {
+            "name": "Spotify",
+            "packageName": "com.spotify.music",
+            "suggestedVersionName": "9.1.20.1452",
+            "suggestedVersionCode": "137897908",
+            "icon": "https://www.dropbox.com/scl/fi/t4wkwigi06q926o5t9jdg/icon_com.spotify.music.png?rlkey=xf3k4ihj3o8zfplpqeve7l44e&dl=1",
+            "web": "https://www.dropbox.com/scl/fi/mxyj3m04s9ihwxxezvz50/Spotify_v9.1.20.1452.apk?rlkey=glu6fbdkvtn9a1wm6a2onxlv3&dl=1",
+            "versions": [
+                {
+                    "versionName": "9.1.20.1452",
+                    "versionCode": "137897908",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/mxyj3m04s9ihwxxezvz50/Spotify_v9.1.20.1452.apk?rlkey=glu6fbdkvtn9a1wm6a2onxlv3&dl=1",
+                    "size": 0,
+                    "added": "2026-02-06"
+                }
+            ]
         }
     ]
 }

@@ -5,6 +5,7 @@ import shutil
 import dropbox
 import gspread
 import zipfile
+import re
 from datetime import datetime
 from PIL import Image
 from dropbox.files import WriteMode
@@ -27,62 +28,57 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 1. MOTOR DE RECOMPOSICIÓN DE ICONOS (Fusión de Capas)
+# 1. MOTOR DE FUSIÓN DE CAPAS (Para .xml adaptativos)
 # ---------------------------------------------------------
-def extraer_icono_maestro(apk_path):
+def fabricar_icono_desde_xml(apk_path):
     """
-    Intenta fusionar capas de iconos adaptativos o busca la imagen más pesada.
+    Busca las piezas del rompecabezas (foreground y background) y las une.
     """
     try:
         with zipfile.ZipFile(apk_path, 'r') as z:
             archivos = z.namelist()
-            # Buscamos por densidades de alta calidad
-            for d in ['xxxhdpi', 'xxhdpi', 'xhdpi']:
-                fg = [n for n in archivos if d in n and 'foreground' in n.lower() and n.endswith(('.png', '.webp'))]
-                bg = [n for n in archivos if d in n and 'background' in n.lower() and n.endswith(('.png', '.webp'))]
+            
+            # Buscamos en las carpetas de más alta calidad primero (xxxhdpi, xxhdpi)
+            for d in ['xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi']:
+                # Buscamos la 'S' blanca (foreground) y el círculo azul (background)
+                fg_candidates = [n for n in archivos if d in n and 'ic_launcher' in n and 'foreground' in n and n.endswith(('.png', '.webp'))]
+                bg_candidates = [n for n in archivos if d in n and 'ic_launcher' in n and 'background' in n and n.endswith(('.png', '.webp'))]
                 
-                if fg and bg:
-                    print(f"🧩 Fusionando capas encontradas en {d}...")
-                    img_bg = Image.open(io.BytesIO(z.read(bg[0]))).convert("RGBA")
-                    img_fg = Image.open(io.BytesIO(z.read(fg[0]))).convert("RGBA")
+                if fg_candidates and bg_candidates:
+                    print(f"🧩 Piezas encontradas en {d}. Iniciando fusión para Shazam...")
+                    img_bg = Image.open(io.BytesIO(z.read(bg_candidates[0]))).convert("RGBA")
+                    img_fg = Image.open(io.BytesIO(z.read(fg_candidates[0]))).convert("RGBA")
                     
+                    # Ajustar tamaño si no coinciden
                     if img_bg.size != img_fg.size:
                         img_fg = img_fg.resize(img_bg.size, Image.LANCZOS)
                     
+                    # Pegar frente sobre fondo
                     img_bg.paste(img_fg, (0, 0), img_fg)
+                    
                     output = io.BytesIO()
                     img_bg.save(output, format="PNG")
                     return output.getvalue()
-
-            # FALLBACK: Si no hay capas, buscamos la imagen cuadrada más pesada (Logo de legado)
-            max_peso = 0
-            mejor_data = None
-            for n in archivos:
-                if n.lower().endswith(('.png', '.webp')) and 'res/' in n:
-                    if 'foreground' in n.lower() or 'background' in n.lower(): continue
-                    try:
-                        data = z.read(n)
-                        img = Image.open(io.BytesIO(data))
-                        w, h = img.size
-                        if w == h and w >= 144:
-                            peso = z.getinfo(n).file_size
-                            if peso > max_peso:
-                                max_peso = peso
-                                mejor_data = data
-                    except: continue
-            return mejor_data
+            
+            # PLAN B: Si no hay capas, busca cualquier logo completo que NO sea XML
+            candidatos_plan_b = [n for n in archivos if 'ic_launcher' in n and n.endswith(('.png', '.webp')) and 'res/' in n]
+            if candidatos_plan_b:
+                candidatos_plan_b.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
+                return z.read(candidatos_plan_b[0])
+                
+        return None
     except Exception as e:
-        print(f"⚠️ Error en motor maestro: {e}")
+        print(f"⚠️ Error fabricando icono: {e}")
         return None
 
 # ---------------------------------------------------------
-# 2. SINCRONIZADOR EXCEL -> JSON
+# 2. SINCRONIZADOR EXCEL -> JSON (Soporta cambios manuales)
 # ---------------------------------------------------------
 def sincronizar_json_desde_excel(sheet):
-    print("🔄 Sincronizando repositorio con el Excel...")
+    print("🔄 Sincronizando index.json desde el Excel...")
     registros = sheet.get_all_records()
     nuevo_index = {
-        "repo": {"name": "Mi Tienda Privada", "description": "Repositorio VIP", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"},
+        "repo": {"name": "Mi Tienda Privada", "description": "APKs desde Google Drive", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"},
         "apps": []
     }
     apps_dict = {}
@@ -100,7 +96,7 @@ def sincronizar_json_desde_excel(sheet):
         json.dump(nuevo_index, f, indent=4)
 
 # ---------------------------------------------------------
-# 3. DROPBOX Y MAIN
+# 3. LÓGICA DROPBOX Y MAIN
 # ---------------------------------------------------------
 def conectar_dropbox():
     return dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
@@ -147,7 +143,7 @@ def main():
             with open(temp_apk, "wb") as f: f.write(fh.read())
 
             apk_info = APK(temp_apk)
-            icon_data = extraer_icono_maestro(temp_apk) # Nuevo motor
+            icon_data = fabricar_icono_desde_xml(temp_apk)
             icon_filename = f"icon_{apk_info.package}.png"
             
             link_apk = subir_a_dropbox(dbx, temp_apk, f"{apk_info.application}_v{apk_info.version_name}.apk")

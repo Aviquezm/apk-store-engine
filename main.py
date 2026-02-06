@@ -27,53 +27,52 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 1. MOTOR DE EXTRACCIÓN EXTREMA (Legacy Finder)
+# 1. MOTOR DE RECOMPOSICIÓN DE ICONOS (Fusión de Capas)
 # ---------------------------------------------------------
-def extraer_icono_real_completo(apk_path):
-    """Busca el icono de legado (el logo completo) ignorando las capas separadas."""
+def extraer_icono_maestro(apk_path):
+    """
+    Intenta fusionar capas de iconos adaptativos o busca la imagen más pesada.
+    """
     try:
-        apk_obj = APK(apk_path)
-        # El nombre que buscamos suele ser 'ic_launcher' o 'ic_launcher_round'
-        posibles_nombres = [
-            os.path.basename(apk_obj.icon_info.get('path', 'ic_launcher')).split('.')[0],
-            "ic_launcher",
-            "ic_launcher_round",
-            "app_icon"
-        ]
-        
-        mejor_icono_data = None
-        max_peso = 0
-
         with zipfile.ZipFile(apk_path, 'r') as z:
-            nombres_archivos = z.namelist()
-            
-            for nombre_ref in posibles_nombres:
-                # Buscamos en mipmap (donde están los logos oficiales)
-                # Filtramos para que NO contenga 'foreground' ni 'background'
-                candidatos = [n for n in nombres_archivos if nombre_ref in n 
-                              and n.lower().endswith(('.png', '.webp')) 
-                              and 'foreground' not in n.lower() 
-                              and 'background' not in n.lower()]
+            archivos = z.namelist()
+            # Buscamos por densidades de alta calidad
+            for d in ['xxxhdpi', 'xxhdpi', 'xhdpi']:
+                fg = [n for n in archivos if d in n and 'foreground' in n.lower() and n.endswith(('.png', '.webp'))]
+                bg = [n for n in archivos if d in n and 'background' in n.lower() and n.endswith(('.png', '.webp'))]
                 
-                for c in candidatos:
+                if fg and bg:
+                    print(f"🧩 Fusionando capas encontradas en {d}...")
+                    img_bg = Image.open(io.BytesIO(z.read(bg[0]))).convert("RGBA")
+                    img_fg = Image.open(io.BytesIO(z.read(fg[0]))).convert("RGBA")
+                    
+                    if img_bg.size != img_fg.size:
+                        img_fg = img_fg.resize(img_bg.size, Image.LANCZOS)
+                    
+                    img_bg.paste(img_fg, (0, 0), img_fg)
+                    output = io.BytesIO()
+                    img_bg.save(output, format="PNG")
+                    return output.getvalue()
+
+            # FALLBACK: Si no hay capas, buscamos la imagen cuadrada más pesada (Logo de legado)
+            max_peso = 0
+            mejor_data = None
+            for n in archivos:
+                if n.lower().endswith(('.png', '.webp')) and 'res/' in n:
+                    if 'foreground' in n.lower() or 'background' in n.lower(): continue
                     try:
-                        data = z.read(c)
+                        data = z.read(n)
                         img = Image.open(io.BytesIO(data))
                         w, h = img.size
-                        # Un logo real de alta calidad suele ser de 144x144 para arriba
                         if w == h and w >= 144:
-                            peso = z.getinfo(c).file_size
+                            peso = z.getinfo(n).file_size
                             if peso > max_peso:
                                 max_peso = peso
-                                mejor_icono_data = data
-                                print(f"💎 Logo completo detectado: {c} ({w}x{h})")
+                                mejor_data = data
                     except: continue
-                
-                if mejor_icono_data: break # Si ya encontramos el oficial, paramos
-                
-        return mejor_icono_data
+            return mejor_data
     except Exception as e:
-        print(f"⚠️ Error en búsqueda extrema: {e}")
+        print(f"⚠️ Error en motor maestro: {e}")
         return None
 
 # ---------------------------------------------------------
@@ -119,7 +118,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1") if url else None
 
 def main():
-    print("🚀 Iniciando Motor de Extracción Extrema...")
+    print("🚀 Iniciando Motor 'Recomponedor'...")
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
@@ -148,7 +147,7 @@ def main():
             with open(temp_apk, "wb") as f: f.write(fh.read())
 
             apk_info = APK(temp_apk)
-            icon_data = extraer_icono_real_completo(temp_apk) # Nuevo motor
+            icon_data = extraer_icono_maestro(temp_apk) # Nuevo motor
             icon_filename = f"icon_{apk_info.package}.png"
             
             link_apk = subir_a_dropbox(dbx, temp_apk, f"{apk_info.application}_v{apk_info.version_name}.apk")

@@ -101,6 +101,23 @@
                     "added": "2026-02-05"
                 }
             ]
+        },
+        {
+            "name": "AdGuard",
+            "packageName": "com.adguard.android",
+            "suggestedVersionName": "4.14.34",
+            "suggestedVersionCode": "10326790",
+            "icon": "https://www.dropbox.com/scl/fi/4b3rxo3j7p2rw1jzll22t/icon_com.adguard.android.png?rlkey=go3wbyvnzoy1oe2oljah3146q&dl=1",
+            "web": "https://www.dropbox.com/scl/fi/hvrmdhw71xa6i2qvydawr/AdGuard_v4.14.34.apk?rlkey=ptwp7zrp26pspqtxqk88g52e8&dl=1",
+            "versions": [
+                {
+                    "versionName": "4.14.34",
+                    "versionCode": "10326790",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/hvrmdhw71xa6i2qvydawr/AdGuard_v4.14.34.apk?rlkey=ptwp7zrp26pspqtxqk88g52e8&dl=1",
+                    "size": 0,
+                    "added": "2026-02-06"
+                }
+            ]
         }
     ]
 }

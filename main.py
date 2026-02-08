@@ -27,58 +27,53 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 1. MOTOR DE EXTRACCIÓN AVANZADA (Radar de Logos)
+# 1. MOTOR DE EXTRACCIÓN (Calibrado para Truecaller)
 # ---------------------------------------------------------
-def extraer_logo_definitivo(apk_path, app_name):
-    """
-    Busca el icono real usando jerarquía, fusión y radar de nombres.
-    """
+def extraer_icono_rebelde(apk_path, app_name):
     try:
         with zipfile.ZipFile(apk_path, 'r') as z:
             archivos = z.namelist()
-            app_name_clean = app_name.lower().replace(" ", "")
+            app_clean = app_name.lower().replace(" ", "")
             
-            # PASO 1: Radar de Nombres (Específico para Shazam y similares)
-            # Busca imágenes que tengan el nombre de la app + 'icon' o 'logo'
-            radar = [n for n in archivos if app_name_clean in n.lower() and 'icon' in n.lower() and n.endswith(('.png', '.webp'))]
+            # A. RADAR POR NOMBRE (Como funcionó con Shazam)
+            radar = [n for n in archivos if app_clean in n.lower() and 'icon' in n.lower() and n.endswith(('.png', '.webp'))]
             if radar:
                 radar.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
-                print(f"🎯 Radar detectó logo específico: {radar[0]}")
                 return z.read(radar[0])
 
-            # PASO 2: Intentar fusión de capas (Fondo + Frente)
+            # B. FUSIÓN AGRESIVA (Para Truecaller)
             for d in ['xxxhdpi', 'xxhdpi', 'xhdpi']:
-                fg = [n for n in archivos if d in n and 'foreground' in n.lower() and n.endswith(('.png', '.webp'))]
-                bg = [n for n in archivos if d in n and 'background' in n.lower() and n.endswith(('.png', '.webp'))]
+                # Buscamos capas de frente y fondo específicamente en mipmap
+                fg = [n for n in archivos if d in n and 'ic_launcher' in n and 'foreground' in n and n.endswith(('.png', '.webp'))]
+                bg = [n for n in archivos if d in n and 'ic_launcher' in n and 'background' in n and n.endswith(('.png', '.webp'))]
+                
                 if fg and bg:
-                    print(f"🧩 Fusionando capas en {d}...")
+                    print(f"🧩 Fusionando capas encontradas para Truecaller en {d}...")
                     img_bg = Image.open(io.BytesIO(z.read(bg[0]))).convert("RGBA")
                     img_fg = Image.open(io.BytesIO(z.read(fg[0]))).convert("RGBA")
-                    if img_bg.size != img_fg.size: img_fg = img_fg.resize(img_bg.size, Image.LANCZOS)
+                    if img_bg.size != img_fg.size:
+                        img_fg = img_fg.resize(img_bg.size, Image.LANCZOS)
                     img_bg.paste(img_fg, (0, 0), img_fg)
                     out = io.BytesIO()
                     img_bg.save(out, format="PNG")
                     return out.getvalue()
 
-            # PASO 3: Buscar cualquier 'ic_launcher' que sea imagen (Legado)
+            # C. ÚLTIMO RECURSO: El PNG más grande que se llame ic_launcher
             launchers = [n for n in archivos if 'ic_launcher' in n and n.endswith(('.png', '.webp')) and 'foreground' not in n.lower()]
             if launchers:
                 launchers.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
-                print(f"💎 Logo legado encontrado: {launchers[0]}")
                 return z.read(launchers[0])
 
         return None
-    except Exception as e:
-        print(f"⚠️ Error en motor: {e}")
-        return None
+    except: return None
 
 # ---------------------------------------------------------
-# 2. SINCRONIZADOR EXCEL -> JSON
+# 2. SINCRONIZADOR EXCEL -> JSON (Consistente)
 # ---------------------------------------------------------
-def sincronizar_json_desde_excel(sheet):
-    print("🔄 Sincronizando index.json...")
+def sincronizar_todo(sheet):
+    print("🔄 Sincronizando catálogo completo...")
     registros = sheet.get_all_records()
-    nuevo_index = {"repo": {"name": "Mi Tienda Privada", "description": "APKs VIP", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"}, "apps": []}
+    nuevo_index = {"repo": {"name": "Mi Tienda Privada", "description": "Repositorio VIP", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"}, "apps": []}
     apps_dict = {}
     for r in registros:
         pkg = r.get('Pkg')
@@ -90,10 +85,11 @@ def sincronizar_json_desde_excel(sheet):
             if not any(v['versionName'] == entry['versionName'] for v in apps_dict[pkg]['versions']):
                 apps_dict[pkg]['versions'].insert(0, entry)
     nuevo_index["apps"] = list(apps_dict.values())
-    with open("index.json", "w") as f: json.dump(nuevo_index, f, indent=4)
+    with open("index.json", "w") as f:
+        json.dump(nuevo_index, f, indent=4)
 
 # ---------------------------------------------------------
-# 3. LÓGICA DROPBOX Y MAIN
+# 3. MAIN (Orden de columnas corregido)
 # ---------------------------------------------------------
 def conectar_dropbox():
     return dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
@@ -111,7 +107,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1") if url else None
 
 def main():
-    print("🚀 Iniciando Motor 'Radar de Logos'...")
+    print("🚀 Motor Gladiador v2 (Especial Truecaller)...")
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
@@ -139,11 +135,11 @@ def main():
             fh.seek(0)
             with open(temp_apk, "wb") as f: f.write(fh.read())
 
-            apk_info = APK(temp_apk)
-            icon_data = extraer_logo_definitivo(temp_apk, apk_info.application) # USANDO EL RADAR
-            icon_filename = f"icon_{apk_info.package}.png"
+            apk = APK(temp_apk)
+            icon_data = extraer_icono_rebelde(temp_apk, apk.application)
+            icon_filename = f"icon_{apk.package}.png"
             
-            link_apk = subir_a_dropbox(dbx, temp_apk, f"{apk_info.application.replace(' ', '_')}_v{apk_info.version_name}.apk")
+            link_apk = subir_a_dropbox(dbx, temp_apk, f"{apk.application.replace(' ', '_')}_v{apk.version_name}.apk")
             
             link_icon = "https://via.placeholder.com/150"
             if icon_data:
@@ -151,14 +147,19 @@ def main():
                 link_icon = subir_a_dropbox(dbx, icon_filename, icon_filename)
                 os.remove(icon_filename)
 
-            sheet.append_row([apk_info.application, "Publicado", link_apk, apk_info.version_name, apk_info.package, link_icon, file_id, str(apk_info.version_code)])
-            print(f"✅ Éxito con radar: {apk_info.application}")
+            # --- CORRECCIÓN DE COLUMNAS EXCEL ---
+            # Columnas: Nombre, Estado, Link APK, Version, Pkg, Link Icono, ID Drive, Repo, VersionCode
+            sheet.append_row([
+                apk.application, "Publicado", link_apk, apk.version_name, 
+                apk.package, link_icon, file_id, "Dropbox/Repo", str(apk.version_code)
+            ])
+            print(f"✅ Éxito: {apk.application}")
 
         except Exception as e: print(f"❌ Error: {e}")
         finally:
             if os.path.exists(temp_apk): os.remove(temp_apk)
 
-    sincronizar_json_desde_excel(sheet)
+    sincronizar_todo(sheet)
 
 if __name__ == "__main__":
     main()

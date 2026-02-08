@@ -1,7 +1,7 @@
 {
     "repo": {
         "name": "Mi Tienda Privada",
-        "description": "APKs VIP",
+        "description": "Repositorio VIP",
         "address": "https://aviquezm.github.io/apk-store-engine/",
         "icon": "https://aviquezm.github.io/apk-store-engine/icon.png"
     },
@@ -108,12 +108,12 @@
             "name": "Truecaller",
             "packageName": "com.truecaller",
             "suggestedVersionName": "26.5.7",
-            "icon": "https://www.dropbox.com/scl/fi/cmv8wrdj0a3p4c31u3zri/icon_com.truecaller.png?rlkey=lx6iej03cfmjj5ilr81lm8k8j&dl=0",
+            "icon": "https://www.dropbox.com/scl/fi/bykvq90fbcevrdro7v110/icon_com.truecaller.png?rlkey=d13kq0aq8o50kega3q602gs2c&dl=0",
             "versions": [
                 {
                     "versionName": "26.5.7",
                     "versionCode": "2605007",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/wi03eecn2lo1iw8ajlexl/Truecaller_v26.5.7.apk?rlkey=1njlkm22rp8pbvx83fv7czpgs&dl=0",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/2xoqnyrchbx4nvsfsjisf/Truecaller_v26.5.7.apk?rlkey=51may52qf9qh44ke0j9y3wumi&dl=0",
                     "added": "2026-02-08"
                 }
             ]

@@ -5,7 +5,6 @@ import shutil
 import dropbox
 import gspread
 import zipfile
-import re
 from datetime import datetime
 from PIL import Image
 from dropbox.files import WriteMode
@@ -15,7 +14,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from pyaxmlparser import APK 
 
-# --- CONFIGURACIÓN ---
+# --- CONFIGURACIÓN SEGURA ---
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
 REPO_URL = os.environ.get('REPO_URL', 'https://aviquezm.github.io/apk-store-engine/') 
@@ -28,72 +27,105 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 1. MOTOR DE FUSIÓN DE CAPAS (Para .xml adaptativos)
+# 1. MOTOR DE EXTRACCIÓN JERÁRQUICA (Reventador de Iconos)
 # ---------------------------------------------------------
-def fabricar_icono_desde_xml(apk_path):
+def reventar_icono_apk(apk_path):
     """
-    Busca las piezas del rompecabezas (foreground y background) y las une.
+    Busca el icono real con 3 niveles de prioridad para no fallar nunca.
     """
     try:
+        apk = APK(apk_path)
+        # Nombre base del icono según el manifiesto (ej: ic_launcher)
+        base_name = os.path.basename(apk.icon_info.get('path', 'ic_launcher')).split('.')[0]
+        
         with zipfile.ZipFile(apk_path, 'r') as z:
             archivos = z.namelist()
+            candidatos = [n for n in archivos if base_name in n and n.lower().endswith(('.png', '.webp'))]
             
-            # Buscamos en las carpetas de más alta calidad primero (xxxhdpi, xxhdpi)
-            for d in ['xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi']:
-                # Buscamos la 'S' blanca (foreground) y el círculo azul (background)
-                fg_candidates = [n for n in archivos if d in n and 'ic_launcher' in n and 'foreground' in n and n.endswith(('.png', '.webp'))]
-                bg_candidates = [n for n in archivos if d in n and 'ic_launcher' in n and 'background' in n and n.endswith(('.png', '.webp'))]
+            # Densidades de alta calidad
+            densidades = ['xxxhdpi', 'xxhdpi', 'xhdpi', 'hdpi']
+            
+            for d in densidades:
+                # Filtrar candidatos por la densidad actual
+                en_densidad = [c for c in candidatos if d in c]
                 
-                if fg_candidates and bg_candidates:
-                    print(f"🧩 Piezas encontradas en {d}. Iniciando fusión para Shazam...")
-                    img_bg = Image.open(io.BytesIO(z.read(bg_candidates[0]))).convert("RGBA")
-                    img_fg = Image.open(io.BytesIO(z.read(fg_candidates[0]))).convert("RGBA")
-                    
-                    # Ajustar tamaño si no coinciden
+                fg = [n for n in en_densidad if 'foreground' in n.lower()]
+                bg = [n for n in en_densidad if 'background' in n.lower()]
+                legacy = [n for n in en_densidad if 'foreground' not in n.lower() and 'background' not in n.lower()]
+                
+                # NIVEL 1: Encontrar el logo ya fusionado (Legacy)
+                if legacy:
+                    print(f"💎 Logo legado encontrado en {d}: {legacy[0]}")
+                    return z.read(legacy[0])
+                
+                # NIVEL 2: Fusionar las capas (Sándwich de icono)
+                if fg and bg:
+                    print(f"🧩 Fusionando capas detectadas en {d}...")
+                    img_bg = Image.open(io.BytesIO(z.read(bg[0]))).convert("RGBA")
+                    img_fg = Image.open(io.BytesIO(z.read(fg[0]))).convert("RGBA")
                     if img_bg.size != img_fg.size:
                         img_fg = img_fg.resize(img_bg.size, Image.LANCZOS)
-                    
-                    # Pegar frente sobre fondo
                     img_bg.paste(img_fg, (0, 0), img_fg)
-                    
-                    output = io.BytesIO()
-                    img_bg.save(output, format="PNG")
-                    return output.getvalue()
-            
-            # PLAN B: Si no hay capas, busca cualquier logo completo que NO sea XML
-            candidatos_plan_b = [n for n in archivos if 'ic_launcher' in n and n.endswith(('.png', '.webp')) and 'res/' in n]
-            if candidatos_plan_b:
-                candidatos_plan_b.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
-                return z.read(candidatos_plan_b[0])
+                    out = io.BytesIO()
+                    img_bg.save(out, format="PNG")
+                    return out.getvalue()
+                
+                # NIVEL 3: Si solo hay una pieza (como la nota musical), úsala
+                if fg:
+                    print(f"⚠️ Solo se encontró Foreground en {d}. Usando pieza suelta.")
+                    return z.read(fg[0])
                 
         return None
     except Exception as e:
-        print(f"⚠️ Error fabricando icono: {e}")
+        print(f"❌ Error 'reventando' el icono: {e}")
         return None
 
 # ---------------------------------------------------------
-# 2. SINCRONIZADOR EXCEL -> JSON (Soporta cambios manuales)
+# 2. SINCRONIZADOR EXCEL -> JSON (Evita errores de GitHub)
 # ---------------------------------------------------------
-def sincronizar_json_desde_excel(sheet):
-    print("🔄 Sincronizando index.json desde el Excel...")
+def reconstruir_index_desde_excel(sheet):
+    """Siempre genera el index.json basándose en el Excel. Evita que falle el Git Push."""
+    print("🔄 Sincronizando index.json con los datos del Excel...")
     registros = sheet.get_all_records()
+    
     nuevo_index = {
-        "repo": {"name": "Mi Tienda Privada", "description": "APKs desde Google Drive", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"},
+        "repo": {
+            "name": "Mi Tienda Privada",
+            "description": "Repositorio VIP",
+            "address": REPO_URL,
+            "icon": f"{REPO_URL}icon.png"
+        },
         "apps": []
     }
+    
     apps_dict = {}
     for r in registros:
         pkg = r.get('Pkg')
         if not pkg: continue
-        entry = {"versionName": str(r.get('Version')), "versionCode": str(r.get('MsgID_O_VersionCode', '0')), "downloadURL": r.get('Link_Dropbox_APK'), "added": datetime.now().strftime("%Y-%m-%d")}
+        
+        entry = {
+            "versionName": str(r.get('Version')),
+            "versionCode": str(r.get('MsgID_O_VersionCode', '0')),
+            "downloadURL": r.get('Link_Dropbox_APK'),
+            "added": datetime.now().strftime("%Y-%m-%d")
+        }
+        
         if pkg not in apps_dict:
-            apps_dict[pkg] = {"name": r.get('Nombre'), "packageName": pkg, "suggestedVersionName": str(r.get('Version')), "icon": r.get('Link_Icono'), "versions": [entry]}
+            apps_dict[pkg] = {
+                "name": r.get('Nombre'),
+                "packageName": pkg,
+                "suggestedVersionName": str(r.get('Version')),
+                "icon": r.get('Link_Icono'),
+                "versions": [entry]
+            }
         else:
             if not any(v['versionName'] == entry['versionName'] for v in apps_dict[pkg]['versions']):
                 apps_dict[pkg]['versions'].insert(0, entry)
+
     nuevo_index["apps"] = list(apps_dict.values())
     with open("index.json", "w") as f:
         json.dump(nuevo_index, f, indent=4)
+    print("✅ index.json generado y listo para subir.")
 
 # ---------------------------------------------------------
 # 3. LÓGICA DROPBOX Y MAIN
@@ -114,7 +146,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1") if url else None
 
 def main():
-    print("🚀 Iniciando Motor 'Recomponedor'...")
+    print("🚀 Iniciando Motor Destripador (Raspberry Pi Style)...")
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
@@ -143,10 +175,10 @@ def main():
             with open(temp_apk, "wb") as f: f.write(fh.read())
 
             apk_info = APK(temp_apk)
-            icon_data = fabricar_icono_desde_xml(temp_apk)
+            icon_data = reventar_icono_apk(temp_apk)
             icon_filename = f"icon_{apk_info.package}.png"
             
-            link_apk = subir_a_dropbox(dbx, temp_apk, f"{apk_info.application}_v{apk_info.version_name}.apk")
+            link_apk = subir_a_dropbox(dbx, temp_apk, f"{apk_info.application.replace(' ', '_')}_v{apk_info.version_name}.apk")
             
             link_icon = "https://via.placeholder.com/150"
             if icon_data:
@@ -157,11 +189,12 @@ def main():
             sheet.append_row([apk_info.application, "Publicado", link_apk, apk_info.version_name, apk_info.package, link_icon, file_id, str(apk_info.version_code)])
             print(f"✅ Éxito: {apk_info.application}")
 
-        except Exception as e: print(f"❌ Error: {e}")
+        except Exception as e: print(f"❌ Error procesando {file_name}: {e}")
         finally:
             if os.path.exists(temp_apk): os.remove(temp_apk)
 
-    sincronizar_json_desde_excel(sheet)
+    # RECONSTRUCCIÓN FINAL (Obligatorio)
+    reconstruir_index_desde_excel(sheet)
 
 if __name__ == "__main__":
     main()

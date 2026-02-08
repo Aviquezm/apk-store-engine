@@ -5,5 +5,118 @@
         "address": "https://aviquezm.github.io/apk-store-engine/",
         "icon": "https://aviquezm.github.io/apk-store-engine/icon.png"
     },
-    "apps": []
+    "apps": [
+        {
+            "name": "Calz",
+            "packageName": "com.wachanga.calories",
+            "suggestedVersionName": "1.28.0",
+            "icon": "https://www.dropbox.com/scl/fi/u1ujp2x5d8s45c691wv85/icon_com.wachanga.calories.png?rlkey=q6d0c7101uo7yf1a6ekk1ulba&dl=1",
+            "versions": [
+                {
+                    "versionName": "1.28.0",
+                    "versionCode": "",
+                    "downloadURL": null,
+                    "added": "2026-02-08"
+                }
+            ]
+        },
+        {
+            "name": "Dead Pixel Fix",
+            "packageName": "com.zoox.deadpixelfix",
+            "suggestedVersionName": "3.11",
+            "icon": "https://www.dropbox.com/scl/fi/bpu3rqazsbvoe3ldpm000/icon_com.zoox.deadpixelfix.png?rlkey=bfxfudqqrn1enixbg852osx97&dl=1",
+            "versions": [
+                {
+                    "versionName": "3.11",
+                    "versionCode": "",
+                    "downloadURL": null,
+                    "added": "2026-02-08"
+                }
+            ]
+        },
+        {
+            "name": "Barquode",
+            "packageName": "com.pranavpandey.matrix",
+            "suggestedVersionName": "8.2.1",
+            "icon": "https://www.dropbox.com/scl/fi/uhk3kpfq69qgyy3o23wcc/icon_com.pranavpandey.matrix.png?rlkey=8l07lmt4smpl5kygroc4b6jg2&dl=1",
+            "versions": [
+                {
+                    "versionName": "8.2.1",
+                    "versionCode": "",
+                    "downloadURL": null,
+                    "added": "2026-02-08"
+                }
+            ]
+        },
+        {
+            "name": "AdGuard",
+            "packageName": "com.adguard.android",
+            "suggestedVersionName": "4.14.34",
+            "icon": "https://www.dropbox.com/scl/fi/4b3rxo3j7p2rw1jzll22t/icon_com.adguard.android.png?rlkey=go3wbyvnzoy1oe2oljah3146q&dl=1",
+            "versions": [
+                {
+                    "versionName": "4.14.34",
+                    "versionCode": "",
+                    "downloadURL": null,
+                    "added": "2026-02-08"
+                }
+            ]
+        },
+        {
+            "name": "Spotify",
+            "packageName": "com.spotify.music",
+            "suggestedVersionName": "9.1.20.1452",
+            "icon": "https://www.dropbox.com/scl/fi/t4wkwigi06q926o5t9jdg/icon_com.spotify.music.png?rlkey=xf3k4ihj3o8zfplpqeve7l44e&dl=1",
+            "versions": [
+                {
+                    "versionName": "9.1.20.1452",
+                    "versionCode": "",
+                    "downloadURL": null,
+                    "added": "2026-02-08"
+                }
+            ]
+        },
+        {
+            "name": "Shazam",
+            "packageName": "com.shazam.android",
+            "suggestedVersionName": "16.27.0-260129",
+            "icon": "https://www.dropbox.com/scl/fi/zx4u39xsub7s2mtqd4f31/icon_com.shazam.android.png?rlkey=nqzwgbktodff8qaioqpe3goxk&dl=0",
+            "versions": [
+                {
+                    "versionName": "16.27.0-260129",
+                    "versionCode": "",
+                    "downloadURL": null,
+                    "added": "2026-02-08"
+                }
+            ]
+        },
+        {
+            "name": "Micro Guard",
+            "packageName": "com.protectstar.microguardfree",
+            "suggestedVersionName": "6.5",
+            "icon": "https://www.dropbox.com/scl/fi/hvhkbienpxeu6i12iheoe/icon_com.protectstar.microguardfree.png?rlkey=ntz9oo81axw1fx9hi1hq4tpzz&dl=0",
+            "versions": [
+                {
+                    "versionName": "6.5",
+                    "versionCode": "",
+                    "downloadURL": null,
+                    "added": "2026-02-08"
+                }
+            ]
+        },
+        {
+            "name": "Truecaller",
+            "packageName": "com.truecaller",
+            "suggestedVersionName": "26.5.7",
+            "icon": "https://via.placeholder.com/150",
+            "versions": [
+                {
+                    "versionName": "26.5.7",
+                    "versionCode": "2605007",
+                    "downloadURL": null,
+                    "added": "2026-02-08"
+                }
+            ]
+        }
+    ]
 }

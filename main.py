@@ -27,12 +27,9 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 1. MOTOR DE EXTRACCIÓN GEOMÉTRICO (Filtro 1:1)
+# 1. MOTOR DE EXTRACCIÓN (Calibrado para tc_rounded_logo)
 # ---------------------------------------------------------
-def extraer_icono_arquitecto(apk_path, app_name):
-    """
-    Busca el icono real asegurándose de que sea CUADRADO.
-    """
+def extraer_icono_precision(apk_path, app_name):
     mejor_puntuacion = -1
     mejor_data = None
     
@@ -42,49 +39,52 @@ def extraer_icono_arquitecto(apk_path, app_name):
             app_clean = app_name.lower().replace(" ", "")
             
             for nombre in archivos:
-                if nombre.lower().endswith(('.png', '.webp')) and 'res/' in nombre:
-                    # Ignorar iconos de notificación (suelen ser muy pequeños y blancos)
-                    if 'notification' in nombre.lower() or 'abc_' in nombre.lower(): continue
+                nombre_lc = nombre.lower()
+                if nombre_lc.endswith(('.png', '.webp')) and 'res/' in nombre:
+                    if 'notification' in nombre_lc or 'abc_' in nombre_lc: continue
                     
                     try:
                         data = z.read(nombre)
                         img = Image.open(io.BytesIO(data))
-                        ancho, alto = img.size
+                        w, h = img.size
                         
-                        # FILTRO CRÍTICO: Debe ser cuadrado (o casi)
-                        if abs(ancho - alto) > 2: continue # Si no es 1:1, fuera.
-                        
-                        # FILTRO DE TAMAÑO: Entre 144 y 512px
-                        if not (140 <= ancho <= 700): continue
+                        # FILTRO GEOMÉTRICO: Debe ser cuadrado
+                        if abs(w - h) > 2 or not (120 <= w <= 1024): continue
                         
                         puntuacion = 0
-                        nombre_lc = nombre.lower()
+                        # PRIORIDAD MÁXIMA: Nombres que suelen ser el logo final armado
+                        if 'rounded_logo' in nombre_lc or 'tc_logo' in nombre_lc: puntuacion += 5000
+                        if 'app_icon' in nombre_lc or 'store_icon' in nombre_lc: puntuacion += 3000
                         
-                        # Puntos por palabras clave
-                        if 'launcher' in nombre_lc: puntuacion += 1000
-                        if app_clean in nombre_lc: puntuacion += 500
-                        if 'ic_tc' in nombre_lc or 'ic_sdk' in nombre_lc: puntuacion += 300
+                        # Prioridad media: Launcher (pero penalizamos si es una 'capa' suelta)
+                        if 'launcher' in nombre_lc:
+                            puntuacion += 1000
+                            if 'foreground' in nombre_lc or 'background' in nombre_lc:
+                                puntuacion -= 500 # Penalizamos piezas sueltas
                         
-                        # Puntos por densidad
-                        if 'xxxhdpi' in nombre_lc: puntuacion += 200
-                        elif 'xxhdpi' in nombre_lc: puntuacion += 100
+                        # Puntos por nombre de app
+                        if app_clean in nombre_lc: puntuacion += 800
+                        if 'tc_' in nombre_lc: puntuacion += 400
+                        
+                        # Puntos por calidad
+                        if 'xxxhdpi' in nombre_lc: puntuacion += 300
+                        elif 'xxhdpi' in nombre_lc: puntuacion += 200
                         
                         if puntuacion > mejor_puntuacion:
                             mejor_puntuacion = puntuacion
                             mejor_data = data
-                            print(f"📐 Candidato cuadrado encontrado: {nombre} ({ancho}x{alto}) - Score: {puntuacion}")
-                            
+                            print(f"🎯 Nuevo líder: {nombre} ({w}x{h}) - Score: {puntuacion}")
                     except: continue
         return mejor_data
     except: return None
 
 # ---------------------------------------------------------
-# 2. SINCRONIZADOR Y LÓGICA DE EXCEL
+# 2. SINCRONIZADOR Y LOGICA DE EXCEL
 # ---------------------------------------------------------
 def sincronizar_todo(sheet):
-    print("🔄 Sincronizando catálogo...")
+    print("🔄 Sincronizando catálogo completo...")
     registros = sheet.get_all_records()
-    nuevo_index = {"repo": {"name": "Mi Tienda Privada", "description": "APKs VIP", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"}, "apps": []}
+    nuevo_index = {"repo": {"name": "Mi Tienda Privada", "description": "Repositorio VIP", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"}, "apps": []}
     apps_dict = {}
     for r in registros:
         pkg = r.get('Pkg')
@@ -99,7 +99,7 @@ def sincronizar_todo(sheet):
     with open("index.json", "w") as f: json.dump(nuevo_index, f, indent=4)
 
 def main():
-    print("🚀 Iniciando Motor 'Arquitecto' v7...")
+    print("🚀 Iniciando Motor 'Precisión Quirúrgica' v8...")
     dbx = dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
@@ -107,15 +107,20 @@ def main():
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
     registros = sheet.get_all_records()
-    procesados = {str(r.get('ID Drive')) for r in registros if r.get('ID Drive')}
+    # Usamos strip() para evitar problemas con espacios invisibles
+    procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
     
     query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
     items = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
 
     for item in items:
-        file_id = str(item['id'])
+        file_id = str(item['id']).strip()
         file_name = item['name']
-        if not file_name.lower().endswith('.apk') or file_id in procesados: continue
+        if not file_name.lower().endswith('.apk'): continue
+        
+        if file_id in procesados:
+            print(f"⏩ Saltando {file_name} (Ya procesado)")
+            continue
 
         print(f"⚙️ Procesando: {file_name}")
         temp_apk = "temp.apk"
@@ -129,8 +134,7 @@ def main():
             with open(temp_apk, "wb") as f: f.write(fh.read())
 
             apk = APK(temp_apk)
-            # USAMOS EL FILTRO CUADRADO
-            icon_data = extraer_icono_arquitecto(temp_apk, apk.application)
+            icon_data = extraer_icono_precision(temp_apk, apk.application)
             icon_filename = f"icon_{apk.package}.png"
             
             nombre_limpio = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
@@ -142,12 +146,11 @@ def main():
                 link_icon = subir_a_dropbox(dbx, icon_filename, icon_filename)
                 os.remove(icon_filename)
 
-            # ORDEN DE COLUMNAS: Nombre, Estado, Link APK, Version, Pkg, Link Icono, ID Drive, Repo, Version Code
             sheet.append_row([
                 nombre_limpio, "Publicado", link_apk, apk.version_name, 
                 apk.package, link_icon, file_id, "Dropbox/Repo", str(apk.version_code)
             ])
-            print(f"✅ Éxito geométrico: {nombre_limpio}")
+            print(f"✅ Éxito con {nombre_limpio}")
 
         except Exception as e: print(f"❌ Error: {e}")
         finally:

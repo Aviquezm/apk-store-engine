@@ -1,7 +1,7 @@
 {
     "repo": {
         "name": "Mi Tienda Privada",
-        "description": "Repositorio VIP",
+        "description": "APKs VIP",
         "address": "https://aviquezm.github.io/apk-store-engine/",
         "icon": "https://aviquezm.github.io/apk-store-engine/icon.png"
     },
@@ -142,6 +142,20 @@
                     "versionName": "10.6.0",
                     "versionCode": "100608781",
                     "downloadURL": "https://www.dropbox.com/scl/fi/e9vftrbqv7g0v1dzkpxxu/Flightradar_v10.6.0.apk?rlkey=j48lyn2e4dtbh2bloosrw6uc8&dl=0",
+                    "added": "2026-02-08"
+                }
+            ]
+        },
+        {
+            "name": "CV Engineer",
+            "packageName": "sampson.cvbuilder",
+            "suggestedVersionName": "18.01.39",
+            "icon": "https://www.dropbox.com/scl/fi/b92gs55ubw9bjm9yt754q/icon_sampson.cvbuilder.png?rlkey=zs3aqtynh60f4x5azh9l07i92&dl=0",
+            "versions": [
+                {
+                    "versionName": "18.01.39",
+                    "versionCode": "523",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/fxdss8ixjvyl2ex4r7h70/CV_Engineer_v18.01.39.apk?rlkey=9157oy16ehwygn2bew0t146mf&dl=0",
                     "added": "2026-02-08"
                 }
             ]

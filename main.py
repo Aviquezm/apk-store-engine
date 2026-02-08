@@ -27,31 +27,25 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 1. MOTOR DE EXTRACCIÓN AGRESIVA (Cazador de Truecaller)
+# 1. MOTOR DE EXTRACCIÓN (Calibrado para Truecaller/Shazam)
 # ---------------------------------------------------------
-def extraer_icono_profundo(apk_path, app_name):
-    """
-    Busca el icono real analizando cada rincón del APK.
-    """
+def extraer_icono_rebelde(apk_path, app_name):
     try:
         with zipfile.ZipFile(apk_path, 'r') as z:
             archivos = z.namelist()
             app_clean = app_name.lower().replace(" ", "")
             
-            # PASO 1: Buscar por el nombre de la App (Efectivo para Truecaller/Shazam)
-            # Buscamos archivos que contengan 'truecaller' o 'shazam' y sean imagen
-            radar_nombre = [n for n in archivos if app_clean in n.lower() and ('icon' in n.lower() or 'logo' in n.lower()) and n.endswith(('.png', '.webp'))]
-            if radar_nombre:
-                radar_nombre.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
-                print(f"🎯 Radar de nombre encontró: {radar_nombre[0]}")
-                return z.read(radar_nombre[0])
+            # A. RADAR POR NOMBRE (Truecaller usa 'tc_' o 'truecaller')
+            radar = [n for n in archivos if (app_clean in n.lower() or 'tc_' in n.lower()) and 'icon' in n.lower() and n.endswith(('.png', '.webp'))]
+            if radar:
+                radar.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
+                return z.read(radar[0])
 
-            # PASO 2: Fusión de Capas (Adaptive Icons)
+            # B. FUSIÓN DE CAPAS (Para escudos modernos)
             for d in ['xxxhdpi', 'xxhdpi', 'xhdpi']:
                 fg = [n for n in archivos if d in n and 'ic_launcher' in n and 'foreground' in n and n.endswith(('.png', '.webp'))]
                 bg = [n for n in archivos if d in n and 'ic_launcher' in n and 'background' in n and n.endswith(('.png', '.webp'))]
                 if fg and bg:
-                    print(f"🧩 Fusionando capas en {d}...")
                     img_bg = Image.open(io.BytesIO(z.read(bg[0]))).convert("RGBA")
                     img_fg = Image.open(io.BytesIO(z.read(fg[0]))).convert("RGBA")
                     if img_bg.size != img_fg.size: img_fg = img_fg.resize(img_bg.size, Image.LANCZOS)
@@ -60,32 +54,35 @@ def extraer_icono_profundo(apk_path, app_name):
                     img_bg.save(out, format="PNG")
                     return out.getvalue()
 
-            # PASO 3: Icono de Legado (El PNG más pesado)
+            # C. LEGADO
             launchers = [n for n in archivos if 'ic_launcher' in n and n.endswith(('.png', '.webp')) and 'foreground' not in n.lower()]
             if launchers:
                 launchers.sort(key=lambda x: z.getinfo(x).file_size, reverse=True)
                 return z.read(launchers[0])
-
         return None
     except: return None
 
 # ---------------------------------------------------------
-# 2. SINCRONIZADOR EXCEL -> JSON (Consistente)
+# 2. SINCRONIZADOR EXCEL -> JSON (Orden estricto)
 # ---------------------------------------------------------
-def reconstruir_catalogo(sheet):
-    print("🔄 Sincronizando index.json...")
+def sincronizar_todo(sheet):
+    print("🔄 Sincronizando catálogo desde Excel...")
     registros = sheet.get_all_records()
     nuevo_index = {"repo": {"name": "Mi Tienda Privada", "description": "APKs VIP", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"}, "apps": []}
     apps_dict = {}
+    
     for r in registros:
+        # Usamos los nombres exactos de tus columnas (con espacios)
         pkg = r.get('Pkg')
         if not pkg: continue
+        
         entry = {
             "versionName": str(r.get('Version')),
-            "versionCode": str(r.get('Version Code', '0')), # Usamos el nuevo nombre de columna
+            "versionCode": str(r.get('Version Code', '0')),
             "downloadURL": r.get('Link APK'),
             "added": datetime.now().strftime("%Y-%m-%d")
         }
+        
         if pkg not in apps_dict:
             apps_dict[pkg] = {
                 "name": r.get('Nombre'),
@@ -99,43 +96,35 @@ def reconstruir_catalogo(sheet):
                 apps_dict[pkg]['versions'].insert(0, entry)
 
     nuevo_index["apps"] = list(apps_dict.values())
-    with open("index.json", "w") as f: json.dump(nuevo_index, f, indent=4)
+    with open("index.json", "w") as f:
+        json.dump(nuevo_index, f, indent=4)
 
 # ---------------------------------------------------------
-# 3. MAIN (Raspberry Pi Style)
+# 3. MAIN (Lógica de procesados corregida)
 # ---------------------------------------------------------
-def conectar_dropbox():
-    return dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
-
-def subir_a_dropbox(dbx, file_path, dest_filename):
-    dest_path = f"/{dest_filename}"
-    with open(file_path, "rb") as f:
-        dbx.files_upload(f.read(), dest_path, mode=WriteMode('overwrite'))
-    try:
-        shared_link = dbx.sharing_create_shared_link_with_settings(dest_path)
-        url = shared_link.url
-    except ApiError:
-        links = dbx.sharing_list_shared_links(path=dest_path, direct_only=True).links
-        url = links[0].url if links else None
-    return url.replace("?dl=0", "?dl=1") if url else None
-
 def main():
-    print("🚀 Iniciando Motor Destripador v3...")
-    dbx = conectar_dropbox()
+    print("🚀 Motor Gladiador v4 (Houston, tenemos el control)...")
+    dbx = dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     client_gs = gspread.authorize(creds)
     drive_service = build('drive', 'v3', credentials=creds)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
+    # IMPORTANTE: Usamos 'ID Drive' con espacio para coincidir con tu Excel
     registros = sheet.get_all_records()
-    procesados = {str(r.get('ID_Drive')) for r in registros if r.get('ID_Drive')}
+    procesados = {str(r.get('ID Drive')) for r in registros if r.get('ID Drive')}
     
     query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
     items = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
 
     for item in items:
         file_id, file_name = item['id'], item['name']
-        if not file_name.lower().endswith('.apk') or file_id in procesados: continue
+        if not file_name.lower().endswith('.apk'): continue
+        
+        # Si el ID ya está en el Excel, lo saltamos
+        if file_id in procesados: 
+            print(f"⏩ Saltando (Ya existe): {file_name}")
+            continue
 
         print(f"⚙️ Procesando: {file_name}")
         temp_apk = "temp.apk"
@@ -148,31 +137,43 @@ def main():
             fh.seek(0)
             with open(temp_apk, "wb") as f: f.write(fh.read())
 
-            apk_info = APK(temp_apk)
-            icon_data = extraer_icono_rebelde(temp_apk, apk_info.application)
-            icon_filename = f"icon_{apk_info.package}.png"
+            apk = APK(temp_apk)
+            icon_data = extraer_icono_rebelde(temp_apk, apk.application)
+            icon_filename = f"icon_{apk.package}.png"
             
-            link_apk = subir_a_dropbox(dbx, temp_apk, f"{apk_info.application.replace(' ', '_')}_v{apk_info.version_name}.apk")
-            
+            # Subir a Dropbox
+            link_apk = subir_a_dropbox(dbx, temp_apk, f"{apk.application.replace(' ', '_')}_v{apk.version_name}.apk")
             link_icon = "https://via.placeholder.com/150"
             if icon_data:
                 with open(icon_filename, "wb") as f: f.write(icon_data)
                 link_icon = subir_a_dropbox(dbx, icon_filename, icon_filename)
                 os.remove(icon_filename)
 
-            # ORDEN DE COLUMNAS CORRECTO:
-            # Nombre, Estado, Link APK, Version, Pkg, Link Icono, ID Drive, Repo, Version Code
+            # ORDEN DE COLUMNAS SOLICITADO:
+            # 1.Nombre | 2.Estado | 3.Link APK | 4.Version | 5.Pkg | 6.Link Icono | 7.ID Drive | 8.Repo | 9.Version Code
             sheet.append_row([
-                apk_info.application, "Publicado", link_apk, apk_info.version_name, 
-                apk_info.package, link_icon, file_id, "Dropbox/Repo", str(apk_info.version_code)
+                apk.application, "Publicado", link_apk, apk.version_name, 
+                apk.package, link_icon, file_id, "Dropbox/Repo", str(apk.version_code)
             ])
-            print(f"✅ Éxito: {apk_info.application}")
+            print(f"✅ Éxito: {apk.application}")
 
         except Exception as e: print(f"❌ Error: {e}")
         finally:
             if os.path.exists(temp_apk): os.remove(temp_apk)
 
-    reconstruir_catalogo(sheet)
+    sincronizar_todo(sheet)
+
+def subir_a_dropbox(dbx, file_path, dest_filename):
+    dest_path = f"/{dest_filename}"
+    with open(file_path, "rb") as f:
+        dbx.files_upload(f.read(), dest_path, mode=WriteMode('overwrite'))
+    try:
+        shared_link = dbx.sharing_create_shared_link_with_settings(dest_path)
+        url = shared_link.url
+    except:
+        links = dbx.sharing_list_shared_links(path=dest_path, direct_only=True).links
+        url = links[0].url if links else None
+    return url.replace("?dl=0", "?dl=1") if url else None
 
 if __name__ == "__main__":
     main()

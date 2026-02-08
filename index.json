@@ -125,6 +125,12 @@
             "icon": "https://www.dropbox.com/scl/fi/lxt9esm7vvaewsvm2d0gp/icon_com.songfinder.recognizer.png?rlkey=u61jasouv5tmdfhp40a6s3d2z&dl=0",
             "versions": [
                 {
+                    "versionName": "2.8.0.9",
+                    "versionCode": "85",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/33ilauwflqzj30lck59i6/Song_Finder_v2.8.0.9.apk?rlkey=31q9qrku3cu2c44qyyrjz60p0&dl=0",
+                    "added": "2026-02-08"
+                },
+                {
                     "versionName": "2.8.0.7",
                     "versionCode": "83",
                     "downloadURL": "https://www.dropbox.com/scl/fi/45taglj6v8x2f4r66qrbf/Song_Finder_v2.8.0.7.apk?rlkey=qzy0t2xpdm4a4ooyppdgocvmm&dl=0",
@@ -152,6 +158,12 @@
             "suggestedVersionName": "18.01.39",
             "icon": "https://www.dropbox.com/scl/fi/b92gs55ubw9bjm9yt754q/icon_sampson.cvbuilder.png?rlkey=zs3aqtynh60f4x5azh9l07i92&dl=0",
             "versions": [
+                {
+                    "versionName": "18.01.44",
+                    "versionCode": "528",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/t8v2uv1i9x1bw2x1npu5j/CV_Engineer_v18.01.44.apk?rlkey=txihsehcqy9unq1qledoi9qoh&dl=0",
+                    "added": "2026-02-08"
+                },
                 {
                     "versionName": "18.01.39",
                     "versionCode": "523",

@@ -17,7 +17,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from pyaxmlparser import APK 
 
-# --- CONFIGURACIÓN DE SECRETOS ---
+# --- CONFIGURACIÓN ---
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
 REPO_URL = os.environ['REPO_URL']
@@ -45,60 +45,77 @@ def notificar(mensaje):
         print(f"⚠️ Error Telegram: {e}")
 
 # ---------------------------------------------------------
-# 1. FUNCIÓN EXTERMINADORA (Borra Drive, Dropbox y Excel)
+# 1. FUNCIÓN NUCLEAR (Depurada)
 # ---------------------------------------------------------
-def eliminar_rastros_anteriores(sheet, drive_service, dbx, package_name, id_archivo_nuevo):
+def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo, id_archivo_nuevo):
     """
-    Busca cualquier rastro de versiones anteriores de este paquete y los destruye.
+    Busca versiones viejas comparando el Package Name de forma insensible a mayúsculas/espacios.
     """
     try:
         registros = sheet.get_all_records()
         filas_a_borrar = []
         archivos_borrados = 0
         
-        print(f"🧹 Escaneando versiones antiguas de: {package_name}...")
+        # Normalizamos el paquete nuevo (minúsculas y sin espacios)
+        pkg_nuevo_clean = str(pkg_nuevo).strip().lower()
+        print(f"\n☢️ INICIANDO BARRIDO NUCLEAR para: [{pkg_nuevo_clean}]")
         
-        # Iteramos buscando duplicados
         for i, r in enumerate(registros):
-            # Si el paquete coincide Y el ID de Drive es diferente (es decir, es una versión vieja)
-            if r.get('Pkg') == package_name and str(r.get('ID Drive')) != id_archivo_nuevo:
+            # Obtener datos de la fila
+            pkg_viejo = str(r.get('Pkg', '')).strip().lower()
+            id_viejo = str(r.get('ID Drive', '')).strip()
+            nombre_app = r.get('Nombre', 'App')
+            version_app = r.get('Version', '0.0')
+
+            # Debug visual para entender qué pasa
+            # print(f"   - Comparando con fila {i+2}: [{pkg_viejo}] vs [{pkg_nuevo_clean}]")
+
+            # CRITERIO DE MUERTE:
+            # 1. El paquete es el mismo.
+            # 2. El ID de Drive NO es el que acabamos de subir (para no borrarnos a nosotros mismos).
+            if pkg_viejo == pkg_nuevo_clean and id_viejo != id_archivo_nuevo:
                 
-                nombre_app = r.get('Nombre')
-                version_app = r.get('Version')
-                print(f"🚫 Detectada versión obsoleta: {nombre_app} v{version_app}")
+                print(f"   🚨 ENCONTRADO DUPLICADO: {nombre_app} v{version_app} (Fila {i+2})")
 
                 # 1. Borrar de Google Drive
-                id_viejo = str(r.get('ID Drive'))
-                try:
-                    drive_service.files().delete(fileId=id_viejo).execute()
-                    print("   - 🔥 Drive: Archivo eliminado.")
-                except:
-                    print("   - ⚠️ Drive: No se encontró el archivo (quizás ya borrado).")
+                if id_viejo:
+                    try:
+                        drive_service.files().delete(fileId=id_viejo).execute()
+                        print("      🔥 Drive: Archivo eliminado.")
+                    except Exception as e:
+                        print(f"      ⚠️ Drive: Falló borrado (¿ya no existe?): {e}")
 
                 # 2. Borrar de Dropbox
-                # Reconstruimos el nombre del archivo en Dropbox para borrarlo
-                # Formato: Nombre_vVersion.apk
+                # Intentamos adivinar el nombre con la lógica estándar
                 nombre_dbx = f"/{nombre_app.replace(' ', '_')}_v{version_app}.apk"
                 try:
                     dbx.files_delete_v2(nombre_dbx)
-                    print(f"   - 🔥 Dropbox: {nombre_dbx} eliminado.")
+                    print(f"      🔥 Dropbox: {nombre_dbx} eliminado.")
                 except:
-                    print(f"   - ⚠️ Dropbox: No se pudo borrar {nombre_dbx} (quizás nombre diferente).")
+                    # Si falla, no importa, lo importante es borrar la fila del Excel
+                    print(f"      ⚠️ Dropbox: No se encontró {nombre_dbx}, saltando.")
 
-                # Marcamos la fila para borrado (Index + 2 porque sheet empieza en 1 y tiene header)
+                # Agregamos a la lista de ejecución (Index + 2)
                 filas_a_borrar.append(i + 2)
                 archivos_borrados += 1
 
-        # 3. Borrar filas del Excel (De abajo hacia arriba para no romper índices)
-        for fila_num in sorted(filas_a_borrar, reverse=True):
-            sheet.delete_row(fila_num)
-            print(f"   - 🔥 Excel: Fila {fila_num} eliminada.")
-            time.sleep(1) # Pausa de seguridad para gspread
+        # 3. EJECUTAR BORRADO DE FILAS (Inverso)
+        if filas_a_borrar:
+            print(f"🔪 Eliminando {len(filas_a_borrar)} filas del Excel...")
+            for fila_num in sorted(filas_a_borrar, reverse=True):
+                try:
+                    sheet.delete_row(fila_num)
+                    print(f"   - Fila {fila_num} eliminada.")
+                    time.sleep(1.5) # Pausa obligatoria para no saturar Google API
+                except Exception as e:
+                    print(f"   ❌ Error borrando fila {fila_num}: {e}")
+        else:
+            print("✅ No se encontraron versiones antiguas para borrar.")
 
         return archivos_borrados
 
     except Exception as e:
-        print(f"⚠️ Error en limpieza: {e}")
+        print(f"❌ Error CRÍTICO en limpieza: {e}")
         return 0
 
 # ---------------------------------------------------------
@@ -142,7 +159,7 @@ def extraer_icono_precision(apk_path, app_name):
 # 3. SINCRONIZADOR
 # ---------------------------------------------------------
 def sincronizar_todo(sheet):
-    print("🔄 Sincronizando catálogo...")
+    print("🔄 Sincronizando index.json...")
     registros = sheet.get_all_records()
     nuevo_index = {
         "repo": {"name": "Mi Tienda Privada", "description": "APKs VIP", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"}, 
@@ -174,7 +191,7 @@ def sincronizar_todo(sheet):
     with open("index.json", "w") as f: json.dump(nuevo_index, f, indent=4)
 
 # ---------------------------------------------------------
-# 4. MAIN
+# 4. MAIN & DROPBOX
 # ---------------------------------------------------------
 def conectar_dropbox():
     return dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
@@ -192,7 +209,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1") if url else None
 
 def main():
-    print("🚀 Iniciando Motor V14 (Modo Exterminador)...")
+    print("🚀 Iniciando Motor V15 (Nuclear Debug)...")
     
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
@@ -206,24 +223,23 @@ def main():
     query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
     items = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
     
-    # Solo procesamos lo que NO está en el Excel
     nuevos = [i for i in items if i['name'].lower().endswith('.apk') and str(i['id']).strip() not in procesados]
 
     if not nuevos:
-        print("💤 Nada nuevo que procesar.")
+        print("💤 Sin novedades.")
         return
 
-    notificar(f"👷‍♂️ <b>Hola Jefe</b>\nDetectados <b>{len(nuevos)}</b> APKs nuevas. Iniciando protocolo de limpieza y subida.")
+    notificar(f"👷‍♂️ <b>Hola Jefe</b>\nProcesando <b>{len(nuevos)}</b> APK(s)...")
 
     for item in nuevos:
         file_id = str(item['id']).strip()
         file_name = item['name']
-        print(f"⚙️ Procesando: {file_name}")
+        print(f"⚙️ Analizando: {file_name}")
         notificar(f"⚙️ Analizando: <i>{file_name}</i>...")
         
         temp_apk = "temp.apk"
         try:
-            # 1. Descargar para analizar
+            # 1. Descargar APK
             request = drive_service.files().get_media(fileId=file_id)
             fh = io.BytesIO()
             downloader = MediaIoBaseDownload(fh, request)
@@ -232,24 +248,17 @@ def main():
             fh.seek(0)
             with open(temp_apk, "wb") as f: f.write(fh.read())
 
+            # 2. Leer Datos Internos
             apk = APK(temp_apk)
             nombre_limpio = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
             package_name = apk.package
             
-            # 2. PROTOCOLO EXTERMINADOR: Borrar todo lo viejo ANTES de subir lo nuevo
-            # Así garantizamos que no haya duplicados ni un segundo.
-            borrados = eliminar_rastros_anteriores(sheet, drive_service, dbx, package_name, file_id)
-            if borrados > 0:
-                notificar(f"🗑️ <b>Limpieza:</b> Se eliminaron {borrados} versiones antiguas de {nombre_limpio}.")
-
-            # 3. Extracción de Icono
-            icon_data = extraer_icono_precision(temp_apk, apk.application)
-            icon_filename = f"icon_{apk.package}.png"
-            
-            # 4. Subida a Dropbox
+            # 3. Subir Nueva Versión (Primero aseguramos el backup)
             nombre_final = f"{nombre_limpio.replace(' ', '_')}_v{apk.version_name}.apk"
             link_apk = subir_a_dropbox(dbx, temp_apk, nombre_final)
             
+            icon_data = extraer_icono_precision(temp_apk, apk.application)
+            icon_filename = f"icon_{apk.package}.png"
             link_icon = "https://via.placeholder.com/150"
             if icon_data:
                 with open(icon_filename, "wb") as f: f.write(icon_data)
@@ -257,30 +266,33 @@ def main():
                 if url_subida: link_icon = url_subida
                 os.remove(icon_filename)
 
-            # 5. Guardar en Excel
+            # 4. Guardar Nueva Fila en Excel
             sheet.append_row([
                 nombre_limpio, "Publicado", link_apk, apk.version_name, 
                 apk.package, link_icon, file_id, "Dropbox/Repo", str(apk.version_code)
             ])
+            print(f"✅ Nueva versión registrada en Excel.")
+
+            # 5. LIMPIEZA NUCLEAR (Después de guardar la nueva, borramos las viejas)
+            borrados = eliminar_rastros_anteriores(sheet, drive_service, dbx, package_name, file_id)
             
-            # 6. Reporte Final
+            # 6. Notificación Final
             msj = (
-                f"✅ <b>¡Actualizado!</b>\n"
-                f"📦 <b>{nombre_limpio}</b>\n"
-                f"🆙 Nueva versión: v{apk.version_name}\n"
+                f"✅ <b>¡Actualización Exitosa!</b>\n"
+                f"📦 <b>{nombre_limpio}</b> v{apk.version_name}\n"
+                f"🗑️ Versiones viejas eliminadas: {borrados}\n"
                 f"🔗 <a href='{link_apk}'>Descargar</a>"
             )
             notificar(msj)
-            print(f"✅ Éxito: {nombre_limpio}")
 
         except Exception as e:
-            notificar(f"❌ <b>Error Crítico</b> con {file_name}:\n<code>{str(e)}</code>")
+            notificar(f"❌ Error con {file_name}: {e}")
             print(f"❌ Error: {e}")
         finally:
             if os.path.exists(temp_apk): os.remove(temp_apk)
 
     sincronizar_todo(sheet)
-    notificar("🏁 <b>Ciclo Terminado.</b> Tienda limpia y actualizada.")
+    notificar("🏁 Tienda Sincronizada.")
 
 if __name__ == "__main__":
     main()

@@ -94,12 +94,12 @@
             "name": "AdGuard",
             "packageName": "com.adguard.android",
             "suggestedVersionName": "4.14.34",
-            "icon": "https://www.dropbox.com/scl/fi/mroa4n2ycr8g21k9hycoj/icon_com.adguard.android.png?rlkey=rt9qk51ai81ng18v58lkh7d0l&dl=0",
+            "icon": "https://www.dropbox.com/scl/fi/qq2juk3a28z6gfkrdshul/icon_com.adguard.android.png?rlkey=ax1nfeakshfy3040p7vwt1sto&dl=0",
             "versions": [
                 {
                     "versionName": "4.14.34",
                     "versionCode": "10326790",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/iji6nodsh0gpyue4djvkq/AdGuard_v4.14.34.apk?rlkey=r98xfi56qi42dkp8huvyszjk1&dl=0",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/1iinaiu0myycb30y6yqq5/AdGuard_v4.14.34.apk?rlkey=e6e0pxd89qpci4yt2cy4qi9jz&dl=0",
                     "added": "2026-02-10"
                 }
             ]
@@ -108,12 +108,12 @@
             "name": "Dead Pixel Fix",
             "packageName": "com.zoox.deadpixelfix",
             "suggestedVersionName": "3.11",
-            "icon": "https://www.dropbox.com/scl/fi/t2qoilr37hwccjqf4cpao/icon_com.zoox.deadpixelfix.png?rlkey=u8n684rvlfjje812obuaygblm&dl=0",
+            "icon": "https://www.dropbox.com/scl/fi/kggoi4wlo4nkbu896zqm8/icon_com.zoox.deadpixelfix.png?rlkey=tofj6suglxytx6wv0tabvjelg&dl=0",
             "versions": [
                 {
                     "versionName": "3.11",
                     "versionCode": "52",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/g82psv75330mla42zjxl2/Dead_Pixel_Fix_v3.11.apk?rlkey=70tl9q82686fgj9nofaxzq5s7&dl=0",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/5zferc83v0nynav34rhog/Dead_Pixel_Fix_v3.11.apk?rlkey=tcufjn4uqete4mo0v165j6i2u&dl=0",
                     "added": "2026-02-10"
                 }
             ]

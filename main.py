@@ -89,7 +89,7 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
         return 0
 
 # ---------------------------------------------------------
-# 2. MOTOR DE EXTRACCIÓN V21 (Equilibrio)
+# 2. MOTOR DE EXTRACCIÓN V22 (Afinado para Dead Pixels)
 # ---------------------------------------------------------
 def extraer_icono_precision(apk_path, app_name):
     mejor_puntuacion = -1
@@ -118,10 +118,8 @@ def extraer_icono_precision(apk_path, app_name):
                     img = Image.open(io.BytesIO(data))
                     w, h = img.size
                     
-                    # FILTRO: CUADRADO EXACTO (Para evitar banners)
-                    # En Dead Pixels el icono es 128x128 (cuadrado perfecto)
+                    # FILTRO: CUADRADO EXACTO (Margen 2px)
                     if abs(w - h) > 2: continue 
-                    
                     # FILTRO: TAMAÑO (Entre 48 y 1024)
                     if w < 48: continue
                     
@@ -140,14 +138,18 @@ def extraer_icono_precision(apk_path, app_name):
                     if 'xxxhdpi' in nombre_lc: puntuacion += 500
                     elif 'xxhdpi' in nombre_lc: puntuacion += 300
                     
-                    # --- LÓGICA V21: FUERZA BRUTA PRUDENTE ---
-                    # Guardamos todas las imágenes cuadradas decentes
-                    # Damos prioridad a las que midan entre 128 y 512 (tamaño icono real)
+                    # --- LÓGICA V22: FUERZA BRUTA DE PRECISIÓN ---
+                    # Clasificamos por tamaño para desempatar si no hay nombres
                     prioridad_fb = 0
-                    if 128 <= w <= 512: prioridad_fb = 2 # Tamaño ideal
-                    elif w > 512: prioridad_fb = 1 # Posiblemente un fondo (riesgo)
-                    else: prioridad_fb = 0 # Muy chico
                     
+                    # Rango Ideal (Iconos normales de Android)
+                    if 96 <= w <= 192: prioridad_fb = 3 
+                    # Rango Alto (Iconos HD)
+                    elif 193 <= w <= 512: prioridad_fb = 2
+                    # Rango Riesgo (Posibles fondos)
+                    elif w > 512: prioridad_fb = 1
+                    
+                    # Guardamos candidato de fuerza bruta
                     candidatos_fb.append((nombre, prioridad_fb, w, data))
 
                     # Si tiene puntos (coincidió con nombre), es candidato directo
@@ -166,12 +168,13 @@ def extraer_icono_precision(apk_path, app_name):
                 print(f"   🏆 Ganador por Nombre: {candidatos[-1][0]} ({mejor_puntuacion} pts)")
                 return mejor_data
             
-            # 2. SI NO: Usamos FUERZA BRUTA PRUDENTE
-            print("   ⚠️ No se hallaron nombres oficiales. Activando FUERZA BRUTA PRUDENTE.")
+            # 2. SI NO: Usamos FUERZA BRUTA INTELIGENTE
+            print("   ⚠️ No se hallaron nombres oficiales. Activando FUERZA BRUTA V22.")
             
             if candidatos_fb:
-                # Ordenamos primero por prioridad (tamaño icono vs tamaño fondo)
-                # Y luego por tamaño (dentro de la misma prioridad, el más grande)
+                # Ordenamos:
+                # 1. Prioridad (Preferimos 96-192px antes que gigantes)
+                # 2. Tamaño (Dentro de la misma prioridad, el más grande)
                 candidatos_fb.sort(key=lambda x: (x[1], x[2]), reverse=True)
                 
                 ganador_fb = candidatos_fb[0]
@@ -239,7 +242,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1") if url else None
 
 def main():
-    print("🚀 Iniciando Motor V21 (Definitivo)...")
+    print("🚀 Iniciando Motor V22 (Afinado)...")
     
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)

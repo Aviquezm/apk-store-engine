@@ -33,7 +33,7 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# 0. UTILIDADES Y NOTIFICACIONES
+# 0. UTILIDADES
 # ---------------------------------------------------------
 def notificar(mensaje):
     if not TG_TOKEN or not TG_CHAT_ID: return
@@ -50,10 +50,9 @@ def limpiar_texto(texto):
     return str(texto).strip().lower().replace('\n', '').replace('\r', '').replace('\t', '')
 
 # ---------------------------------------------------------
-# 1. FUNCIÓN DE LIMPIEZA FORENSE (Anti-Duplicados)
+# 1. FUNCIÓN DE LIMPIEZA (Anti-Duplicados)
 # ---------------------------------------------------------
 def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_archivo_nuevo):
-    """Elimina versiones viejas de Drive, Dropbox y Excel."""
     try:
         registros = sheet.get_all_records()
         filas_a_borrar = []
@@ -66,32 +65,24 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
             pkg_viejo = limpiar_texto(r.get('Pkg'))
             id_viejo = str(r.get('ID Drive', '')).strip()
             
-            # Si coinciden los paquetes Y NO es el mismo archivo que acabamos de subir
             if pkg_viejo == pkg_nuevo and id_viejo != id_archivo_nuevo:
-                print(f"   🚨 DUPLICADO ENCONTRADO (Fila {i+2})")
-                
-                # 1. Borrar de Drive
+                print(f"   🚨 DUPLICADO (Fila {i+2})")
                 try:
                     drive_service.files().delete(fileId=id_viejo).execute()
-                    print("      🔥 Drive: Eliminado.")
                 except: pass
-
-                # 2. Borrar de Dropbox
+                
+                # Borrar Dropbox
                 nombre_dbx = f"/{r.get('Nombre', '').replace(' ', '_')}_v{r.get('Version', '')}.apk"
-                try:
-                    dbx.files_delete_v2(nombre_dbx)
-                    print("      🔥 Dropbox: Eliminado.")
+                try: dbx.files_delete_v2(nombre_dbx)
                 except: pass
 
                 filas_a_borrar.append(i + 2)
                 archivos_borrados += 1
 
-        # 3. Borrar filas del Excel (De abajo hacia arriba)
         if filas_a_borrar:
-            print(f"🔪 Borrando {len(filas_a_borrar)} filas del Excel...")
             for fila_num in sorted(filas_a_borrar, reverse=True):
                 sheet.delete_row(fila_num)
-                time.sleep(1.5) # Pausa para no saturar la API
+                time.sleep(1.5)
         
         return archivos_borrados
     except Exception as e:
@@ -99,14 +90,16 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
         return 0
 
 # ---------------------------------------------------------
-# 2. MOTOR DE EXTRACCIÓN V19 (Jerarquía Estricta)
+# 2. MOTOR DE EXTRACCIÓN V20 (Fuerza Bruta)
 # ---------------------------------------------------------
 def extraer_icono_precision(apk_path, app_name):
-    mejor_puntuacion = -1000 
+    mejor_puntuacion = -1
     mejor_data = None
-    app_clean = app_name.lower().replace(" ", "")
     
-    print(f"\n🕵️‍♂️ [Autopsia] Buscando icono dentro de: {app_name}")
+    # Lista para la estrategia de "Fuerza Bruta" (Respaldo)
+    imagenes_cuadradas = [] 
+    
+    print(f"\n🕵️‍♂️ [Autopsia] Buscando icono para: {app_name}")
     
     try:
         with zipfile.ZipFile(apk_path, 'r') as z:
@@ -116,12 +109,9 @@ def extraer_icono_precision(apk_path, app_name):
             for nombre in archivos:
                 nombre_lc = nombre.lower()
                 
-                # 1. FILTRO BÁSICO: Solo imágenes en res/
-                if not (nombre_lc.endswith(('.png', '.webp')) and 'res/' in nombre):
-                    continue
-                
-                # 2. FILTRO DE BASURA: Ignorar notificaciones y botones
-                if 'notification' in nombre_lc or 'abc_' in nombre_lc or 'common_' in nombre_lc: continue
+                # FILTROS BÁSICOS
+                if not (nombre_lc.endswith(('.png', '.webp')) and 'res/' in nombre): continue
+                if 'notification' in nombre_lc or 'abc_' in nombre_lc: continue
                 if 'splash' in nombre_lc or 'background' in nombre_lc: continue 
 
                 try:
@@ -129,58 +119,61 @@ def extraer_icono_precision(apk_path, app_name):
                     img = Image.open(io.BytesIO(data))
                     w, h = img.size
                     
-                    # 3. FILTROS TÉCNICOS
-                    if abs(w - h) > 5: continue # Tiene que ser cuadrado
-                    if not (36 <= w <= 1024): continue # Ni muy chico ni gigante
+                    # FILTRO: DEBE SER CUADRADO (Margen error 5px)
+                    if abs(w - h) > 5: continue 
+                    # FILTRO: TAMAÑO MÍNIMO (Evitar iconos de 16px)
+                    if w < 48: continue
                     
-                    # --- SISTEMA DE PUNTUACIÓN V19 ---
+                    # --- GUARDAR EN FUERZA BRUTA ---
+                    # Si todo falla, usaremos la imagen cuadrada más grande
+                    imagenes_cuadradas.append((nombre, w, data))
+
+                    # --- SISTEMA DE PUNTUACIÓN (Nombres Conocidos) ---
                     puntuacion = 0
                     
-                    # >> REGLA 1: CASOS ESPECIALES (Truecaller) <<
-                    # Nadie le gana a esto.
+                    # Nivel DIOS (Truecaller)
                     if 'rounded_logo' in nombre_lc or 'tc_logo' in nombre_lc: puntuacion += 10000
-                    if 'tc_' in nombre_lc: puntuacion += 500
-
-                    # >> REGLA 2: ESTÁNDAR DE ANDROID (Song Finder / Shazam) <<
-                    # La mayoría de apps (y mods) ponen su icono aquí.
-                    # Le damos mucho valor para que gane a cualquier imagen interna.
+                    
+                    # Nivel REY (Estándar)
                     if 'ic_launcher_round' in nombre_lc: puntuacion += 5000
                     if 'ic_launcher' in nombre_lc: puntuacion += 4500
                     if 'app_icon' in nombre_lc: puntuacion += 4000
-
-                    # >> REGLA 3: DESEMPATE POR CALIDAD <<
-                    # Si hay varios ic_launcher, queremos el de mejor calidad (xxxhdpi)
+                    
+                    # Nivel ALFIL (Calidad)
                     if 'xxxhdpi' in nombre_lc: puntuacion += 500
                     elif 'xxhdpi' in nombre_lc: puntuacion += 300
-                    elif 'xhdpi' in nombre_lc: puntuacion += 200
                     
-                    # >> REGLA 4: COINCIDENCIAS MENORES (Baja prioridad) <<
-                    # Solo suman un poquito, nunca ganarán al launcher.
-                    if 'shazam' in nombre_lc: puntuacion += 100 
-                    if app_clean in nombre_lc: puntuacion += 100
-                    
-                    # Log de candidatos
+                    # Si tiene puntos (coincidió con algún nombre), es candidato directo
                     if puntuacion > 0:
-                        candidatos.append((nombre, puntuacion))
-
-                    if puntuacion > mejor_puntuacion:
-                        mejor_puntuacion = puntuacion
-                        mejor_data = data
-                        
+                        if puntuacion > mejor_puntuacion:
+                            mejor_puntuacion = puntuacion
+                            mejor_data = data
+                            candidatos.append((nombre, puntuacion))
+                            
                 except: continue
             
-            # REPORTE EN CONSOLA (Para que veas quién ganó)
-            candidatos.sort(key=lambda x: x[1], reverse=True)
-            if candidatos:
-                print(f"   🏆 Ganador: {candidatos[0][0]} ({candidatos[0][1]} pts)")
-                if len(candidatos) > 1:
-                    print(f"   🥈 Segundo: {candidatos[1][0]} ({candidatos[1][1]} pts)")
+            # --- FASE FINAL: EL JUICIO ---
+            
+            # Si encontramos un candidato con nombre oficial (Truecaller, Shazam), ganamos.
+            if mejor_puntuacion > 1000:
+                print(f"   🏆 Ganador por Nombre: {candidatos[-1][0]} ({mejor_puntuacion} pts)")
+                return mejor_data
+            
+            # SI NO (Caso AdGuard / Dead Pixels): Usamos FUERZA BRUTA
+            print("   ⚠️ No se hallaron nombres oficiales. Activando FUERZA BRUTA.")
+            
+            if imagenes_cuadradas:
+                # Ordenamos por tamaño (el más grande primero)
+                imagenes_cuadradas.sort(key=lambda x: x[1], reverse=True)
+                ganador_fb = imagenes_cuadradas[0] # El más grande
+                print(f"   🦍 Ganador Fuerza Bruta: {ganador_fb[0]} (Tamaño: {ganador_fb[1]}px)")
+                return ganador_fb[2] # Retornamos la data de la imagen
             else:
-                print("   ⚠️ FALLO: No se encontró ningún icono válido.")
-                
-        return mejor_data
+                print("   ❌ FALLO TOTAL: No hay imágenes cuadradas válidas.")
+                return None
+
     except Exception as e:
-        print(f"❌ Error crítico en autopsia: {e}")
+        print(f"❌ Error crítico: {e}")
         return None
 
 # ---------------------------------------------------------
@@ -237,7 +230,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1") if url else None
 
 def main():
-    print("🚀 Iniciando Motor V19 (Icono Jerárquico)...")
+    print("🚀 Iniciando Motor V20 (Fuerza Bruta)...")
     
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
@@ -245,7 +238,7 @@ def main():
     drive_service = build('drive', 'v3', credentials=creds)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
-    # Detección de Nuevos
+    # Detección
     registros = sheet.get_all_records()
     procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
     
@@ -283,33 +276,29 @@ def main():
             icon_data = extraer_icono_precision(temp_apk, apk.application)
             icon_filename = f"icon_{apk.package}.png"
             
-            # Subida APK
+            # Subidas
             nombre_final = f"{nombre_limpio.replace(' ', '_')}_v{apk.version_name}.apk"
             link_apk = subir_a_dropbox(dbx, temp_apk, nombre_final)
             
-            # Subida Icono
-            link_icon = "https://via.placeholder.com/150" # Icono por defecto si falla
+            link_icon = "https://via.placeholder.com/150" 
             if icon_data:
                 with open(icon_filename, "wb") as f: f.write(icon_data)
                 url_subida = subir_a_dropbox(dbx, icon_filename, icon_filename)
                 if url_subida: link_icon = url_subida
                 os.remove(icon_filename)
 
-            # Guardar en Excel
+            # Excel y Limpieza
             sheet.append_row([
                 nombre_limpio, "Publicado", link_apk, apk.version_name, 
                 apk.package, link_icon, file_id, "Dropbox/Repo", str(apk.version_code)
             ])
-            
-            # Limpiar versiones viejas
             borrados = eliminar_rastros_anteriores(sheet, drive_service, dbx, apk.package, file_id)
             
-            # Reporte final
             msj = (
                 f"✅ <b>¡Actualizado!</b>\n"
                 f"📦 {nombre_limpio} v{apk.version_name}\n"
                 f"🎨 Icono: {'Recuperado' if icon_data else 'Genérico'}\n"
-                f"🗑️ Limpieza: {borrados} versiones eliminadas"
+                f"🗑️ Limpieza: {borrados}"
             )
             notificar(msj)
 

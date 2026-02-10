@@ -45,118 +45,145 @@ def notificar(mensaje):
         print(f"⚠️ Error Telegram: {e}")
 
 def limpiar_texto(texto):
-    """Elimina espacios invisibles, saltos de línea y pone todo en minúsculas"""
+    """Normaliza texto para comparaciones (sin espacios, minúsculas)"""
     if not texto: return ""
     return str(texto).strip().lower().replace('\n', '').replace('\r', '').replace('\t', '')
 
 # ---------------------------------------------------------
-# 1. FUNCIÓN FORENSE (La que arregla el problema)
+# 1. FUNCIÓN DE LIMPIEZA (Anti-Duplicados)
 # ---------------------------------------------------------
 def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_archivo_nuevo):
     try:
         registros = sheet.get_all_records()
         filas_a_borrar = []
         archivos_borrados = 0
-        
-        # Limpieza agresiva del paquete nuevo
         pkg_nuevo = limpiar_texto(pkg_nuevo_raw)
         
-        print(f"\n🔍 INICIANDO ESCÁNER FORENSE para: '{pkg_nuevo}'")
-        print(f"   (ID del archivo nuevo: {id_archivo_nuevo})")
+        print(f"\n🔍 [Limpieza] Buscando rastros de: '{pkg_nuevo}'...")
         
         for i, r in enumerate(registros):
-            # Limpieza agresiva del paquete viejo del Excel
             pkg_viejo = limpiar_texto(r.get('Pkg'))
             id_viejo = str(r.get('ID Drive', '')).strip()
-            nombre_app = r.get('Nombre', 'App')
             
-            # --- DEBUG VISUAL (Para ver por qué falla) ---
-            # Solo imprimimos si se parecen un poco para no llenar el log
-            if pkg_nuevo in pkg_viejo or pkg_viejo in pkg_nuevo:
-                print(f"   👉 Fila {i+2}: Excel='{pkg_viejo}' vs Nuevo='{pkg_nuevo}' | IDs: {id_viejo} vs {id_archivo_nuevo}")
+            # Si coinciden los paquetes Y NO es el mismo archivo
+            if pkg_viejo == pkg_nuevo and id_viejo != id_archivo_nuevo:
+                print(f"   🚨 DUPLICADO ENCONTRADO (Fila {i+2})")
+                
+                # Borrar Drive
+                try:
+                    drive_service.files().delete(fileId=id_viejo).execute()
+                    print("      🔥 Drive: Eliminado.")
+                except: pass
 
-            # LA COMPARACIÓN MAESTRA
-            if pkg_viejo == pkg_nuevo:
-                if id_viejo != id_archivo_nuevo:
-                    print(f"   🚨 ¡DUPLICADO DETECTADO! Fila {i+2} ({nombre_app})")
-                    
-                    # 1. Borrar de Drive
-                    try:
-                        drive_service.files().delete(fileId=id_viejo).execute()
-                        print("      🔥 Drive: Eliminado.")
-                    except: print("      ⚠️ Drive: No encontrado.")
+                # Borrar Dropbox
+                nombre_dbx = f"/{r.get('Nombre', '').replace(' ', '_')}_v{r.get('Version', '')}.apk"
+                try:
+                    dbx.files_delete_v2(nombre_dbx)
+                    print("      🔥 Dropbox: Eliminado.")
+                except: pass
 
-                    # 2. Borrar de Dropbox
-                    nombre_dbx = f"/{nombre_app.replace(' ', '_')}_v{r.get('Version')}.apk"
-                    try:
-                        dbx.files_delete_v2(nombre_dbx)
-                        print("      🔥 Dropbox: Eliminado.")
-                    except: pass
+                filas_a_borrar.append(i + 2)
+                archivos_borrados += 1
 
-                    filas_a_borrar.append(i + 2)
-                    archivos_borrados += 1
-                else:
-                    print(f"   ✅ Esta es la fila que acabamos de crear (Fila {i+2}). No borrar.")
-
-        # 3. EJECUTAR BORRADO EN EXCEL
         if filas_a_borrar:
-            print(f"🔪 Eliminando {len(filas_a_borrar)} filas antiguas del Excel...")
-            # Borramos de abajo hacia arriba
+            print(f"🔪 Borrando {len(filas_a_borrar)} filas del Excel...")
             for fila_num in sorted(filas_a_borrar, reverse=True):
                 sheet.delete_row(fila_num)
-                print(f"   - Fila {fila_num} eliminada.")
                 time.sleep(1.5)
-        else:
-            print("✅ Escáner terminado. No se encontraron duplicados antiguos.")
-
+        
         return archivos_borrados
-
     except Exception as e:
-        print(f"❌ Error Forense: {e}")
+        print(f"❌ Error Limpieza: {e}")
         return 0
 
 # ---------------------------------------------------------
-# 2. MOTOR DE EXTRACCIÓN
+# 2. MOTOR DE EXTRACCIÓN V17 (El Sherlock Holmes)
 # ---------------------------------------------------------
 def extraer_icono_precision(apk_path, app_name):
-    mejor_puntuacion = -1
+    mejor_puntuacion = -1000 # Empezamos bajo para aceptar cualquier cosa si es necesario
     mejor_data = None
+    
+    print(f"\n🕵️‍♂️ [Icono] Iniciando búsqueda para: {app_name}")
+    
     try:
         with zipfile.ZipFile(apk_path, 'r') as z:
             archivos = z.namelist()
             app_clean = app_name.lower().replace(" ", "")
+            
+            candidatos = [] # Para el log
+            
             for nombre in archivos:
                 nombre_lc = nombre.lower()
+                
+                # Solo imágenes en carpetas de recursos (res/)
                 if nombre_lc.endswith(('.png', '.webp')) and 'res/' in nombre:
-                    if 'notification' in nombre_lc or 'abc_' in nombre_lc: continue
+                    # Ignorar basura obvia
+                    if 'notification' in nombre_lc or 'abc_' in nombre_lc or 'common_' in nombre_lc: continue
+                    
                     try:
                         data = z.read(nombre)
                         img = Image.open(io.BytesIO(data))
                         w, h = img.size
-                        if abs(w - h) > 2: continue 
-                        if not (120 <= w <= 1024): continue
+                        
+                        # FILTRO 1: Geometría (debe ser casi cuadrado)
+                        if abs(w - h) > 5: continue 
+                        
+                        # FILTRO 2: Tamaño (Bajamos la vara a 36px para apps viejas)
+                        if not (36 <= w <= 1024): continue
+                        
+                        # SISTEMA DE PUNTOS
                         puntuacion = 0
+                        
+                        # La Joya de la Corona
+                        if 'ic_launcher' in nombre_lc: puntuacion += 2000
+                        if 'ic_launcher_round' in nombre_lc: puntuacion += 2500 # Preferimos redondos
+                        
+                        # Marcas específicas
                         if 'rounded_logo' in nombre_lc or 'tc_logo' in nombre_lc: puntuacion += 5000
                         if 'app_icon' in nombre_lc or 'store_icon' in nombre_lc: puntuacion += 3000
-                        if 'launcher' in nombre_lc:
-                            puntuacion += 1000
-                            if 'foreground' in nombre_lc or 'background' in nombre_lc: puntuacion -= 500 
+                        
+                        # Adaptive Icons (El cambio clave: YA NO RESTAMOS PUNTOS, SUMAMOS POCO)
+                        if 'foreground' in nombre_lc: puntuacion += 500 
+                        
+                        # Densidad (Calidad)
+                        if 'xxxhdpi' in nombre_lc: puntuacion += 400
+                        elif 'xxhdpi' in nombre_lc: puntuacion += 300
+                        elif 'xhdpi' in nombre_lc: puntuacion += 200
+                        elif 'hdpi' in nombre_lc: puntuacion += 100
+                        
+                        # Coincidencia de nombre
                         if app_clean in nombre_lc: puntuacion += 800
-                        if 'tc_' in nombre_lc: puntuacion += 400
-                        if 'xxxhdpi' in nombre_lc: puntuacion += 300
-                        elif 'xxhdpi' in nombre_lc: puntuacion += 200
+                        
+                        # Guardamos candidato para debug
+                        if puntuacion > 0:
+                            candidatos.append((nombre, puntuacion, w))
+
+                        # Ganador actual
                         if puntuacion > mejor_puntuacion:
                             mejor_puntuacion = puntuacion
                             mejor_data = data
+                            
                     except: continue
+            
+            # Imprimir Top 3 candidatos encontrados para entender qué pasó
+            candidatos.sort(key=lambda x: x[1], reverse=True)
+            print(f"   🔎 Candidatos Top 3: {candidatos[:3]}")
+            
+            if mejor_data:
+                print(f"   ✅ Icono seleccionado con {mejor_puntuacion} pts.")
+            else:
+                print("   ⚠️ No se encontró ningún icono válido.")
+                
         return mejor_data
-    except: return None
+    except Exception as e:
+        print(f"❌ Error extrayendo icono: {e}")
+        return None
 
 # ---------------------------------------------------------
 # 3. SINCRONIZADOR
 # ---------------------------------------------------------
 def sincronizar_todo(sheet):
-    print("🔄 Sincronizando catálogo...")
+    print("🔄 Sincronizando index.json...")
     registros = sheet.get_all_records()
     nuevo_index = {
         "repo": {"name": "Mi Tienda Privada", "description": "APKs VIP", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"}, 
@@ -206,7 +233,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1") if url else None
 
 def main():
-    print("🚀 Iniciando Motor V16 (Forense)...")
+    print("🚀 Iniciando Motor V17 (Sherlock + Fix Iconos)...")
     
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
@@ -214,6 +241,7 @@ def main():
     drive_service = build('drive', 'v3', credentials=creds)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
+    # Lógica de detección de nuevos archivos
     registros = sheet.get_all_records()
     procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
     
@@ -226,12 +254,12 @@ def main():
         print("💤 Sin novedades.")
         return
 
-    notificar(f"👷‍♂️ <b>Hola Jefe</b>\nAnalizando <b>{len(nuevos)}</b> APKs nuevas con Modo Forense.")
+    notificar(f"👷‍♂️ <b>Hola Jefe</b>\nProcesando <b>{len(nuevos)}</b> APK(s)...")
 
     for item in nuevos:
         file_id = str(item['id']).strip()
         file_name = item['name']
-        print(f"⚙️ Procesando: {file_name}")
+        print(f"\n⚙️ Procesando: {file_name}")
         notificar(f"⚙️ Analizando: <i>{file_name}</i>")
         
         temp_apk = "temp.apk"
@@ -246,46 +274,47 @@ def main():
 
             apk = APK(temp_apk)
             nombre_limpio = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
-            package_name = apk.package
             
-            # Subir y Guardar
+            # --- AQUÍ OCURRE LA MAGIA DEL ICONO ---
+            icon_data = extraer_icono_precision(temp_apk, apk.application)
+            icon_filename = f"icon_{apk.package}.png"
+            
+            # Subida
             nombre_final = f"{nombre_limpio.replace(' ', '_')}_v{apk.version_name}.apk"
             link_apk = subir_a_dropbox(dbx, temp_apk, nombre_final)
             
-            icon_data = extraer_icono_precision(temp_apk, apk.application)
-            icon_filename = f"icon_{apk.package}.png"
-            link_icon = "https://via.placeholder.com/150"
+            link_icon = "https://via.placeholder.com/150" # Fallback si falla todo
             if icon_data:
                 with open(icon_filename, "wb") as f: f.write(icon_data)
                 url_subida = subir_a_dropbox(dbx, icon_filename, icon_filename)
                 if url_subida: link_icon = url_subida
                 os.remove(icon_filename)
 
+            # Guardar
             sheet.append_row([
                 nombre_limpio, "Publicado", link_apk, apk.version_name, 
                 apk.package, link_icon, file_id, "Dropbox/Repo", str(apk.version_code)
             ])
-            print("✅ Guardado en Excel. Iniciando limpieza...")
-
-            # --- LA PRUEBA DE LA VERDAD ---
-            # Aquí llamamos al forense para que nos diga por qué no borraba antes
-            borrados = eliminar_rastros_anteriores(sheet, drive_service, dbx, package_name, file_id)
+            
+            # Limpiar duplicados
+            borrados = eliminar_rastros_anteriores(sheet, drive_service, dbx, apk.package, file_id)
             
             msj = (
                 f"✅ <b>¡Actualizado!</b>\n"
                 f"📦 {nombre_limpio} v{apk.version_name}\n"
-                f"🗑️ Duplicados eliminados: {borrados}"
+                f"🎨 Icono: {'Recuperado' if icon_data else 'Genérico'}\n"
+                f"🗑️ Limpieza: {borrados} versiones eliminadas"
             )
             notificar(msj)
 
         except Exception as e:
-            notificar(f"❌ Error: {e}")
-            print(f"❌ Error: {e}")
+            notificar(f"❌ Error con {file_name}: {e}")
+            print(f"❌ Error crítico: {e}")
         finally:
             if os.path.exists(temp_apk): os.remove(temp_apk)
 
     sincronizar_todo(sheet)
-    notificar("🏁 Fin del proceso.")
+    notificar("🏁 Tienda Sincronizada.")
 
 if __name__ == "__main__":
     main()

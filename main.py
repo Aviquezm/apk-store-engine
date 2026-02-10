@@ -67,13 +67,12 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
             
             if pkg_viejo == pkg_nuevo and id_viejo != id_archivo_nuevo:
                 print(f"   🚨 DUPLICADO (Fila {i+2})")
-                try:
-                    drive_service.files().delete(fileId=id_viejo).execute()
+                try: drive_service.files().delete(fileId=id_viejo).execute()
                 except: pass
                 
-                # Borrar Dropbox
-                nombre_dbx = f"/{r.get('Nombre', '').replace(' ', '_')}_v{r.get('Version', '')}.apk"
-                try: dbx.files_delete_v2(nombre_dbx)
+                try: 
+                    nombre_dbx = f"/{r.get('Nombre', '').replace(' ', '_')}_v{r.get('Version', '')}.apk"
+                    dbx.files_delete_v2(nombre_dbx)
                 except: pass
 
                 filas_a_borrar.append(i + 2)
@@ -90,14 +89,14 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
         return 0
 
 # ---------------------------------------------------------
-# 2. MOTOR DE EXTRACCIÓN V20 (Fuerza Bruta)
+# 2. MOTOR DE EXTRACCIÓN V21 (Equilibrio)
 # ---------------------------------------------------------
 def extraer_icono_precision(apk_path, app_name):
     mejor_puntuacion = -1
     mejor_data = None
     
-    # Lista para la estrategia de "Fuerza Bruta" (Respaldo)
-    imagenes_cuadradas = [] 
+    # Respaldo de Fuerza Bruta (pero filtrado)
+    candidatos_fb = [] 
     
     print(f"\n🕵️‍♂️ [Autopsia] Buscando icono para: {app_name}")
     
@@ -119,16 +118,14 @@ def extraer_icono_precision(apk_path, app_name):
                     img = Image.open(io.BytesIO(data))
                     w, h = img.size
                     
-                    # FILTRO: DEBE SER CUADRADO (Margen error 5px)
-                    if abs(w - h) > 5: continue 
-                    # FILTRO: TAMAÑO MÍNIMO (Evitar iconos de 16px)
+                    # FILTRO: CUADRADO EXACTO (Para evitar banners)
+                    # En Dead Pixels el icono es 128x128 (cuadrado perfecto)
+                    if abs(w - h) > 2: continue 
+                    
+                    # FILTRO: TAMAÑO (Entre 48 y 1024)
                     if w < 48: continue
                     
-                    # --- GUARDAR EN FUERZA BRUTA ---
-                    # Si todo falla, usaremos la imagen cuadrada más grande
-                    imagenes_cuadradas.append((nombre, w, data))
-
-                    # --- SISTEMA DE PUNTUACIÓN (Nombres Conocidos) ---
+                    # --- SISTEMA DE PUNTUACIÓN (Nombres) ---
                     puntuacion = 0
                     
                     # Nivel DIOS (Truecaller)
@@ -143,7 +140,17 @@ def extraer_icono_precision(apk_path, app_name):
                     if 'xxxhdpi' in nombre_lc: puntuacion += 500
                     elif 'xxhdpi' in nombre_lc: puntuacion += 300
                     
-                    # Si tiene puntos (coincidió con algún nombre), es candidato directo
+                    # --- LÓGICA V21: FUERZA BRUTA PRUDENTE ---
+                    # Guardamos todas las imágenes cuadradas decentes
+                    # Damos prioridad a las que midan entre 128 y 512 (tamaño icono real)
+                    prioridad_fb = 0
+                    if 128 <= w <= 512: prioridad_fb = 2 # Tamaño ideal
+                    elif w > 512: prioridad_fb = 1 # Posiblemente un fondo (riesgo)
+                    else: prioridad_fb = 0 # Muy chico
+                    
+                    candidatos_fb.append((nombre, prioridad_fb, w, data))
+
+                    # Si tiene puntos (coincidió con nombre), es candidato directo
                     if puntuacion > 0:
                         if puntuacion > mejor_puntuacion:
                             mejor_puntuacion = puntuacion
@@ -154,22 +161,24 @@ def extraer_icono_precision(apk_path, app_name):
             
             # --- FASE FINAL: EL JUICIO ---
             
-            # Si encontramos un candidato con nombre oficial (Truecaller, Shazam), ganamos.
+            # 1. Si encontramos un nombre oficial, ganamos.
             if mejor_puntuacion > 1000:
                 print(f"   🏆 Ganador por Nombre: {candidatos[-1][0]} ({mejor_puntuacion} pts)")
                 return mejor_data
             
-            # SI NO (Caso AdGuard / Dead Pixels): Usamos FUERZA BRUTA
-            print("   ⚠️ No se hallaron nombres oficiales. Activando FUERZA BRUTA.")
+            # 2. SI NO: Usamos FUERZA BRUTA PRUDENTE
+            print("   ⚠️ No se hallaron nombres oficiales. Activando FUERZA BRUTA PRUDENTE.")
             
-            if imagenes_cuadradas:
-                # Ordenamos por tamaño (el más grande primero)
-                imagenes_cuadradas.sort(key=lambda x: x[1], reverse=True)
-                ganador_fb = imagenes_cuadradas[0] # El más grande
-                print(f"   🦍 Ganador Fuerza Bruta: {ganador_fb[0]} (Tamaño: {ganador_fb[1]}px)")
-                return ganador_fb[2] # Retornamos la data de la imagen
+            if candidatos_fb:
+                # Ordenamos primero por prioridad (tamaño icono vs tamaño fondo)
+                # Y luego por tamaño (dentro de la misma prioridad, el más grande)
+                candidatos_fb.sort(key=lambda x: (x[1], x[2]), reverse=True)
+                
+                ganador_fb = candidatos_fb[0]
+                print(f"   🦍 Ganador Fuerza Bruta: {ganador_fb[0]} (Prioridad: {ganador_fb[1]}, Tamaño: {ganador_fb[2]}px)")
+                return ganador_fb[3]
             else:
-                print("   ❌ FALLO TOTAL: No hay imágenes cuadradas válidas.")
+                print("   ❌ FALLO TOTAL: No hay imágenes válidas.")
                 return None
 
     except Exception as e:
@@ -230,7 +239,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1") if url else None
 
 def main():
-    print("🚀 Iniciando Motor V20 (Fuerza Bruta)...")
+    print("🚀 Iniciando Motor V21 (Definitivo)...")
     
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
@@ -238,7 +247,6 @@ def main():
     drive_service = build('drive', 'v3', credentials=creds)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
-    # Detección
     registros = sheet.get_all_records()
     procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
     
@@ -272,11 +280,11 @@ def main():
             apk = APK(temp_apk)
             nombre_limpio = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
             
-            # --- EXTRACCIÓN DEL ICONO ---
+            # EXTRACCIÓN
             icon_data = extraer_icono_precision(temp_apk, apk.application)
             icon_filename = f"icon_{apk.package}.png"
             
-            # Subidas
+            # SUBIDAS
             nombre_final = f"{nombre_limpio.replace(' ', '_')}_v{apk.version_name}.apk"
             link_apk = subir_a_dropbox(dbx, temp_apk, nombre_final)
             
@@ -287,7 +295,7 @@ def main():
                 if url_subida: link_icon = url_subida
                 os.remove(icon_filename)
 
-            # Excel y Limpieza
+            # EXCEL Y LIMPIEZA
             sheet.append_row([
                 nombre_limpio, "Publicado", link_apk, apk.version_name, 
                 apk.package, link_icon, file_id, "Dropbox/Repo", str(apk.version_code)

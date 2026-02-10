@@ -77,20 +77,6 @@
             ]
         },
         {
-            "name": "AdGuard",
-            "packageName": "com.adguard.android",
-            "suggestedVersionName": "4.14.34",
-            "icon": "https://www.dropbox.com/scl/fi/441xluiblwjlqtjd0zlsw/icon_com.adguard.android.png?rlkey=egbzdnqsqj07ch3cnnhveziw4&dl=0",
-            "versions": [
-                {
-                    "versionName": "4.14.34",
-                    "versionCode": "10326790",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/0ajzg1q39a74es7rwm1u3/AdGuard_v4.14.34.apk?rlkey=zmg66qmixu6rsk36ypjfquqin&dl=0",
-                    "added": "2026-02-10"
-                }
-            ]
-        },
-        {
             "name": "Calz",
             "packageName": "com.wachanga.calories",
             "suggestedVersionName": "1.28.0",
@@ -105,15 +91,29 @@
             ]
         },
         {
+            "name": "AdGuard",
+            "packageName": "com.adguard.android",
+            "suggestedVersionName": "4.14.34",
+            "icon": "https://www.dropbox.com/scl/fi/mroa4n2ycr8g21k9hycoj/icon_com.adguard.android.png?rlkey=rt9qk51ai81ng18v58lkh7d0l&dl=0",
+            "versions": [
+                {
+                    "versionName": "4.14.34",
+                    "versionCode": "10326790",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/iji6nodsh0gpyue4djvkq/AdGuard_v4.14.34.apk?rlkey=r98xfi56qi42dkp8huvyszjk1&dl=0",
+                    "added": "2026-02-10"
+                }
+            ]
+        },
+        {
             "name": "Dead Pixel Fix",
             "packageName": "com.zoox.deadpixelfix",
             "suggestedVersionName": "3.11",
-            "icon": "https://www.dropbox.com/scl/fi/8tfbap0to77cl0ry4wam7/icon_com.zoox.deadpixelfix.png?rlkey=dkpms9jjt84pt5tg2cyv9dux1&dl=0",
+            "icon": "https://www.dropbox.com/scl/fi/t2qoilr37hwccjqf4cpao/icon_com.zoox.deadpixelfix.png?rlkey=u8n684rvlfjje812obuaygblm&dl=0",
             "versions": [
                 {
                     "versionName": "3.11",
                     "versionCode": "52",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/a2cmoilnie849xpo7zsmc/Dead_Pixel_Fix_v3.11.apk?rlkey=9eqdrsmzmdw05kkjd38wgmumn&dl=0",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/g82psv75330mla42zjxl2/Dead_Pixel_Fix_v3.11.apk?rlkey=70tl9q82686fgj9nofaxzq5s7&dl=0",
                     "added": "2026-02-10"
                 }
             ]

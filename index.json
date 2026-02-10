@@ -7,62 +7,6 @@
     },
     "apps": [
         {
-            "name": "Calz",
-            "packageName": "com.wachanga.calories",
-            "suggestedVersionName": "1.28.0",
-            "icon": "https://www.dropbox.com/scl/fi/u1ujp2x5d8s45c691wv85/icon_com.wachanga.calories.png?rlkey=q6d0c7101uo7yf1a6ekk1ulba&dl=1",
-            "versions": [
-                {
-                    "versionName": "1.28.0",
-                    "versionCode": "",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/5cuiubajkefb9ty60ao45/Calz_v1.28.0.apk?rlkey=jhyxn1gwj30yjc4bvr5ps0jwm&dl=1",
-                    "added": "2026-02-10"
-                }
-            ]
-        },
-        {
-            "name": "AdGuard",
-            "packageName": "com.adguard.android",
-            "suggestedVersionName": "4.14.34",
-            "icon": "https://www.dropbox.com/scl/fi/4b3rxo3j7p2rw1jzll22t/icon_com.adguard.android.png?rlkey=go3wbyvnzoy1oe2oljah3146q&dl=1",
-            "versions": [
-                {
-                    "versionName": "4.14.34",
-                    "versionCode": "",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/hvrmdhw71xa6i2qvydawr/AdGuard_v4.14.34.apk?rlkey=ptwp7zrp26pspqtxqk88g52e8&dl=1",
-                    "added": "2026-02-10"
-                }
-            ]
-        },
-        {
-            "name": "Micro Guard",
-            "packageName": "com.protectstar.microguardfree",
-            "suggestedVersionName": "6.5",
-            "icon": "https://www.dropbox.com/scl/fi/hvhkbienpxeu6i12iheoe/icon_com.protectstar.microguardfree.png?rlkey=ntz9oo81axw1fx9hi1hq4tpzz&dl=0",
-            "versions": [
-                {
-                    "versionName": "6.5",
-                    "versionCode": "",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/ml3mx528ehamaspjuly8o/Micro_Guard_v6.5.apk?rlkey=r57sphug8xrn89qonk9mnd0tf&dl=0",
-                    "added": "2026-02-10"
-                }
-            ]
-        },
-        {
-            "name": "Flightradar",
-            "packageName": "com.flightradar24free",
-            "suggestedVersionName": "10.6.0",
-            "icon": "https://www.dropbox.com/scl/fi/mrglm6ghusjflr633pyzd/icon_com.flightradar24free.png?rlkey=6rqcr3qfbt33by9seiddswjcc&dl=0",
-            "versions": [
-                {
-                    "versionName": "10.6.0",
-                    "versionCode": "100608781",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/e9vftrbqv7g0v1dzkpxxu/Flightradar_v10.6.0.apk?rlkey=j48lyn2e4dtbh2bloosrw6uc8&dl=0",
-                    "added": "2026-02-10"
-                }
-            ]
-        },
-        {
             "name": "Shazam",
             "packageName": "com.shazam.android",
             "suggestedVersionName": "16.27.0-260129",
@@ -105,15 +49,71 @@
             ]
         },
         {
+            "name": "Flightradar",
+            "packageName": "com.flightradar24free",
+            "suggestedVersionName": "10.6.0",
+            "icon": "https://www.dropbox.com/scl/fi/wjigc3ksxfd0ks5wxmnxs/icon_com.flightradar24free.png?rlkey=4zc8qx1e29i7q6ioqtrw5j7aa&dl=0",
+            "versions": [
+                {
+                    "versionName": "10.6.0",
+                    "versionCode": "100608781",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/ehq5tz5aoa0xnvvt0wzos/Flightradar_v10.6.0.apk?rlkey=t0xm824769j86g3ckis53g5kn&dl=0",
+                    "added": "2026-02-10"
+                }
+            ]
+        },
+        {
+            "name": "Micro Guard",
+            "packageName": "com.protectstar.microguardfree",
+            "suggestedVersionName": "6.5",
+            "icon": "https://www.dropbox.com/scl/fi/sbwvlpcjtzn7rj2qtm7k2/icon_com.protectstar.microguardfree.png?rlkey=lsxlx2eqll1o00mzk9l7xz36a&dl=0",
+            "versions": [
+                {
+                    "versionName": "6.5",
+                    "versionCode": "6500",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/mnyfsokir24fros8qa5es/Micro_Guard_v6.5.apk?rlkey=qjouedpxkwwuezg4phdqmvfwh&dl=0",
+                    "added": "2026-02-10"
+                }
+            ]
+        },
+        {
+            "name": "AdGuard",
+            "packageName": "com.adguard.android",
+            "suggestedVersionName": "4.14.34",
+            "icon": "https://www.dropbox.com/scl/fi/441xluiblwjlqtjd0zlsw/icon_com.adguard.android.png?rlkey=egbzdnqsqj07ch3cnnhveziw4&dl=0",
+            "versions": [
+                {
+                    "versionName": "4.14.34",
+                    "versionCode": "10326790",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/0ajzg1q39a74es7rwm1u3/AdGuard_v4.14.34.apk?rlkey=zmg66qmixu6rsk36ypjfquqin&dl=0",
+                    "added": "2026-02-10"
+                }
+            ]
+        },
+        {
+            "name": "Calz",
+            "packageName": "com.wachanga.calories",
+            "suggestedVersionName": "1.28.0",
+            "icon": "https://www.dropbox.com/scl/fi/zj3ak9yulbo0shzph171i/icon_com.wachanga.calories.png?rlkey=adf9ixm3vlit4eyvqfudbkjk9&dl=0",
+            "versions": [
+                {
+                    "versionName": "1.28.0",
+                    "versionCode": "490",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/gyzad8zxu9tx4uv7g6b8v/Calz_v1.28.0.apk?rlkey=m8r99j2kzyyxjkoco4rind437&dl=0",
+                    "added": "2026-02-10"
+                }
+            ]
+        },
+        {
             "name": "Dead Pixel Fix",
             "packageName": "com.zoox.deadpixelfix",
             "suggestedVersionName": "3.11",
-            "icon": "https://www.dropbox.com/scl/fi/svhrr90ezqxd9j7fvxp7m/icon_com.zoox.deadpixelfix.png?rlkey=3oukuxruo13s8ecy9g2bb7oqt&dl=0",
+            "icon": "https://www.dropbox.com/scl/fi/8tfbap0to77cl0ry4wam7/icon_com.zoox.deadpixelfix.png?rlkey=dkpms9jjt84pt5tg2cyv9dux1&dl=0",
             "versions": [
                 {
                     "versionName": "3.11",
                     "versionCode": "52",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/h0emlz9sgb7b4oh7glgo7/Dead_Pixel_Fix_v3.11.apk?rlkey=mymhxgl9yflbus75ms6zc1xpp&dl=0",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/a2cmoilnie849xpo7zsmc/Dead_Pixel_Fix_v3.11.apk?rlkey=9eqdrsmzmdw05kkjd38wgmumn&dl=0",
                     "added": "2026-02-10"
                 }
             ]

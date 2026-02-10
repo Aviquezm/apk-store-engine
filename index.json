@@ -77,20 +77,6 @@
             ]
         },
         {
-            "name": "Shazam",
-            "packageName": "com.shazam.android",
-            "suggestedVersionName": "16.27.0-260129",
-            "icon": "https://www.dropbox.com/scl/fi/zx4u39xsub7s2mtqd4f31/icon_com.shazam.android.png?rlkey=nqzwgbktodff8qaioqpe3goxk&dl=0",
-            "versions": [
-                {
-                    "versionName": "16.27.0-260129",
-                    "versionCode": "",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/3mu8fcoyy1wneehcyvovf/Shazam_v16.27.0-260129.apk?rlkey=m7ymhihrjquocej5sua6nv2d7&dl=0",
-                    "added": "2026-02-10"
-                }
-            ]
-        },
-        {
             "name": "Micro Guard",
             "packageName": "com.protectstar.microguardfree",
             "suggestedVersionName": "6.5",
@@ -100,20 +86,6 @@
                     "versionName": "6.5",
                     "versionCode": "",
                     "downloadURL": "https://www.dropbox.com/scl/fi/ml3mx528ehamaspjuly8o/Micro_Guard_v6.5.apk?rlkey=r57sphug8xrn89qonk9mnd0tf&dl=0",
-                    "added": "2026-02-10"
-                }
-            ]
-        },
-        {
-            "name": "Truecaller",
-            "packageName": "com.truecaller",
-            "suggestedVersionName": "26.5.7",
-            "icon": "https://www.dropbox.com/scl/fi/bykvq90fbcevrdro7v110/icon_com.truecaller.png?rlkey=d13kq0aq8o50kega3q602gs2c&dl=0",
-            "versions": [
-                {
-                    "versionName": "26.5.7",
-                    "versionCode": "2605007",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/2xoqnyrchbx4nvsfsjisf/Truecaller_v26.5.7.apk?rlkey=51may52qf9qh44ke0j9y3wumi&dl=0",
                     "added": "2026-02-10"
                 }
             ]
@@ -150,12 +122,40 @@
             "name": "Song Finder",
             "packageName": "com.songfinder.recognizer",
             "suggestedVersionName": "2.8.0.9",
-            "icon": "https://www.dropbox.com/scl/fi/54mu24bw6gvx8czyu6yfd/icon_com.songfinder.recognizer.png?rlkey=6fpkmnbooh2zdrlw9xoyiofl7&dl=0",
+            "icon": "https://www.dropbox.com/scl/fi/235ft4gsercxzstmimeu1/icon_com.songfinder.recognizer.png?rlkey=wjo56tq724svyl4kji8vgmihk&dl=0",
             "versions": [
                 {
                     "versionName": "2.8.0.9",
                     "versionCode": "85",
-                    "downloadURL": "https://www.dropbox.com/scl/fi/9xagjq2fnguebkjzwo8ad/Song_Finder_v2.8.0.9.apk?rlkey=crn5yqyxvazkxu80d6x8mnmbn&dl=0",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/3paie3qv6gm7qpgpjwmjj/Song_Finder_v2.8.0.9.apk?rlkey=9a8rmyakpm6penz9q30ztkb56&dl=0",
+                    "added": "2026-02-10"
+                }
+            ]
+        },
+        {
+            "name": "Shazam",
+            "packageName": "com.shazam.android",
+            "suggestedVersionName": "16.27.0-260129",
+            "icon": "https://www.dropbox.com/scl/fi/83qjr7c1lblrpkjidbczs/icon_com.shazam.android.png?rlkey=wgxh5e1wx294wfbpcrl30yrkh&dl=0",
+            "versions": [
+                {
+                    "versionName": "16.27.0-260129",
+                    "versionCode": "1602700",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/klkzcibtwmejzlfjfye31/Shazam_v16.27.0-260129.apk?rlkey=2g9jcicjn7ay8z3uaqorbmn0d&dl=0",
+                    "added": "2026-02-10"
+                }
+            ]
+        },
+        {
+            "name": "Truecaller",
+            "packageName": "com.truecaller",
+            "suggestedVersionName": "26.5.7",
+            "icon": "https://www.dropbox.com/scl/fi/ez8i1dxjxy3jse736zjtv/icon_com.truecaller.png?rlkey=phydnbeko4hby3d4lih1z7en8&dl=0",
+            "versions": [
+                {
+                    "versionName": "26.5.7",
+                    "versionCode": "2605007",
+                    "downloadURL": "https://www.dropbox.com/scl/fi/yn5vekc59kei14bb8igl0/Truecaller_v26.5.7.apk?rlkey=ozetwa0r3pg9bl0809tced4xg&dl=0",
                     "added": "2026-02-10"
                 }
             ]

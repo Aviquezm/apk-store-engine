@@ -3,94 +3,99 @@
     <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <title>Repositorio APKs</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tienda APK Privada</title>
         <style>
-            body { font-family: sans-serif; background: #121212; color: white; padding: 20px; }
-            .app { border: 1px solid #333; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; align-items: center; }
-            .icon { width: 50px; height: 50px; border-radius: 10px; margin-right: 15px; }
-            a { color: #00e676; text-decoration: none; font-weight: bold; }
+            body { background-color: #121212; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
+            h1 { text-align: center; color: #00e676; }
+            .container { max-width: 800px; margin: 0 auto; }
+            .app-card { background-color: #1e1e1e; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+            .app-icon { width: 64px; height: 64px; border-radius: 12px; margin-right: 20px; object-fit: cover; }
+            .app-info { flex-grow: 1; }
+            .app-name { font-size: 1.2em; font-weight: bold; margin: 0; }
+            .app-version { color: #aaaaaa; font-size: 0.9em; margin: 5px 0; }
+            .btn-download { background-color: #00e676; color: #000000; text-decoration: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 0.9em; display: inline-block; }
+            .btn-download:hover { background-color: #00c853; }
         </style>
     </head>
     <body>
-        <h1>Catálogo de Actualizaciones</h1>
+        <div class="container">
+            <h1>📦 Mis Aplicaciones</h1>
     
-        <div class="app" id="com.shazam.android">
-            <img src="https://www.dropbox.com/scl/fi/topgb1k2m0mahf5aicumk/icon_com.shazam.android.png?rlkey=1bmirqhhid6dm365eq302gask&dl=0" class="icon">
-            <div>
-                <h3>Shazam</h3>
-                <p>Version: 16.27.0-260129</p>
-                <p>ID: com.shazam.android</p>
-                <a href="https://www.dropbox.com/scl/fi/xoayc14ligtxaffxfc5e5/Shazam_v16.27.0-260129.apk?rlkey=gztjynhwqpf0n36qpqr34jdar&dl=0">Descargar APK</a>
+            <div class="app-card" id="com.shazam.android">
+                <img src="https://www.dropbox.com/scl/fi/topgb1k2m0mahf5aicumk/icon_com.shazam.android.png?rlkey=1bmirqhhid6dm365eq302gask&dl=0" alt="Icono" class="app-icon">
+                <div class="app-info">
+                    <h2 class="app-name">Shazam</h2>
+                    <p class="app-version">v16.27.0-260129</p>
+                    <a href="https://www.dropbox.com/scl/fi/xoayc14ligtxaffxfc5e5/Shazam_v16.27.0-260129.apk?rlkey=gztjynhwqpf0n36qpqr34jdar&dl=0" class="btn-download">Descargar APK</a>
+                </div>
             </div>
-        </div>
         
-        <div class="app" id="com.flightradar24free">
-            <img src="https://www.dropbox.com/scl/fi/vatfc2y8ccobrcmbjnsuz/icon_com.flightradar24free.png?rlkey=39ta2m1d2xvtmyz1wj0iseyvc&dl=0" class="icon">
-            <div>
-                <h3>Flightradar</h3>
-                <p>Version: 10.6.0</p>
-                <p>ID: com.flightradar24free</p>
-                <a href="https://www.dropbox.com/scl/fi/lflbavsvn5l3b2pak0mji/Flightradar_v10.6.0.apk?rlkey=ychqvn0asvu6ejmegeeihdjbh&dl=0">Descargar APK</a>
+            <div class="app-card" id="com.flightradar24free">
+                <img src="https://www.dropbox.com/scl/fi/vatfc2y8ccobrcmbjnsuz/icon_com.flightradar24free.png?rlkey=39ta2m1d2xvtmyz1wj0iseyvc&dl=0" alt="Icono" class="app-icon">
+                <div class="app-info">
+                    <h2 class="app-name">Flightradar</h2>
+                    <p class="app-version">v10.6.0</p>
+                    <a href="https://www.dropbox.com/scl/fi/lflbavsvn5l3b2pak0mji/Flightradar_v10.6.0.apk?rlkey=ychqvn0asvu6ejmegeeihdjbh&dl=0" class="btn-download">Descargar APK</a>
+                </div>
             </div>
-        </div>
         
-        <div class="app" id="com.protectstar.microguardfree">
-            <img src="https://www.dropbox.com/scl/fi/x7x9zig88qmm4rwhoo69h/icon_com.protectstar.microguardfree.png?rlkey=cq93tfti2bggh9d7ze0xw9c8h&dl=0" class="icon">
-            <div>
-                <h3>Micro Guard</h3>
-                <p>Version: 6.5</p>
-                <p>ID: com.protectstar.microguardfree</p>
-                <a href="https://www.dropbox.com/scl/fi/e5cc3g8h8691conf3mv7k/Micro_Guard_v6.5.apk?rlkey=ayx90xmxlbjhznrn105w4imz7&dl=0">Descargar APK</a>
+            <div class="app-card" id="com.protectstar.microguardfree">
+                <img src="https://www.dropbox.com/scl/fi/x7x9zig88qmm4rwhoo69h/icon_com.protectstar.microguardfree.png?rlkey=cq93tfti2bggh9d7ze0xw9c8h&dl=0" alt="Icono" class="app-icon">
+                <div class="app-info">
+                    <h2 class="app-name">Micro Guard</h2>
+                    <p class="app-version">v6.5</p>
+                    <a href="https://www.dropbox.com/scl/fi/e5cc3g8h8691conf3mv7k/Micro_Guard_v6.5.apk?rlkey=ayx90xmxlbjhznrn105w4imz7&dl=0" class="btn-download">Descargar APK</a>
+                </div>
             </div>
-        </div>
         
-        <div class="app" id="com.truecaller">
-            <img src="https://www.dropbox.com/scl/fi/df265jfp0jgbu0ab31syq/icon_com.truecaller.png?rlkey=ob3spok3xi4q9wgk35pqne1nl&dl=0" class="icon">
-            <div>
-                <h3>Truecaller</h3>
-                <p>Version: 26.5.7</p>
-                <p>ID: com.truecaller</p>
-                <a href="https://www.dropbox.com/scl/fi/ij1e61ljfaewkjzm5yv8c/Truecaller_v26.5.7.apk?rlkey=4ki6iq3b41oav488rit55zxn6&dl=0">Descargar APK</a>
+            <div class="app-card" id="com.truecaller">
+                <img src="https://www.dropbox.com/scl/fi/df265jfp0jgbu0ab31syq/icon_com.truecaller.png?rlkey=ob3spok3xi4q9wgk35pqne1nl&dl=0" alt="Icono" class="app-icon">
+                <div class="app-info">
+                    <h2 class="app-name">Truecaller</h2>
+                    <p class="app-version">v26.5.7</p>
+                    <a href="https://www.dropbox.com/scl/fi/ij1e61ljfaewkjzm5yv8c/Truecaller_v26.5.7.apk?rlkey=4ki6iq3b41oav488rit55zxn6&dl=0" class="btn-download">Descargar APK</a>
+                </div>
             </div>
-        </div>
         
-        <div class="app" id="com.spotify.music">
-            <img src="https://www.dropbox.com/scl/fi/qm0y0augp8phsf5oywsna/icon_com.spotify.music.png?rlkey=klwmc0emisrv9vbpyn3zyfu2t&dl=0" class="icon">
-            <div>
-                <h3>Spotify</h3>
-                <p>Version: 9.1.20.1452</p>
-                <p>ID: com.spotify.music</p>
-                <a href="https://www.dropbox.com/scl/fi/q6rh194f3xh02igio1nyz/Spotify_v9.1.20.1452.apk?rlkey=63f9uxx5x77uq4e7f1ju81eab&dl=0">Descargar APK</a>
+            <div class="app-card" id="com.spotify.music">
+                <img src="https://www.dropbox.com/scl/fi/qm0y0augp8phsf5oywsna/icon_com.spotify.music.png?rlkey=klwmc0emisrv9vbpyn3zyfu2t&dl=0" alt="Icono" class="app-icon">
+                <div class="app-info">
+                    <h2 class="app-name">Spotify</h2>
+                    <p class="app-version">v9.1.20.1452</p>
+                    <a href="https://www.dropbox.com/scl/fi/q6rh194f3xh02igio1nyz/Spotify_v9.1.20.1452.apk?rlkey=63f9uxx5x77uq4e7f1ju81eab&dl=0" class="btn-download">Descargar APK</a>
+                </div>
             </div>
-        </div>
         
-        <div class="app" id="com.adguard.android">
-            <img src="https://www.dropbox.com/scl/fi/7dfpeezodur6nn49beig4/icon_com.adguard.android.png?rlkey=kz67jehyui5skr5uh3ddnnqrg&dl=0" class="icon">
-            <div>
-                <h3>AdGuard</h3>
-                <p>Version: 4.14.34</p>
-                <p>ID: com.adguard.android</p>
-                <a href="https://www.dropbox.com/scl/fi/glg8grjkvftu7x2r4fvcb/AdGuard_v4.14.34.apk?rlkey=cxvjdx22oq9usmza1bmm0bwr0&dl=0">Descargar APK</a>
+            <div class="app-card" id="com.adguard.android">
+                <img src="https://www.dropbox.com/scl/fi/7dfpeezodur6nn49beig4/icon_com.adguard.android.png?rlkey=kz67jehyui5skr5uh3ddnnqrg&dl=0" alt="Icono" class="app-icon">
+                <div class="app-info">
+                    <h2 class="app-name">AdGuard</h2>
+                    <p class="app-version">v4.14.34</p>
+                    <a href="https://www.dropbox.com/scl/fi/glg8grjkvftu7x2r4fvcb/AdGuard_v4.14.34.apk?rlkey=cxvjdx22oq9usmza1bmm0bwr0&dl=0" class="btn-download">Descargar APK</a>
+                </div>
             </div>
-        </div>
         
-        <div class="app" id="com.wachanga.calories">
-            <img src="https://www.dropbox.com/scl/fi/166ivvrc4k4mxlvtg6dmf/icon_com.wachanga.calories.png?rlkey=ex4kyqr9trb3vubdobpc56c42&dl=0" class="icon">
-            <div>
-                <h3>Calz</h3>
-                <p>Version: 1.28.0</p>
-                <p>ID: com.wachanga.calories</p>
-                <a href="https://www.dropbox.com/scl/fi/k5d4wn9uyckzxfalfdvhg/Calz_v1.28.0.apk?rlkey=l9gog1xrgnnp3ch5auulrtkmx&dl=0">Descargar APK</a>
+            <div class="app-card" id="com.wachanga.calories">
+                <img src="https://www.dropbox.com/scl/fi/166ivvrc4k4mxlvtg6dmf/icon_com.wachanga.calories.png?rlkey=ex4kyqr9trb3vubdobpc56c42&dl=0" alt="Icono" class="app-icon">
+                <div class="app-info">
+                    <h2 class="app-name">Calz</h2>
+                    <p class="app-version">v1.28.0</p>
+                    <a href="https://www.dropbox.com/scl/fi/k5d4wn9uyckzxfalfdvhg/Calz_v1.28.0.apk?rlkey=l9gog1xrgnnp3ch5auulrtkmx&dl=0" class="btn-download">Descargar APK</a>
+                </div>
             </div>
-        </div>
         
-        <div class="app" id="com.zoox.deadpixelfix">
-            <img src="https://www.dropbox.com/scl/fi/lqod6zpoo3mosmlmjmo7s/icon_com.zoox.deadpixelfix.png?rlkey=yl1qspf2yynweri4a1lq6w4nt&dl=0" class="icon">
-            <div>
-                <h3>Dead Pixel Fix</h3>
-                <p>Version: 3.11</p>
-                <p>ID: com.zoox.deadpixelfix</p>
-                <a href="https://www.dropbox.com/scl/fi/0y3jti0dwihfzo8265wy3/Dead_Pixel_Fix_v3.11.apk?rlkey=nracvjfss9punik17fpi93ahv&dl=0">Descargar APK</a>
+            <div class="app-card" id="com.zoox.deadpixelfix">
+                <img src="https://www.dropbox.com/scl/fi/lqod6zpoo3mosmlmjmo7s/icon_com.zoox.deadpixelfix.png?rlkey=yl1qspf2yynweri4a1lq6w4nt&dl=0" alt="Icono" class="app-icon">
+                <div class="app-info">
+                    <h2 class="app-name">Dead Pixel Fix</h2>
+                    <p class="app-version">v3.11</p>
+                    <a href="https://www.dropbox.com/scl/fi/0y3jti0dwihfzo8265wy3/Dead_Pixel_Fix_v3.11.apk?rlkey=nracvjfss9punik17fpi93ahv&dl=0" class="btn-download">Descargar APK</a>
+                </div>
             </div>
+        
         </div>
-        </body></html>
+        <p style="text-align: center; color: #666; margin-top: 30px;">Generado automáticamente por Bot V25</p>
+    </body>
+    </html>
+    

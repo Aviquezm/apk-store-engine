@@ -2,7 +2,7 @@ import os
 import json
 import io
 import time
-import shutil
+import hashlib
 import dropbox
 import gspread
 import zipfile
@@ -11,16 +11,15 @@ import requests
 from datetime import datetime
 from PIL import Image
 from dropbox.files import WriteMode
-from dropbox.exceptions import ApiError
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from pyaxmlparser import APK 
 
-# --- CONFIGURACIÓN DE SECRETOS ---
+# --- CONFIGURACIÓN ---
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
-REPO_URL = os.environ['REPO_URL']
+REPO_URL = os.environ['REPO_URL'] # Debe terminar en / (ej: https://tu.github.io/repo/)
 
 DBX_KEY = os.environ['DROPBOX_APP_KEY']
 DBX_SECRET = os.environ['DROPBOX_APP_SECRET']
@@ -41,16 +40,22 @@ def notificar(mensaje):
         url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
         data = {"chat_id": TG_CHAT_ID, "text": mensaje, "parse_mode": "HTML"}
         requests.post(url, data=data)
-    except Exception as e:
-        print(f"⚠️ Error Telegram: {e}")
+    except Exception as e: print(f"⚠️ Telegram Error: {e}")
 
 def limpiar_texto(texto):
-    """Normaliza texto para comparaciones (sin espacios, minúsculas)"""
     if not texto: return ""
     return str(texto).strip().lower().replace('\n', '').replace('\r', '').replace('\t', '')
 
+def calcular_hash(file_path):
+    """Calcula el SHA256 para F-Droid"""
+    sha256_hash = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
+
 # ---------------------------------------------------------
-# 1. FUNCIÓN DE LIMPIEZA (Anti-Duplicados)
+# 1. LIMPIEZA
 # ---------------------------------------------------------
 def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_archivo_nuevo):
     try:
@@ -60,7 +65,6 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
         pkg_nuevo = limpiar_texto(pkg_nuevo_raw)
         
         print(f"\n🔍 [Limpieza] Buscando rastros de: '{pkg_nuevo}'...")
-        
         for i, r in enumerate(registros):
             pkg_viejo = limpiar_texto(r.get('Pkg'))
             id_viejo = str(r.get('ID Drive', '')).strip()
@@ -69,12 +73,10 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
                 print(f"   🚨 DUPLICADO (Fila {i+2})")
                 try: drive_service.files().delete(fileId=id_viejo).execute()
                 except: pass
-                
                 try: 
                     nombre_dbx = f"/{r.get('Nombre', '').replace(' ', '_')}_v{r.get('Version', '')}.apk"
                     dbx.files_delete_v2(nombre_dbx)
                 except: pass
-
                 filas_a_borrar.append(i + 2)
                 archivos_borrados += 1
 
@@ -82,14 +84,13 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
             for fila_num in sorted(filas_a_borrar, reverse=True):
                 sheet.delete_row(fila_num)
                 time.sleep(1.5)
-        
         return archivos_borrados
     except Exception as e:
         print(f"❌ Error Limpieza: {e}")
         return 0
 
 # ---------------------------------------------------------
-# 2. MOTOR DE EXTRACCIÓN V22 (Afinado para Dead Pixels)
+# 2. MOTOR DE ICONOS V22 (Invencible)
 # ---------------------------------------------------------
 def extraer_icono_precision(apk_path, app_name):
     mejor_puntuacion = -1
@@ -97,116 +98,115 @@ def extraer_icono_precision(apk_path, app_name):
     candidatos_fb = [] 
     
     print(f"\n🕵️‍♂️ [Autopsia] Buscando icono para: {app_name}")
-    
     try:
         with zipfile.ZipFile(apk_path, 'r') as z:
-            archivos = z.namelist()
-            candidatos = [] 
-
-            for nombre in archivos:
+            for nombre in z.namelist():
                 nombre_lc = nombre.lower()
-                
                 if not (nombre_lc.endswith(('.png', '.webp')) and 'res/' in nombre): continue
-                if 'notification' in nombre_lc or 'abc_' in nombre_lc: continue
-                if 'splash' in nombre_lc or 'background' in nombre_lc: continue 
+                if 'notification' in nombre_lc or 'abc_' in nombre_lc or 'splash' in nombre_lc: continue 
 
                 try:
                     data = z.read(nombre)
                     img = Image.open(io.BytesIO(data))
                     w, h = img.size
-                    
-                    if abs(w - h) > 2: continue 
-                    if w < 48: continue
+                    if abs(w - h) > 2 or w < 48: continue 
                     
                     puntuacion = 0
-                    
                     if 'rounded_logo' in nombre_lc or 'tc_logo' in nombre_lc: puntuacion += 10000
-                    
                     if 'ic_launcher_round' in nombre_lc: puntuacion += 5000
                     if 'ic_launcher' in nombre_lc: puntuacion += 4500
                     if 'app_icon' in nombre_lc: puntuacion += 4000
-                    
                     if 'xxxhdpi' in nombre_lc: puntuacion += 500
                     elif 'xxhdpi' in nombre_lc: puntuacion += 300
                     
+                    # Lógica V22 (Fuerza Bruta Inteligente)
                     prioridad_fb = 0
                     if 96 <= w <= 192: prioridad_fb = 3 
                     elif 193 <= w <= 512: prioridad_fb = 2
                     elif w > 512: prioridad_fb = 1
-                    
                     candidatos_fb.append((nombre, prioridad_fb, w, data))
 
                     if puntuacion > 0:
                         if puntuacion > mejor_puntuacion:
                             mejor_puntuacion = puntuacion
                             mejor_data = data
-                            candidatos.append((nombre, puntuacion))
                             
                 except: continue
             
-            if mejor_puntuacion > 1000:
-                print(f"   🏆 Ganador por Nombre: {candidatos[-1][0]} ({mejor_puntuacion} pts)")
-                return mejor_data
-            
-            print("   ⚠️ No se hallaron nombres oficiales. Activando FUERZA BRUTA V22.")
+            if mejor_puntuacion > 1000: return mejor_data
             
             if candidatos_fb:
                 candidatos_fb.sort(key=lambda x: (x[1], x[2]), reverse=True)
-                ganador_fb = candidatos_fb[0]
-                print(f"   🦍 Ganador Fuerza Bruta: {ganador_fb[0]} (Prioridad: {ganador_fb[1]}, Tamaño: {ganador_fb[2]}px)")
-                return ganador_fb[3]
-            else:
-                print("   ❌ FALLO TOTAL: No hay imágenes válidas.")
-                return None
-
-    except Exception as e:
-        print(f"❌ Error crítico: {e}")
-        return None
+                return candidatos_fb[0][3]
+            return None
+    except: return None
 
 # ---------------------------------------------------------
-# 3. SINCRONIZADOR (CORREGIDO PARA DROID-IFY)
+# 3. SINCRONIZADOR F-DROID (El Traductor Oficial)
 # ---------------------------------------------------------
 def sincronizar_todo(sheet):
-    print("🔄 Sincronizando index.json...")
+    print("🔄 Generando 'index-v1.json' (Formato Oficial F-Droid)...")
     registros = sheet.get_all_records()
-    nuevo_index = {
-        "repo": {"name": "Mi Tienda Privada", "description": "APKs VIP", "address": REPO_URL, "icon": f"{REPO_URL}icon.png"}, 
+    
+    # Estructura Oficial
+    repo_data = {
+        "repo": {
+            "name": "Mi Tienda Privada",
+            "timestamp": int(time.time() * 1000),
+            "version": 1,
+            "address": REPO_URL,
+            "icon": f"{REPO_URL}icon.png",
+            "description": "Repositorio VIP Automatizado"
+        },
+        "requests": {"install": [], "uninstall": []},
         "apps": []
     }
-    apps_dict = {}
+
+    # Agrupar por paquete
+    apps_grouped = {}
     for r in registros:
         pkg = r.get('Pkg')
         if not pkg: continue
-        
-        # --- FIX: Convertir VersionCode a ENTERO ---
-        try:
-            v_code = int(str(r.get('Version Code', '0')).replace('.', ''))
-        except:
-            v_code = 0
-            
-        entry = {
-            "versionName": str(r.get('Version')),
-            "versionCode": v_code, # Ahora es un número real (sin comillas)
-            "downloadURL": r.get('Link APK'),
-            "added": datetime.now().strftime("%Y-%m-%d")
-        }
-        if pkg not in apps_dict:
-            apps_dict[pkg] = {
-                "name": r.get('Nombre'),
-                "packageName": pkg,
-                "suggestedVersionName": str(r.get('Version')),
-                "icon": r.get('Link Icono'),
-                "versions": [entry]
-            }
-        else:
-            if not any(v['versionName'] == entry['versionName'] for v in apps_dict[pkg]['versions']):
-                apps_dict[pkg]['versions'].insert(0, entry)
+        if pkg not in apps_grouped: apps_grouped[pkg] = []
+        apps_grouped[pkg].append(r)
 
-    nuevo_index["apps"] = list(apps_dict.values())
-    with open("index.json", "w") as f: json.dump(nuevo_index, f, indent=4)
+    # Construir entradas
+    for pkg, versiones in apps_grouped.items():
+        # Usamos datos de la versión más reciente para la ficha general
+        latest = versiones[-1] 
+        
+        app_entry = {
+            "packageName": pkg,
+            "name": latest.get('Nombre', 'App'),
+            "summary": f"Versión {latest.get('Version')}",
+            "icon": latest.get('Link Icono'), # Algunos clientes aceptan URLs aquí
+            "suggestedVersionCode": str(latest.get('Version Code', '0')),
+            "license": "Unknown",
+            "packages": []
+        }
+
+        for v in versiones:
+            # El truco para Dropbox: Ponemos la URL completa en apkName si el cliente lo permite
+            # O usamos el link directo. Droid-ify suele ser listo.
+            pkg_entry = {
+                "versionCode": int(v.get('Version Code', 0) if v.get('Version Code') else 0),
+                "versionName": str(v.get('Version')),
+                "apkName": v.get('Link APK'), # <--- EL HACK: Pasamos la URL directa
+                "hash": v.get('SHA256', ''),
+                "hashType": "sha256",
+                "size": int(v.get('Size', 0) if v.get('Size') else 0)
+            }
+            app_entry["packages"].append(pkg_entry)
+        
+        repo_data["apps"].append(app_entry)
+
+    # Guardar index-v1.json (El que busca Neo Store)
+    with open("index-v1.json", "w") as f: json.dump(repo_data, f, indent=4)
+    # Guardar index.json (Compatibilidad)
+    with open("index.json", "w") as f: json.dump(repo_data, f, indent=4)
 
 # ---------------------------------------------------------
-# 4. MAIN & CONEXIONES
+# 4. MAIN
 # ---------------------------------------------------------
 def conectar_dropbox():
     return dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
@@ -224,7 +224,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1") if url else None
 
 def main():
-    print("🚀 Iniciando Motor V23 (JSON Fix)...")
+    print("🚀 Iniciando Motor V23 (F-Droid Ready)...")
     
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
@@ -240,20 +240,18 @@ def main():
     
     nuevos = [i for i in items if i['name'].lower().endswith('.apk') and str(i['id']).strip() not in procesados]
 
-    # SIEMPRE ACTUALIZAR JSON (Incluso si no hay apps nuevas, para arreglar el error viejo)
     if not nuevos:
-        print("💤 Sin APKs nuevas, pero regenerando JSON...")
-        sincronizar_todo(sheet)
-        print("✅ JSON regenerado.")
+        print("💤 Sin novedades.")
+        # Opcional: Regenerar index si se borró el Excel pero no hay archivos nuevos
+        if not registros and procesados: sincronizar_todo(sheet) 
         return
 
-    notificar(f"👷‍♂️ <b>Hola Jefe</b>\nProcesando <b>{len(nuevos)}</b> APK(s)...")
+    notificar(f"👷‍♂️ <b>Procesando {len(nuevos)} APKs</b>\nCalculando firmas de seguridad...")
 
     for item in nuevos:
         file_id = str(item['id']).strip()
         file_name = item['name']
         print(f"\n⚙️ Procesando: {file_name}")
-        notificar(f"⚙️ Analizando: <i>{file_name}</i>")
         
         temp_apk = "temp.apk"
         try:
@@ -265,12 +263,19 @@ def main():
             fh.seek(0)
             with open(temp_apk, "wb") as f: f.write(fh.read())
 
+            # ANÁLISIS COMPLETO
             apk = APK(temp_apk)
             nombre_limpio = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
             
+            # 1. Icono (V22)
             icon_data = extraer_icono_precision(temp_apk, apk.application)
             icon_filename = f"icon_{apk.package}.png"
             
+            # 2. Hash SHA256 y Tamaño (Para F-Droid)
+            apk_hash = calcular_hash(temp_apk)
+            apk_size = os.path.getsize(temp_apk)
+            
+            # Subidas
             nombre_final = f"{nombre_limpio.replace(' ', '_')}_v{apk.version_name}.apk"
             link_apk = subir_a_dropbox(dbx, temp_apk, nombre_final)
             
@@ -281,28 +286,25 @@ def main():
                 if url_subida: link_icon = url_subida
                 os.remove(icon_filename)
 
+            # Guardar en Excel con los NUEVOS CAMPOS
             sheet.append_row([
                 nombre_limpio, "Publicado", link_apk, apk.version_name, 
-                apk.package, link_icon, file_id, "Dropbox/Repo", str(apk.version_code)
+                apk.package, link_icon, file_id, "Dropbox", 
+                str(apk.version_code), apk_hash, str(apk_size)
             ])
+            
             borrados = eliminar_rastros_anteriores(sheet, drive_service, dbx, apk.package, file_id)
             
-            msj = (
-                f"✅ <b>¡Actualizado!</b>\n"
-                f"📦 {nombre_limpio} v{apk.version_name}\n"
-                f"🎨 Icono: {'Recuperado' if icon_data else 'Genérico'}\n"
-                f"🗑️ Limpieza: {borrados}"
-            )
-            notificar(msj)
+            notificar(f"✅ <b>{nombre_limpio}</b> v{apk.version_name}\n🛡️ Hash Generado\n🎨 Icono OK")
 
         except Exception as e:
             notificar(f"❌ Error con {file_name}: {e}")
-            print(f"❌ Error crítico: {e}")
+            print(f"❌ Error: {e}")
         finally:
             if os.path.exists(temp_apk): os.remove(temp_apk)
 
     sincronizar_todo(sheet)
-    notificar("🏁 Tienda Sincronizada.")
+    notificar("🏁 Repositorio F-Droid Actualizado.")
 
 if __name__ == "__main__":
     main()

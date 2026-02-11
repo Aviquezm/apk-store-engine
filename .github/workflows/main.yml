@@ -2,16 +2,17 @@ name: Actualizar Tienda APK
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
+    - cron: '*/30 * * * *' # Ejecuta cada 30 minutos
+  workflow_dispatch:      # Permite el botón manual "Run workflow"
 
-# ESTA ES LA CLAVE: Permisos explícitos al inicio
+# PERMISOS GLOBALES (La Llave Maestra)
 permissions:
   contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout del código
         uses: actions/checkout@v3
@@ -39,11 +40,17 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: python main.py
 
-      - name: Guardar y Subir (Commit & Push)
+      # PASO CRÍTICO: GUARDAR TODO (HTML + JSON)
+      - name: Guardar y Subir Cambios
         run: |
           git config --global user.name "Bot de Tienda"
           git config --global user.email "bot@noreply.github.com"
-          git add index.json index-v1.json
-          # El "|| echo" evita que falle si no hay cambios
-          git commit -m "🔄 Tienda Reconstruida" || echo "⚠️ Nada nuevo que guardar"
+          
+          # Añadimos el HTML (para Obtainium) y los JSON (para F-Droid)
+          git add index.html index.json index-v1.json
+          
+          # Hacemos commit (si falla porque no hay cambios, no rompe el proceso)
+          git commit -m "🚀 Actualización: Nuevas APKs y Web" || echo "⚠️ Nada nuevo que guardar"
+          
+          # Empujamos los cambios con fuerza
           git push

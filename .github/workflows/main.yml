@@ -2,14 +2,14 @@ name: Actualizar Tienda APK
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Ejecutar cada 30 minutos
-  workflow_dispatch: # Permite ejecutar manualmente con el botón Run
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # IMPORTANTE: Permiso para guardar archivos
+      contents: write
 
     steps:
       - name: Checkout del código
@@ -38,11 +38,10 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: python main.py
 
-      # --- EL PASO QUE FALTABA ---
-      - name: Guardar y Subir cambios (index.json)
+      - name: Guardar y Subir cambios
         run: |
           git config --global user.name "Bot de Tienda"
           git config --global user.email "bot@noreply.github.com"
           git add index.json index-v1.json
-          git commit -m "🔄 Tienda Actualizada: Nuevas APKs" || echo "Nada nuevo por aquí"
+          git commit -m "🔄 Tienda Actualizada" || echo "Nada nuevo"
           git push

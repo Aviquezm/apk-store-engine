@@ -1,50 +1,48 @@
-name: Tienda APK Automática (Dropbox)
+name: Actualizar Tienda APK
 
 on:
-  workflow_dispatch: 
   schedule:
-    - cron: '*/30 * * * *' 
-
-permissions:
-  contents: write 
+    - cron: '*/30 * * * *' # Ejecutar cada 30 minutos
+  workflow_dispatch: # Permite ejecutar manualmente con el botón Run
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # IMPORTANTE: Permiso para guardar archivos
+
     steps:
-      - name: 1. Checkout del código
+      - name: Checkout del código
         uses: actions/checkout@v3
 
-      - name: 2. Configurar Python
+      - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.9'
 
-      - name: 3. Instalar librerías necesarias
+      - name: Instalar librerías
         run: |
-          python -m pip install --upgrade pip
+          pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 4. Ejecutar Motor Principal (Drive -> Dropbox -> index.json)
+      - name: Ejecutar Script Maestro
         env:
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          ADMIN_ID: ${{ secrets.ADMIN_ID }}
           DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
+          REPO_URL: ${{ secrets.REPO_URL }}
           DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
           DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
           DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
-          REPO_URL: ${{ secrets.REPO_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: python main.py
 
-      - name: 5. Guardar Cambios en GitHub
+      # --- EL PASO QUE FALTABA ---
+      - name: Guardar y Subir cambios (index.json)
         run: |
-          git config --global user.name "GitHub Action Bot"
-          git config --global user.email "action@github.com"
-          if [ -f index.json ]; then
-            git add index.json
-            git commit -m "🚀 Actualización de repositorio" || echo "Sin cambios"
-            git push
-          else
-            echo "El archivo index.json no existe aún porque no se procesaron APKs nuevas."
-          fi
+          git config --global user.name "Bot de Tienda"
+          git config --global user.email "bot@noreply.github.com"
+          git add index.json index-v1.json
+          git commit -m "🔄 Tienda Actualizada: Nuevas APKs" || echo "Nada nuevo por aquí"
+          git push

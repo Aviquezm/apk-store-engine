@@ -71,23 +71,21 @@ def extraer_icono_precision(apk_path, app_name):
     except: return None
 
 # ---------------------------------------------------------
-# GENERADOR WEB V28 (FIX IMAGENES DROPBOX)
+# GENERADOR WEB V29 (Optimizado para Obtainium)
 # ---------------------------------------------------------
 def generar_archivos_finales(sheet):
-    print("🔄 Generando Web V28 (Iconos Reparados)...")
+    print("🔄 Generando Web V29...")
     registros = sheet.get_all_records()
     
     html = """<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda APK Privada</title>
+    <title>Tienda APK</title>
     <style>
-        body { background: #121212; color: #e0e0e0; font-family: sans-serif; padding: 20px; }
+        body { background: #121212; color: #fff; font-family: sans-serif; padding: 20px; }
         .app { background: #1e1e1e; padding: 15px; margin-bottom: 15px; border-radius: 12px; display: flex; align-items: center; border: 1px solid #333; }
         .icon { width: 64px; height: 64px; border-radius: 15px; margin-right: 15px; object-fit: cover; background: #333; }
-        h3 { margin: 0 0 5px 0; color: #fff; }
-        p { margin: 0 0 10px 0; color: #aaa; font-size: 0.9em; }
-        .btn { background: #00E676; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; }
-    </style></head><body><h1 style="text-align:center; color:#00E676;">📦 Mis Apps</h1>"""
+        .btn { background: #00E676; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; margin-top:5px; }
+    </style></head><body><h1 style="text-align:center;color:#00E676;">📦 Mis Apps</h1>"""
 
     for r in registros:
         if not r.get('Pkg'): continue
@@ -95,40 +93,38 @@ def generar_archivos_finales(sheet):
         version = r.get('Version', '1.0')
         link = r.get('Link APK')
         
-        # --- EL FIX MAESTRO PARA ICONOS ---
+        # FIX ICONOS: Usamos el dominio directo de contenidos de Dropbox
         raw_icon = str(r.get('Link Icono', ''))
-        # Convertimos www.dropbox.com -> dl.dropboxusercontent.com
-        # Esto obliga al navegador a mostrar la imagen real
         icon = raw_icon.replace("www.dropbox.com", "dl.dropboxusercontent.com").replace("?dl=0", "").replace("?dl=1", "")
         
+        # FIX OBTAINIUM: El texto del enlace es CLAVE: "NombreApp vVersion"
         html += f"""
         <div class="app">
             <img src="{icon}" class="icon" onerror="this.src='https://via.placeholder.com/64'">
             <div>
                 <h3>{nombre}</h3>
-                <p>v{version}</p>
-                <a href="{link}" class="btn">Descargar {nombre} v{version}</a>
+                <a href="{link}" class="btn">{nombre} v{version}</a>
             </div>
         </div>"""
     
     html += "</body></html>"
     with open("index.html", "w", encoding='utf-8') as f: f.write(html)
     
-    # Archivos Extra
+    # Generamos JSONs para compatibilidad
     with open("index.json", "w") as f: json.dump({"apps": registros}, f)
 
 # ---------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor V28...")
+    print("🚀 Iniciando Motor V29...")
     dbx = dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     drive_service = build('drive', 'v3', credentials=creds)
     client_gs = gspread.authorize(creds)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
-    # Procesar APKs Nuevas
+    # Procesar APKs
     try:
         registros = sheet.get_all_records()
         procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
@@ -141,9 +137,7 @@ def main():
             for item in nuevos:
                 temp_apk = "temp.apk"
                 try:
-                    # Descargar y Analizar
-                    file_id = item['id']
-                    request = drive_service.files().get_media(fileId=file_id)
+                    request = drive_service.files().get_media(fileId=item['id'])
                     fh = io.BytesIO()
                     downloader = MediaIoBaseDownload(fh, request)
                     done = False
@@ -153,9 +147,9 @@ def main():
 
                     apk = APK(temp_apk)
                     nombre = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
-                    icon_data = extraer_icono_precision(temp_apk, apk.application)
                     
-                    # Subir Icono
+                    # Icono
+                    icon_data = extraer_icono_precision(temp_apk, apk.application)
                     link_icon = "https://via.placeholder.com/64"
                     if icon_data:
                         with open("temp.png", "wb") as f: f.write(icon_data)
@@ -164,27 +158,21 @@ def main():
                         link_icon = l.replace("?dl=0", "?dl=1")
                         os.remove("temp.png")
 
-                    # Subir APK
-                    path_apk = f"/{nombre}_{apk.version_name}.apk"
-                    with open(temp_apk, "rb") as f: dbx.files_upload(f.read(), path_apk, mode=WriteMode('overwrite'))
-                    l_apk = dbx.sharing_create_shared_link_with_settings(path_apk).url
+                    # APK
+                    path = f"/{nombre}_{apk.version_name}.apk"
+                    with open(temp_apk, "rb") as f: dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
+                    l_apk = dbx.sharing_create_shared_link_with_settings(path).url
                     link_apk = l_apk.replace("?dl=0", "?dl=1")
 
-                    sheet.append_row([
-                        nombre, "Publicado", link_apk, apk.version_name, 
-                        apk.package, link_icon, file_id, "Dropbox", 
-                        str(apk.version_code), calcular_hash(temp_apk), str(os.path.getsize(temp_apk))
-                    ])
-                    notificar(f"✅ {nombre} v{apk.version_name} Agregado")
-                except Exception as e: print(f"Error {item['name']}: {e}")
+                    sheet.append_row([nombre, "Publicado", link_apk, apk.version_name, apk.package, link_icon, item['id'], "Dropbox", str(apk.version_code), calcular_hash(temp_apk), str(os.path.getsize(temp_apk))])
+                    notificar(f"✅ {nombre} v{apk.version_name} listo")
+                except Exception as e: print(e)
                 finally: 
                     if os.path.exists(temp_apk): os.remove(temp_apk)
-    except Exception as e:
-        print(f"Error: {e}")
+    except Exception as e: print(e)
 
-    # REGENERAR WEB
     generar_archivos_finales(sheet)
-    print("✅ Web V28 Generada (Iconos Fix).")
+    print("✅ Web V29 Generada.")
 
 if __name__ == "__main__":
     main()

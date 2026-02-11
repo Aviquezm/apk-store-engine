@@ -71,10 +71,10 @@ def extraer_icono_precision(apk_path, app_name):
     except: return None
 
 # ---------------------------------------------------------
-# GENERADOR WEB (CORREGIDO PARA ICONOS Y OBTAINIUM)
+# GENERADOR WEB V28 (FIX IMAGENES DROPBOX)
 # ---------------------------------------------------------
 def generar_archivos_finales(sheet):
-    print("🔄 Generando Web V27...")
+    print("🔄 Generando Web V28 (Iconos Reparados)...")
     registros = sheet.get_all_records()
     
     html = """<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
@@ -94,10 +94,13 @@ def generar_archivos_finales(sheet):
         nombre = r.get('Nombre', 'App')
         version = r.get('Version', '1.0')
         link = r.get('Link APK')
-        # FIX ICONOS: Forzamos dl=1 para que se vea la imagen
-        icon = str(r.get('Link Icono', '')).replace("dl=0", "dl=1")
         
-        # FIX OBTAINIUM: Ponemos la versión en el texto del botón
+        # --- EL FIX MAESTRO PARA ICONOS ---
+        raw_icon = str(r.get('Link Icono', ''))
+        # Convertimos www.dropbox.com -> dl.dropboxusercontent.com
+        # Esto obliga al navegador a mostrar la imagen real
+        icon = raw_icon.replace("www.dropbox.com", "dl.dropboxusercontent.com").replace("?dl=0", "").replace("?dl=1", "")
+        
         html += f"""
         <div class="app">
             <img src="{icon}" class="icon" onerror="this.src='https://via.placeholder.com/64'">
@@ -111,22 +114,21 @@ def generar_archivos_finales(sheet):
     html += "</body></html>"
     with open("index.html", "w", encoding='utf-8') as f: f.write(html)
     
-    # Archivos Extra para evitar errores de GitHub
+    # Archivos Extra
     with open("index.json", "w") as f: json.dump({"apps": registros}, f)
-    with open("index-v1.json", "w") as f: json.dump({"repo": "dummy"}, f) # Archivo fantasma para calmar al .yml
 
 # ---------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor V27...")
+    print("🚀 Iniciando Motor V28...")
     dbx = dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     drive_service = build('drive', 'v3', credentials=creds)
     client_gs = gspread.authorize(creds)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
-    # Procesar APKs Nuevas (Si las hay)
+    # Procesar APKs Nuevas
     try:
         registros = sheet.get_all_records()
         procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
@@ -139,6 +141,7 @@ def main():
             for item in nuevos:
                 temp_apk = "temp.apk"
                 try:
+                    # Descargar y Analizar
                     file_id = item['id']
                     request = drive_service.files().get_media(fileId=file_id)
                     fh = io.BytesIO()
@@ -157,7 +160,6 @@ def main():
                     if icon_data:
                         with open("temp.png", "wb") as f: f.write(icon_data)
                         with open("temp.png", "rb") as f: dbx.files_upload(f.read(), f"/icon_{apk.package}.png", mode=WriteMode('overwrite'))
-                        # Obtenemos enlace y forzamos dl=1
                         l = dbx.sharing_create_shared_link_with_settings(f"/icon_{apk.package}.png").url
                         link_icon = l.replace("?dl=0", "?dl=1")
                         os.remove("temp.png")
@@ -178,11 +180,11 @@ def main():
                 finally: 
                     if os.path.exists(temp_apk): os.remove(temp_apk)
     except Exception as e:
-        print(f"Error General: {e}")
+        print(f"Error: {e}")
 
-    # SIEMPRE REGENERAR WEB
+    # REGENERAR WEB
     generar_archivos_finales(sheet)
-    print("✅ Web V27 Generada.")
+    print("✅ Web V28 Generada (Iconos Fix).")
 
 if __name__ == "__main__":
     main()

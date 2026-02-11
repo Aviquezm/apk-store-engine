@@ -14,9 +14,9 @@
             "versions": [
                 {
                     "versionName": "16.27.0-260129",
-                    "versionCode": "1602700",
+                    "versionCode": 1602700,
                     "downloadURL": "https://www.dropbox.com/scl/fi/pz6p984wc2t7imhxq9a7s/Shazam_v16.27.0-260129.apk?rlkey=qapul88t65anshk4mas1chmde&dl=0",
-                    "added": "2026-02-10"
+                    "added": "2026-02-11"
                 }
             ]
         },
@@ -28,9 +28,9 @@
             "versions": [
                 {
                     "versionName": "26.5.7",
-                    "versionCode": "2605007",
+                    "versionCode": 2605007,
                     "downloadURL": "https://www.dropbox.com/scl/fi/m0r4gbbfmdnwl3sv627wh/Truecaller_v26.5.7.apk?rlkey=bzxalpk8kq0uleiz7mu54zs5n&dl=0",
-                    "added": "2026-02-10"
+                    "added": "2026-02-11"
                 }
             ]
         },
@@ -42,9 +42,9 @@
             "versions": [
                 {
                     "versionName": "9.1.20.1452",
-                    "versionCode": "137897908",
+                    "versionCode": 137897908,
                     "downloadURL": "https://www.dropbox.com/scl/fi/v4r4zmowmopf5qpky7x9c/Spotify_v9.1.20.1452.apk?rlkey=lbo020p4nsaaj76tgyr6wxrxb&dl=0",
-                    "added": "2026-02-10"
+                    "added": "2026-02-11"
                 }
             ]
         },
@@ -56,9 +56,9 @@
             "versions": [
                 {
                     "versionName": "10.6.0",
-                    "versionCode": "100608781",
+                    "versionCode": 100608781,
                     "downloadURL": "https://www.dropbox.com/scl/fi/ehq5tz5aoa0xnvvt0wzos/Flightradar_v10.6.0.apk?rlkey=t0xm824769j86g3ckis53g5kn&dl=0",
-                    "added": "2026-02-10"
+                    "added": "2026-02-11"
                 }
             ]
         },
@@ -70,9 +70,9 @@
             "versions": [
                 {
                     "versionName": "6.5",
-                    "versionCode": "6500",
+                    "versionCode": 6500,
                     "downloadURL": "https://www.dropbox.com/scl/fi/mnyfsokir24fros8qa5es/Micro_Guard_v6.5.apk?rlkey=qjouedpxkwwuezg4phdqmvfwh&dl=0",
-                    "added": "2026-02-10"
+                    "added": "2026-02-11"
                 }
             ]
         },
@@ -84,9 +84,9 @@
             "versions": [
                 {
                     "versionName": "1.28.0",
-                    "versionCode": "490",
+                    "versionCode": 490,
                     "downloadURL": "https://www.dropbox.com/scl/fi/gyzad8zxu9tx4uv7g6b8v/Calz_v1.28.0.apk?rlkey=m8r99j2kzyyxjkoco4rind437&dl=0",
-                    "added": "2026-02-10"
+                    "added": "2026-02-11"
                 }
             ]
         },
@@ -98,9 +98,9 @@
             "versions": [
                 {
                     "versionName": "4.14.34",
-                    "versionCode": "10326790",
+                    "versionCode": 10326790,
                     "downloadURL": "https://www.dropbox.com/scl/fi/1iinaiu0myycb30y6yqq5/AdGuard_v4.14.34.apk?rlkey=e6e0pxd89qpci4yt2cy4qi9jz&dl=0",
-                    "added": "2026-02-10"
+                    "added": "2026-02-11"
                 }
             ]
         },
@@ -112,9 +112,9 @@
             "versions": [
                 {
                     "versionName": "3.11",
-                    "versionCode": "52",
+                    "versionCode": 52,
                     "downloadURL": "https://www.dropbox.com/scl/fi/fvi1p887s1lo4ssi32isi/Dead_Pixel_Fix_v3.11.apk?rlkey=3ypfw32pcuidzvkgrdsvcdb2c&dl=0",
-                    "added": "2026-02-10"
+                    "added": "2026-02-11"
                 }
             ]
         }

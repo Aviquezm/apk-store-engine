@@ -2,32 +2,30 @@ name: Actualizar Tienda APK
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Ejecuta cada 30 minutos
-  workflow_dispatch:      # Permite el botón manual "Run workflow"
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
 
-# PERMISOS GLOBALES (La Llave Maestra)
 permissions:
   contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout del código
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Configurar Python
+      - name: Python Setup
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - name: Instalar librerías
+      - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Ejecutar Script Maestro
+      - name: Ejecutar Bot V27
         env:
           DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
@@ -40,17 +38,11 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: python main.py
 
-      # PASO CRÍTICO: GUARDAR TODO (HTML + JSON)
-      - name: Guardar y Subir Cambios
+      - name: Guardar Todo
         run: |
-          git config --global user.name "Bot de Tienda"
+          git config --global user.name "Bot"
           git config --global user.email "bot@noreply.github.com"
-          
-          # Añadimos el HTML (para Obtainium) y los JSON (para F-Droid)
-          git add index.html index.json index-v1.json
-          
-          # Hacemos commit (si falla porque no hay cambios, no rompe el proceso)
-          git commit -m "🚀 Actualización: Nuevas APKs y Web" || echo "⚠️ Nada nuevo que guardar"
-          
-          # Empujamos los cambios con fuerza
+          # El truco: 'git add .' agrega TODO lo que exista (html, json, etc)
+          git add .
+          git commit -m "🚀 Update V27" || echo "Sin cambios"
           git push

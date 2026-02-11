@@ -5,17 +5,16 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
+# ESTA ES LA CLAVE: Permisos explícitos al inicio
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write  # Permiso explícito aquí también
-
     steps:
       - name: Checkout del código
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Usar token oficial
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -40,13 +39,11 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: python main.py
 
-      # --- AQUÍ ESTÁ EL CAMBIO "BLINDADO" ---
-      - name: Guardar y Subir (Fuerza Bruta)
+      - name: Guardar y Subir (Commit & Push)
         run: |
           git config --global user.name "Bot de Tienda"
           git config --global user.email "bot@noreply.github.com"
           git add index.json index-v1.json
-          # Si no hay cambios, no da error, solo avisa
-          git commit -m "🔄 Actualización Automática" || echo "⚠️ Nada nuevo que guardar"
-          # Empuje autenticado manualmente
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
+          # El "|| echo" evita que falle si no hay cambios
+          git commit -m "🔄 Tienda Reconstruida" || echo "⚠️ Nada nuevo que guardar"
+          git push

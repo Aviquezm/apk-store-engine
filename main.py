@@ -94,8 +94,6 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
 def extraer_icono_precision(apk_path, app_name):
     mejor_puntuacion = -1
     mejor_data = None
-    
-    # Respaldo de Fuerza Bruta (pero filtrado)
     candidatos_fb = [] 
     
     print(f"\n🕵️‍♂️ [Autopsia] Buscando icono para: {app_name}")
@@ -108,7 +106,6 @@ def extraer_icono_precision(apk_path, app_name):
             for nombre in archivos:
                 nombre_lc = nombre.lower()
                 
-                # FILTROS BÁSICOS
                 if not (nombre_lc.endswith(('.png', '.webp')) and 'res/' in nombre): continue
                 if 'notification' in nombre_lc or 'abc_' in nombre_lc: continue
                 if 'splash' in nombre_lc or 'background' in nombre_lc: continue 
@@ -118,41 +115,27 @@ def extraer_icono_precision(apk_path, app_name):
                     img = Image.open(io.BytesIO(data))
                     w, h = img.size
                     
-                    # FILTRO: CUADRADO EXACTO (Margen 2px)
                     if abs(w - h) > 2: continue 
-                    # FILTRO: TAMAÑO (Entre 48 y 1024)
                     if w < 48: continue
                     
-                    # --- SISTEMA DE PUNTUACIÓN (Nombres) ---
                     puntuacion = 0
                     
-                    # Nivel DIOS (Truecaller)
                     if 'rounded_logo' in nombre_lc or 'tc_logo' in nombre_lc: puntuacion += 10000
                     
-                    # Nivel REY (Estándar)
                     if 'ic_launcher_round' in nombre_lc: puntuacion += 5000
                     if 'ic_launcher' in nombre_lc: puntuacion += 4500
                     if 'app_icon' in nombre_lc: puntuacion += 4000
                     
-                    # Nivel ALFIL (Calidad)
                     if 'xxxhdpi' in nombre_lc: puntuacion += 500
                     elif 'xxhdpi' in nombre_lc: puntuacion += 300
                     
-                    # --- LÓGICA V22: FUERZA BRUTA DE PRECISIÓN ---
-                    # Clasificamos por tamaño para desempatar si no hay nombres
                     prioridad_fb = 0
-                    
-                    # Rango Ideal (Iconos normales de Android)
                     if 96 <= w <= 192: prioridad_fb = 3 
-                    # Rango Alto (Iconos HD)
                     elif 193 <= w <= 512: prioridad_fb = 2
-                    # Rango Riesgo (Posibles fondos)
                     elif w > 512: prioridad_fb = 1
                     
-                    # Guardamos candidato de fuerza bruta
                     candidatos_fb.append((nombre, prioridad_fb, w, data))
 
-                    # Si tiene puntos (coincidió con nombre), es candidato directo
                     if puntuacion > 0:
                         if puntuacion > mejor_puntuacion:
                             mejor_puntuacion = puntuacion
@@ -161,22 +144,14 @@ def extraer_icono_precision(apk_path, app_name):
                             
                 except: continue
             
-            # --- FASE FINAL: EL JUICIO ---
-            
-            # 1. Si encontramos un nombre oficial, ganamos.
             if mejor_puntuacion > 1000:
                 print(f"   🏆 Ganador por Nombre: {candidatos[-1][0]} ({mejor_puntuacion} pts)")
                 return mejor_data
             
-            # 2. SI NO: Usamos FUERZA BRUTA INTELIGENTE
             print("   ⚠️ No se hallaron nombres oficiales. Activando FUERZA BRUTA V22.")
             
             if candidatos_fb:
-                # Ordenamos:
-                # 1. Prioridad (Preferimos 96-192px antes que gigantes)
-                # 2. Tamaño (Dentro de la misma prioridad, el más grande)
                 candidatos_fb.sort(key=lambda x: (x[1], x[2]), reverse=True)
-                
                 ganador_fb = candidatos_fb[0]
                 print(f"   🦍 Ganador Fuerza Bruta: {ganador_fb[0]} (Prioridad: {ganador_fb[1]}, Tamaño: {ganador_fb[2]}px)")
                 return ganador_fb[3]
@@ -189,7 +164,7 @@ def extraer_icono_precision(apk_path, app_name):
         return None
 
 # ---------------------------------------------------------
-# 3. SINCRONIZADOR
+# 3. SINCRONIZADOR (CORREGIDO PARA DROID-IFY)
 # ---------------------------------------------------------
 def sincronizar_todo(sheet):
     print("🔄 Sincronizando index.json...")
@@ -202,9 +177,16 @@ def sincronizar_todo(sheet):
     for r in registros:
         pkg = r.get('Pkg')
         if not pkg: continue
+        
+        # --- FIX: Convertir VersionCode a ENTERO ---
+        try:
+            v_code = int(str(r.get('Version Code', '0')).replace('.', ''))
+        except:
+            v_code = 0
+            
         entry = {
             "versionName": str(r.get('Version')),
-            "versionCode": str(r.get('Version Code', '0')),
+            "versionCode": v_code, # Ahora es un número real (sin comillas)
             "downloadURL": r.get('Link APK'),
             "added": datetime.now().strftime("%Y-%m-%d")
         }
@@ -242,7 +224,7 @@ def subir_a_dropbox(dbx, file_path, dest_filename):
     return url.replace("?dl=0", "?dl=1") if url else None
 
 def main():
-    print("🚀 Iniciando Motor V22 (Afinado)...")
+    print("🚀 Iniciando Motor V23 (JSON Fix)...")
     
     dbx = conectar_dropbox()
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
@@ -258,8 +240,11 @@ def main():
     
     nuevos = [i for i in items if i['name'].lower().endswith('.apk') and str(i['id']).strip() not in procesados]
 
+    # SIEMPRE ACTUALIZAR JSON (Incluso si no hay apps nuevas, para arreglar el error viejo)
     if not nuevos:
-        print("💤 Sin novedades.")
+        print("💤 Sin APKs nuevas, pero regenerando JSON...")
+        sincronizar_todo(sheet)
+        print("✅ JSON regenerado.")
         return
 
     notificar(f"👷‍♂️ <b>Hola Jefe</b>\nProcesando <b>{len(nuevos)}</b> APK(s)...")
@@ -283,11 +268,9 @@ def main():
             apk = APK(temp_apk)
             nombre_limpio = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
             
-            # EXTRACCIÓN
             icon_data = extraer_icono_precision(temp_apk, apk.application)
             icon_filename = f"icon_{apk.package}.png"
             
-            # SUBIDAS
             nombre_final = f"{nombre_limpio.replace(' ', '_')}_v{apk.version_name}.apk"
             link_apk = subir_a_dropbox(dbx, temp_apk, nombre_final)
             
@@ -298,7 +281,6 @@ def main():
                 if url_subida: link_icon = url_subida
                 os.remove(icon_filename)
 
-            # EXCEL Y LIMPIEZA
             sheet.append_row([
                 nombre_limpio, "Publicado", link_apk, apk.version_name, 
                 apk.package, link_icon, file_id, "Dropbox/Repo", str(apk.version_code)

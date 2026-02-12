@@ -108,10 +108,10 @@ def generar_sistema_completo(sheet):
     for r in registros:
         if not r.get('Pkg'): continue
         
-        # --- BLINDAJE DE DATOS ---
-        # Convertimos todo a string (str) para evitar números sueltos que rompan el JSON
+        # --- BLINDAJE DE DATOS (AQUÍ ESTÁ LA MAGIA) ---
+        # Convertimos todo a string (str) obligatoriamente
         nombre = str(r.get('Nombre', 'App')).strip()
-        version = str(r.get('Version', '1.0')).strip() # <--- ESTO ARREGLA EL ERROR DE IMPORTACIÓN
+        version = str(r.get('Version', '1.0')).strip() # <--- ESTO ARREGLA EL ERROR "6.5"
         link_apk = str(r.get('Link APK', '')).strip()
         pkg = str(r.get('Pkg', '')).strip()
         
@@ -127,12 +127,12 @@ def generar_sistema_completo(sheet):
         """
         with open(filename, "w", encoding='utf-8') as f: f.write(html_content)
         
-        # Entrada JSON (Formato correcto con datos blindados)
+        # Entrada JSON
         app_entry = {
             "id": pkg,
             "url": full_url,
             "name": nombre,
-            "version": version, # Ahora siempre será "6.5" (texto), no 6.5 (número)
+            "version": version, # Ahora siempre tendrá comillas
             "pinned": False,
             "categories": [],
             "preferredApkPath": "",
@@ -140,7 +140,7 @@ def generar_sistema_completo(sheet):
         }
         obtainium_apps.append(app_entry)
 
-    # GUARDADO V34: Volvemos al formato {"apps": [...]} que es el estándar de Obtainium
+    # GUARDADO V34: Volvemos al formato {"apps": [...]}
     export_data = {"apps": obtainium_apps}
     with open("obtainium.json", "w", encoding='utf-8') as f: json.dump(export_data, f, indent=4)
     

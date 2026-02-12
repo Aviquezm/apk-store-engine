@@ -27,11 +27,10 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Ejecutar Script Maestro (V31)
+      - name: Ejecutar Script Maestro (V33)
         env:
           DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
-          # Asegúrate de que esta variable exista en tus Secrets o usa la URL directa en el código
           REPO_URL: ${{ secrets.REPO_URL }} 
           DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
           DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
@@ -41,17 +40,16 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: python main.py
 
-      - name: Guardar y Subir Cambios (V31)
+      - name: Guardar y Subir Cambios (Blindado)
         run: |
           git config --global user.name "Bot de Tienda"
           git config --global user.email "bot@noreply.github.com"
           
-          # COMANDO CLAVE: "git add ."
-          # Esto agrega CUALQUIER archivo nuevo (ej: spotify.html, whatsapp.html, obtainium.json)
-          git add .
+          # "git add -A" es la opción nuclear: Agrega TODO (Nuevos, Editados y Borrados)
+          git add -A
           
-          # Hacemos el commit (si falla porque no hay cambios, no rompe el proceso)
-          git commit -m "🚀 Actualización Automática V31" || echo "⚠️ Nada nuevo que guardar"
+          # Hacemos el commit
+          git commit -m "🚀 Actualización Automática V33" || echo "⚠️ Nada nuevo que guardar"
           
-          # Empujamos los cambios al repositorio
+          # Empujamos los cambios
           git push

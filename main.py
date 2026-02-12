@@ -19,8 +19,6 @@ from pyaxmlparser import APK
 # --- CONFIGURACIÓN ---
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
-# IMPORTANTE: La URL base de tu repo (debe terminar en /)
-# Ejemplo: https://aviquezm.github.io/apk-store-engine/
 REPO_URL_BASE = "https://aviquezm.github.io/apk-store-engine/" 
 
 DBX_KEY = os.environ['DROPBOX_APP_KEY']
@@ -34,7 +32,7 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# UTILIDADES
+# 1. UTILIDADES
 # ---------------------------------------------------------
 def notificar(mensaje):
     if not TG_TOKEN or not TG_CHAT_ID: return
@@ -50,9 +48,11 @@ def calcular_hash(file_path):
     return sha256.hexdigest()
 
 def nombre_seguro(texto):
-    # Crea un nombre de archivo seguro: "WhatsApp Beta" -> "whatsapp_beta"
     return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
 
+# ---------------------------------------------------------
+# 2. MOTOR DE ICONOS
+# ---------------------------------------------------------
 def extraer_icono_precision(apk_path, app_name):
     mejor_puntuacion = -1
     mejor_data = None
@@ -77,13 +77,47 @@ def extraer_icono_precision(apk_path, app_name):
     except: return None
 
 # ---------------------------------------------------------
-# GENERADOR MASIVO (HTMLs + OBTAINIUM IMPORT)
+# 3. LIMPIEZA (El código que faltaba)
+# ---------------------------------------------------------
+def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_archivo_nuevo):
+    try:
+        registros = sheet.get_all_records()
+        filas_a_borrar = []
+        pkg_nuevo = str(pkg_nuevo_raw).strip().lower()
+        
+        for i, r in enumerate(registros):
+            pkg_viejo = str(r.get('Pkg')).strip().lower()
+            id_viejo = str(r.get('ID Drive', '')).strip()
+            
+            # Si es el mismo paquete pero diferente archivo Drive -> Es versión vieja
+            if pkg_viejo == pkg_nuevo and id_viejo != id_archivo_nuevo:
+                # 1. Borrar de Drive
+                try: drive_service.files().delete(fileId=id_viejo).execute()
+                except: pass
+                
+                # 2. Borrar de Dropbox (Nombre viejo)
+                try: 
+                    nombre_dbx = f"/{r.get('Nombre', '').replace(' ', '_')}_v{r.get('Version', '')}.apk"
+                    dbx.files_delete_v2(nombre_dbx)
+                except: pass
+                
+                filas_a_borrar.append(i + 2) # +2 porque Sheets empieza en 1 y tiene encabezado
+
+        # 3. Borrar fila del Excel
+        if filas_a_borrar:
+            for fila_num in sorted(filas_a_borrar, reverse=True):
+                sheet.delete_row(fila_num)
+                time.sleep(1.5)
+    except: pass
+
+# ---------------------------------------------------------
+# 4. GENERADOR SISTEMA (Fix V32 para Obtainium)
 # ---------------------------------------------------------
 def generar_sistema_completo(sheet):
-    print("🔄 Generando Sistema Masivo V31...")
+    print("🔄 Generando Sistema V33 (Full)...")
     registros = sheet.get_all_records()
     
-    obtainium_apps = [] # Lista para el archivo mágico
+    obtainium_apps = []
 
     for r in registros:
         if not r.get('Pkg'): continue
@@ -92,8 +126,7 @@ def generar_sistema_completo(sheet):
         link_apk = r.get('Link APK')
         pkg = r.get('Pkg')
         
-        # 1. Crear página individual (ej: spotify.html)
-        # Esto asegura que Obtainium nunca falle al buscar la versión
+        # A. HTML INDIVIDUAL
         filename = f"{nombre_seguro(nombre)}.html"
         full_url = f"{REPO_URL_BASE}{filename}"
         
@@ -101,45 +134,43 @@ def generar_sistema_completo(sheet):
         <!DOCTYPE html><html><head><title>{nombre}</title></head>
         <body>
             <h1>{nombre}</h1>
+            <p>Version: {version}</p>
             <a href="{link_apk}">Descargar {nombre} v{version}</a>
         </body></html>
         """
         with open(filename, "w", encoding='utf-8') as f: f.write(html_content)
         
-        # 2. Agregar a la lista de "Importación Mágica"
-        # Este formato simula ser una copia de seguridad de Obtainium
+        # B. DATO PARA JSON
         app_entry = {
             "id": pkg,
-            "url": full_url, # Apunta a su HTML individual
+            "url": full_url,
             "name": nombre,
             "version": version,
             "pinned": False,
             "categories": [],
             "preferredApkPath": "",
-            "additionalSettings": "{\"forceHtml\": true}" # Forzamos modo HTML
+            "additionalSettings": "{\"forceHtml\": true}"
         }
         obtainium_apps.append(app_entry)
 
-    # 3. Guardar el archivo mágico "obtainium.json"
-    export_data = {"apps": obtainium_apps}
-    with open("obtainium.json", "w", encoding='utf-8') as f: json.dump(export_data, f, indent=4)
+    # C. JSON PLANO (Sin "apps": {})
+    with open("obtainium.json", "w", encoding='utf-8') as f: json.dump(obtainium_apps, f, indent=4)
     
-    # 4. Generar index.html simple por si entras desde el navegador
-    index_html = "<html><body><h1>📦 Mis Apps (Sistema V31)</h1><p>Usa 'obtainium.json' para importar todo.</p></body></html>"
-    with open("index.html", "w", encoding='utf-8') as f: f.write(index_html)
+    # D. INDEX SIMPLE
+    with open("index.html", "w", encoding='utf-8') as f: f.write("<html><body><h1>V33 Master Online</h1></body></html>")
 
 # ---------------------------------------------------------
-# MAIN
+# 5. MAIN
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor V31 (Modo Importación)...")
+    print("🚀 Iniciando Motor V33 (Completo)...")
     dbx = dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     drive_service = build('drive', 'v3', credentials=creds)
     client_gs = gspread.authorize(creds)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
-    # Procesar APKs (Código estándar)
+    # PROCESAMIENTO
     try:
         registros = sheet.get_all_records()
         procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
@@ -179,16 +210,21 @@ def main():
                     l_apk = dbx.sharing_create_shared_link_with_settings(path).url
                     link_apk = l_apk.replace("?dl=0", "?dl=1")
 
+                    # Guardar y Limpiar
                     sheet.append_row([nombre, "Publicado", link_apk, apk.version_name, apk.package, link_icon, item['id'], "Dropbox", str(apk.version_code), calcular_hash(temp_apk), str(os.path.getsize(temp_apk))])
+                    
+                    # Llamamos a la limpieza
+                    eliminar_rastros_anteriores(sheet, drive_service, dbx, apk.package, item['id'])
+                    
                     notificar(f"✅ {nombre} v{apk.version_name} listo")
                 except Exception as e: print(e)
                 finally: 
                     if os.path.exists(temp_apk): os.remove(temp_apk)
     except Exception as e: print(e)
 
-    # GENERAR ARCHIVO MÁGICO
+    # GENERAR ARCHIVOS FINALES
     generar_sistema_completo(sheet)
-    print("✅ Web V31 Generada.")
+    print("✅ Web V33 Generada.")
 
 if __name__ == "__main__":
     main()

@@ -1,50 +1,84 @@
-[
-    {
-        "id": "com.wachanga.calories",
-        "name": "Calz",
-        "version": "v490",
-        "url": "https://www.dropbox.com/scl/fi/v2i8m3sxw2prxcez762pj/Calz_v490.apk?rlkey=e5dtfruipn0qj5qpg5gctf0wt&dl=1",
-        "icon": "https://www.dropbox.com/scl/fi/ox90u7irm1ucbwiv8qlhu/com.wachanga.calories_icon.png?rlkey=yhgjorshg2acywwhclf4d6h5j&dl=1",
-        "pinned": false,
-        "categories": [],
-        "env": {},
-        "provider": "HTML",
-        "about": "Descarga directa desde Dropbox Personal"
-    },
-    {
-        "id": "com.shazam.android",
-        "name": "Shazam",
-        "version": "v1602600",
-        "url": "https://www.dropbox.com/scl/fi/wb4mwy5rwiqvcw29bupue/Shazam_v1602600.apk?rlkey=reurceigu50di03dzc4wzk8af&dl=1",
-        "icon": "https://www.dropbox.com/scl/fi/qq1tzlvto8lnpa184mcq4/com.shazam.android_icon.png?rlkey=96lkzcgpz0jtkc1kasry14zd5&dl=1",
-        "pinned": false,
-        "categories": [],
-        "env": {},
-        "provider": "HTML",
-        "about": "Descarga directa desde Dropbox Personal"
-    },
-    {
-        "id": "com.zoox.deadpixelfix",
-        "name": "Dead Pixel Fix",
-        "version": "v52",
-        "url": "https://www.dropbox.com/scl/fi/8de1r3vma4xl0byxumxw9/Dead_Pixel_Fix_v52.apk?rlkey=8kv1bp6js4m11dct4hmpqmlvh&dl=1",
-        "icon": "https://www.dropbox.com/scl/fi/cuor6ivfd4blhnds2fg9g/com.zoox.deadpixelfix_icon.png?rlkey=rclk9a0diuica5br6gjnjfrwd&dl=1",
-        "pinned": false,
-        "categories": [],
-        "env": {},
-        "provider": "HTML",
-        "about": "Descarga directa desde Dropbox Personal"
-    },
-    {
-        "id": "com.pranavpandey.matrix",
-        "name": "Barquode",
-        "version": "v89",
-        "url": "https://www.dropbox.com/scl/fi/4bptppn1hom7e3wtyauf4/Barquode_v89.apk?rlkey=vzv8xiuv10vagm15fpx3hu2r6&dl=1",
-        "icon": "https://www.dropbox.com/scl/fi/gb2jhn43rpu7jllojds6l/com.pranavpandey.matrix_icon.png?rlkey=4iom6h3d5qmwursp84ug1miyc&dl=1",
-        "pinned": false,
-        "categories": [],
-        "env": {},
-        "provider": "HTML",
-        "about": "Descarga directa desde Dropbox Personal"
-    }
-]
+{
+    "apps": [
+        {
+            "id": "com.shazam.android",
+            "url": "https://aviquezm.github.io/apk-store-engine/shazam.html",
+            "name": "Shazam",
+            "version": "16.27.0-260129",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.flightradar24free",
+            "url": "https://aviquezm.github.io/apk-store-engine/flightradar.html",
+            "name": "Flightradar",
+            "version": "10.6.0",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.protectstar.microguardfree",
+            "url": "https://aviquezm.github.io/apk-store-engine/micro_guard.html",
+            "name": "Micro Guard",
+            "version": 6.5,
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.truecaller",
+            "url": "https://aviquezm.github.io/apk-store-engine/truecaller.html",
+            "name": "Truecaller",
+            "version": "26.5.7",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.spotify.music",
+            "url": "https://aviquezm.github.io/apk-store-engine/spotify.html",
+            "name": "Spotify",
+            "version": "9.1.20.1452",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.adguard.android",
+            "url": "https://aviquezm.github.io/apk-store-engine/adguard.html",
+            "name": "AdGuard",
+            "version": "4.14.34",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.wachanga.calories",
+            "url": "https://aviquezm.github.io/apk-store-engine/calz.html",
+            "name": "Calz",
+            "version": "1.28.0",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.zoox.deadpixelfix",
+            "url": "https://aviquezm.github.io/apk-store-engine/dead_pixel_fix.html",
+            "name": "Dead Pixel Fix",
+            "version": 3.11,
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        }
+    ]
+}

@@ -2,34 +2,37 @@ name: Actualizar Tienda APK
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
+    - cron: '*/30 * * * *' # Se ejecuta cada 30 minutos
+  workflow_dispatch:      # Botón manual para forzar la actualización
 
+# PERMISOS: La "Llave Maestra" para poder guardar archivos
 permissions:
   contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Chequear el código
         uses: actions/checkout@v3
 
-      - name: Python Setup
+      - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
+      - name: Instalar librerías necesarias
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Ejecutar Bot V27
+      - name: Ejecutar Script Maestro (V31)
         env:
           DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
-          REPO_URL: ${{ secrets.REPO_URL }}
+          # Asegúrate de que esta variable exista en tus Secrets o usa la URL directa en el código
+          REPO_URL: ${{ secrets.REPO_URL }} 
           DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
           DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
           DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
@@ -38,11 +41,17 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: python main.py
 
-      - name: Guardar Todo
+      - name: Guardar y Subir Cambios (V31)
         run: |
-          git config --global user.name "Bot"
+          git config --global user.name "Bot de Tienda"
           git config --global user.email "bot@noreply.github.com"
-          # El truco: 'git add .' agrega TODO lo que exista (html, json, etc)
+          
+          # COMANDO CLAVE: "git add ."
+          # Esto agrega CUALQUIER archivo nuevo (ej: spotify.html, whatsapp.html, obtainium.json)
           git add .
-          git commit -m "🚀 Update V27" || echo "Sin cambios"
+          
+          # Hacemos el commit (si falla porque no hay cambios, no rompe el proceso)
+          git commit -m "🚀 Actualización Automática V31" || echo "⚠️ Nada nuevo que guardar"
+          
+          # Empujamos los cambios al repositorio
           git push

@@ -31,9 +31,6 @@ TG_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
 SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-# ---------------------------------------------------------
-# UTILIDADES
-# ---------------------------------------------------------
 def notificar(mensaje):
     if not TG_TOKEN or not TG_CHAT_ID:
         return
@@ -87,9 +84,6 @@ def extraer_icono_precision(apk_path, app_name):
         print(f"[WARN] Error extrayendo icono: {e}")
         return None
 
-# ---------------------------------------------------------
-# LIMPIEZA
-# ---------------------------------------------------------
 def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_archivo_nuevo):
     try:
         registros = sheet.get_all_records()
@@ -112,44 +106,36 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
                     print(f"[WARN] No se pudo borrar de Dropbox: {e}")
                 
                 filas_a_borrar.append(i + 2)
-                time.sleep(0.5)  # Rate limiting
+                time.sleep(0.5)
         
         if filas_a_borrar:
             for fila_num in sorted(filas_a_borrar, reverse=True):
                 try:
                     sheet.delete_row(fila_num)
-                    time.sleep(1.5)  # Rate limiting para Sheets API
+                    time.sleep(1.5)
                 except Exception as e:
                     print(f"[WARN] Error borrando fila {fila_num}: {e}")
     except Exception as e:
         print(f"[ERROR] Error en limpieza: {e}")
 
-# ---------------------------------------------------------
-# GENERADOR V35 (FORMATO CORREGIDO PARA OBTAINIUM)
-# ---------------------------------------------------------
 def generar_sistema_completo(sheet):
     print("🔄 Generando Sistema V35...")
     registros = sheet.get_all_records()
-    
-    # OBTAINIUM ESPERA UN ARRAY DIRECTO, NO {"apps": [...]}
     obtainium_apps = []
 
     for r in registros:
         if not r.get('Pkg'):
             continue
         
-        # --- BLINDAJE DE DATOS ---
         nombre = str(r.get('Nombre', 'App')).strip()
         version = str(r.get('Version', '1.0')).strip()
         link_apk = str(r.get('Link APK', '')).strip()
         pkg = str(r.get('Pkg', '')).strip()
         
-        # HTML Individual con cache-busting
         filename = f"{nombre_seguro(nombre)}.html"
         cache_buster = int(time.time())
         full_url = f"{REPO_URL_BASE}{filename}?v={cache_buster}"
         
-        # HTML con meta tags de no-cache y estructura predecible
         html_content = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -171,7 +157,6 @@ def generar_sistema_completo(sheet):
         with open(filename, "w", encoding='utf-8') as f:
             f.write(html_content)
         
-        # ESTRUCTURA CORRECTA PARA OBTAINIUM BULK IMPORT
         app_entry = {
             "url": full_url,
             "appName": nombre,
@@ -187,11 +172,9 @@ def generar_sistema_completo(sheet):
         
         obtainium_apps.append(app_entry)
 
-    # GUARDADO V35: ARRAY DIRECTO (NO {"apps": [...]})
     with open("obtainium.json", "w", encoding='utf-8') as f:
         json.dump(obtainium_apps, f, indent=2, ensure_ascii=False)
     
-    # Validar el JSON generado
     try:
         with open("obtainium.json", "r") as f:
             validado = json.load(f)
@@ -199,13 +182,9 @@ def generar_sistema_completo(sheet):
     except Exception as e:
         print(f"[ERROR] JSON inválido: {e}")
     
-    # Índice simple
     with open("index.html", "w", encoding='utf-8') as f:
         f.write("<html><body><h1>V35 Online - Tienda APK</h1></body></html>")
 
-# ---------------------------------------------------------
-# MAIN
-# ---------------------------------------------------------
 def main():
     print("🚀 Iniciando Motor V35...")
     
@@ -240,7 +219,6 @@ def main():
             for item in nuevos:
                 temp_apk = "temp.apk"
                 try:
-                    # Descargar APK de Drive
                     request = drive_service.files().get_media(fileId=item['id'])
                     fh = io.BytesIO()
                     downloader = MediaIoBaseDownload(fh, request)
@@ -252,12 +230,10 @@ def main():
                     with open(temp_apk, "wb") as f:
                         f.write(fh.read())
 
-                    # Parsear APK
                     apk = APK(temp_apk)
                     nombre = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
                     icon_data = extraer_icono_precision(temp_apk, apk.application)
                     
-                    # Subir icono a Dropbox
                     link_icon = "https://via.placeholder.com/64"
                     if icon_data:
                         with open("temp.png", "wb") as f:
@@ -272,7 +248,6 @@ def main():
                         link_icon = l.replace("?dl=0", "?dl=1")
                         os.remove("temp.png")
 
-                    # Subir APK a Dropbox
                     path = f"/{nombre}_{apk.version_name}.apk"
                     with open(temp_apk, "rb") as f:
                         dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
@@ -280,7 +255,6 @@ def main():
                     l_apk = dbx.sharing_create_shared_link_with_settings(path).url
                     link_apk = l_apk.replace("?dl=0", "?dl=1")
 
-                    # Agregar a Sheets
                     sheet.append_row([
                         nombre,
                         "Publicado",
@@ -295,11 +269,10 @@ def main():
                         str(os.path.getsize(temp_apk))
                     ])
                     
-                    # Limpiar versiones anteriores
                     eliminar_rastros_anteriores(sheet, drive_service, dbx, apk.package, item['id'])
                     
                     notificar(f"✅ {nombre} v{apk.version_name} listo")
-                    time.sleep(1)  # Rate limiting
+                    time.sleep(1)
                     
                 except Exception as e:
                     print(f"[ERROR] Procesando {item['name']}: {e}")
@@ -310,7 +283,6 @@ def main():
         else:
             print("ℹ️  No hay APKs nuevas para procesar")
         
-        # Generar sistema
         generar_sistema_completo(sheet)
         print("✅ Web V35 Generada correctamente")
         

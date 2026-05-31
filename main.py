@@ -125,10 +125,10 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
         print(f"[ERROR] Error en limpieza: {e}")
 
 # ---------------------------------------------------------
-# GENERADOR V36 (HTML SIMPLIFICADO + REGEX PERMISIVAS)
+# GENERADOR V37 (FIX DROPBOX URL + REGEX PERMISIVAS)
 # ---------------------------------------------------------
 def generar_sistema_completo(sheet):
-    print("🔄 Generando Sistema V36...")
+    print("🔄 Generando Sistema V37...")
     registros = sheet.get_all_records()
     obtainium_apps = []
 
@@ -147,7 +147,7 @@ def generar_sistema_completo(sheet):
         cache_buster = int(time.time())
         full_url = f"{REPO_URL_BASE}{filename}?v={cache_buster}"
         
-        # HTML SUPER SIMPLE - Obtainium detecta versión y enlace fácilmente
+        # HTML SUPER SIMPLE - Obtainium detecta fácilmente
         html_content = f"""<!DOCTYPE html>
 <html>
 <head><title>{nombre}</title></head>
@@ -161,7 +161,7 @@ def generar_sistema_completo(sheet):
         with open(filename, "w", encoding='utf-8') as f:
             f.write(html_content)
         
-        # ESTRUCTURA PARA OBTAINIUM - Regex muy permisivas
+        # ESTRUCTURA PARA OBTAINIUM - Regex que maneja ?dl=1 de Dropbox
         app_entry = {
             "url": full_url,
             "appName": nombre,
@@ -169,7 +169,7 @@ def generar_sistema_completo(sheet):
             "additionalSettings": {
                 "sourceType": "html",
                 "versionRegex": r"[Vv]ersion[:\s]+([\d\.]+)",
-                "downloadLinkRegex": r'href=["\']([^"\']+\.apk)["\']',
+                "downloadLinkRegex": r'href=["\']([^"\']+\.apk[^"\']*)["\']',
                 "pollingIntervalMinutes": 30
             }
         }
@@ -190,13 +190,13 @@ def generar_sistema_completo(sheet):
     
     # Índice con versión visible
     with open("index.html", "w", encoding='utf-8') as f:
-        f.write(f"<html><body><h1>V36 Online - Tienda APK</h1><p>Apps: {len(obtainium_apps)}</p></body></html>")
+        f.write(f"<html><body><h1>V37 Online - Tienda APK</h1><p>Apps: {len(obtainium_apps)}</p></body></html>")
 
 # ---------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor V36...")
+    print("🚀 Iniciando Motor V37...")
     
     try:
         dbx = dropbox.Dropbox(
@@ -301,7 +301,7 @@ def main():
         
         # Generar sistema
         generar_sistema_completo(sheet)
-        print("✅ Web V36 Generada correctamente")
+        print("✅ Web V37 Generada correctamente")
         
     except Exception as e:
         print(f"[ERROR FATAL] {e}")

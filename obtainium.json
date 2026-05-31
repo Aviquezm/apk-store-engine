@@ -1,100 +1,10 @@
 [
   {
-    "id": "com.shazam.android",
-    "url": "https://aviquezm.github.io/apk-store-engine/shazam.html",
-    "author": "com.shazam.android",
-    "name": "Shazam",
-    "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"Shazam\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
-    "pinned": false,
-    "categories": [],
-    "overrideSource": "HTML"
-  },
-  {
-    "id": "com.flightradar24free",
-    "url": "https://aviquezm.github.io/apk-store-engine/flightradar.html",
-    "author": "com.flightradar24free",
-    "name": "Flightradar",
-    "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"Flightradar\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
-    "pinned": false,
-    "categories": [],
-    "overrideSource": "HTML"
-  },
-  {
-    "id": "com.protectstar.microguardfree",
-    "url": "https://aviquezm.github.io/apk-store-engine/micro_guard.html",
-    "author": "com.protectstar.microguardfree",
-    "name": "Micro Guard",
-    "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"Micro Guard\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
-    "pinned": false,
-    "categories": [],
-    "overrideSource": "HTML"
-  },
-  {
-    "id": "com.truecaller",
-    "url": "https://aviquezm.github.io/apk-store-engine/truecaller.html",
-    "author": "com.truecaller",
-    "name": "Truecaller",
-    "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"Truecaller\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
-    "pinned": false,
-    "categories": [],
-    "overrideSource": "HTML"
-  },
-  {
-    "id": "com.spotify.music",
-    "url": "https://aviquezm.github.io/apk-store-engine/spotify.html",
-    "author": "com.spotify.music",
-    "name": "Spotify",
-    "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"Spotify\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
-    "pinned": false,
-    "categories": [],
-    "overrideSource": "HTML"
-  },
-  {
-    "id": "com.adguard.android",
-    "url": "https://aviquezm.github.io/apk-store-engine/adguard.html",
-    "author": "com.adguard.android",
-    "name": "AdGuard",
-    "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"AdGuard\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
-    "pinned": false,
-    "categories": [],
-    "overrideSource": "HTML"
-  },
-  {
-    "id": "com.wachanga.calories",
-    "url": "https://aviquezm.github.io/apk-store-engine/calz.html",
-    "author": "com.wachanga.calories",
-    "name": "Calz",
-    "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"Calz\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
-    "pinned": false,
-    "categories": [],
-    "overrideSource": "HTML"
-  },
-  {
     "id": "com.zoox.deadpixelfix",
     "url": "https://aviquezm.github.io/apk-store-engine/dead_pixel_fix.html",
     "author": "com.zoox.deadpixelfix",
     "name": "Dead Pixel Fix",
     "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"Dead Pixel Fix\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
-    "pinned": false,
-    "categories": [],
-    "overrideSource": "HTML"
-  },
-  {
-    "id": "com.tv.nacionalcr",
-    "url": "https://aviquezm.github.io/apk-store-engine/tv_nacional_cr.html",
-    "author": "com.tv.nacionalcr",
-    "name": "TV Nacional CR",
-    "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"TV Nacional CR\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
-    "pinned": false,
-    "categories": [],
-    "overrideSource": "HTML"
-  },
-  {
-    "id": "com.tv.optimizadorram",
-    "url": "https://aviquezm.github.io/apk-store-engine/optimizador_de_ram.html",
-    "author": "com.tv.optimizadorram",
-    "name": "Optimizador de Ram",
-    "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"Optimizador de Ram\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
     "pinned": false,
     "categories": [],
     "overrideSource": "HTML"

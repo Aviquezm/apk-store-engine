@@ -1,0 +1,82 @@
+[
+  {
+    "pkg": "com.shazam.android",
+    "name": "Shazam",
+    "versionName": "16.27.0-260129",
+    "versionCode": 1602700,
+    "apkUrl": "https://www.dropbox.com/scl/fi/xoayc14ligtxaffxfc5e5/Shazam_v16.27.0-260129.apk?rlkey=gztjynhwqpf0n36qpqr34jdar&dl=0",
+    "icon": "https://via.placeholder.com/64"
+  },
+  {
+    "pkg": "com.flightradar24free",
+    "name": "Flightradar",
+    "versionName": "10.6.0",
+    "versionCode": 100608781,
+    "apkUrl": "https://www.dropbox.com/scl/fi/lflbavsvn5l3b2pak0mji/Flightradar_v10.6.0.apk?rlkey=ychqvn0asvu6ejmegeeihdjbh&dl=0",
+    "icon": "https://via.placeholder.com/64"
+  },
+  {
+    "pkg": "com.protectstar.microguardfree",
+    "name": "Micro Guard",
+    "versionName": "6.5",
+    "versionCode": 6500,
+    "apkUrl": "https://www.dropbox.com/scl/fi/e5cc3g8h8691conf3mv7k/Micro_Guard_v6.5.apk?rlkey=ayx90xmxlbjhznrn105w4imz7&dl=0",
+    "icon": "https://via.placeholder.com/64"
+  },
+  {
+    "pkg": "com.truecaller",
+    "name": "Truecaller",
+    "versionName": "26.5.7",
+    "versionCode": 2605007,
+    "apkUrl": "https://www.dropbox.com/scl/fi/ij1e61ljfaewkjzm5yv8c/Truecaller_v26.5.7.apk?rlkey=4ki6iq3b41oav488rit55zxn6&dl=0",
+    "icon": "https://via.placeholder.com/64"
+  },
+  {
+    "pkg": "com.spotify.music",
+    "name": "Spotify",
+    "versionName": "9.1.20.1452",
+    "versionCode": 137897908,
+    "apkUrl": "https://www.dropbox.com/scl/fi/q6rh194f3xh02igio1nyz/Spotify_v9.1.20.1452.apk?rlkey=63f9uxx5x77uq4e7f1ju81eab&dl=0",
+    "icon": "https://via.placeholder.com/64"
+  },
+  {
+    "pkg": "com.adguard.android",
+    "name": "AdGuard",
+    "versionName": "4.14.34",
+    "versionCode": 10326790,
+    "apkUrl": "https://www.dropbox.com/scl/fi/glg8grjkvftu7x2r4fvcb/AdGuard_v4.14.34.apk?rlkey=cxvjdx22oq9usmza1bmm0bwr0&dl=0",
+    "icon": "https://via.placeholder.com/64"
+  },
+  {
+    "pkg": "com.wachanga.calories",
+    "name": "Calz",
+    "versionName": "1.28.0",
+    "versionCode": 490,
+    "apkUrl": "https://www.dropbox.com/scl/fi/k5d4wn9uyckzxfalfdvhg/Calz_v1.28.0.apk?rlkey=l9gog1xrgnnp3ch5auulrtkmx&dl=0",
+    "icon": "https://via.placeholder.com/64"
+  },
+  {
+    "pkg": "com.zoox.deadpixelfix",
+    "name": "Dead Pixel Fix",
+    "versionName": "3.11",
+    "versionCode": 52,
+    "apkUrl": "https://www.dropbox.com/scl/fi/0y3jti0dwihfzo8265wy3/Dead_Pixel_Fix_v3.11.apk?rlkey=nracvjfss9punik17fpi93ahv&dl=0",
+    "icon": "https://via.placeholder.com/64"
+  },
+  {
+    "pkg": "com.tv.nacionalcr",
+    "name": "TV Nacional CR",
+    "versionName": "7.03",
+    "versionCode": 7,
+    "apkUrl": "https://www.dropbox.com/scl/fi/v9e97e73hzpqxeqhkm5oc/TV-Nacional-CR_7.03.apk?rlkey=xmisfqgwzu921brka7v8amc3c&dl=0",
+    "icon": "https://via.placeholder.com/64"
+  },
+  {
+    "pkg": "com.tv.optimizadorram",
+    "name": "Optimizador de Ram",
+    "versionName": "2.1",
+    "versionCode": 2,
+    "apkUrl": "https://www.dropbox.com/scl/fi/op9rohwemdtq5lsygqmel/Optimizador-de-Ram_2.1.apk?rlkey=bny34womtf0et0dm7yacwhfyc&dl=0",
+    "icon": "https://via.placeholder.com/64"
+  }
+]

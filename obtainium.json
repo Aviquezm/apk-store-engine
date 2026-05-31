@@ -1,12 +1,14 @@
-[
-  {
-    "id": "com.zoox.deadpixelfix",
-    "url": "https://aviquezm.github.io/apk-store-engine/dead_pixel_fix.html",
-    "author": "com.zoox.deadpixelfix",
-    "name": "Dead Pixel Fix",
-    "additionalSettings": "{\"customLinkFilterRegex\": \"\\\\.apk\", \"filterByLinkText\": false, \"versionExtractWholePage\": true, \"versionExtractionRegEx\": \"Version:\\\\s*([0-9a-zA-Z\\\\.\\\\-]+)\", \"matchGroupToUse\": \"$1\", \"versionDetection\": true, \"apkFilterRegEx\": \"\", \"invertAPKFilter\": false, \"autoApkFilterByArch\": false, \"appName\": \"Dead Pixel Fix\", \"allowInsecure\": false, \"refreshBeforeDownload\": false}",
-    "pinned": false,
-    "categories": [],
-    "overrideSource": "HTML"
-  }
-]
+{
+    "apps": [
+        {
+            "id": "com.zoox.deadpixelfix",
+            "url": "https://aviquezm.github.io/apk-store-engine/dead_pixel_fix.html",
+            "name": "Dead Pixel Fix",
+            "version": "3.11",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        }
+    ]
+}

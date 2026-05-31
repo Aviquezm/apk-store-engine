@@ -50,6 +50,9 @@ def calcular_hash(file_path):
 def nombre_seguro(texto):
     return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
 
+# ---------------------------------------------------------
+# EXTRACCIÓN DE ICONOS - VERSIÓN V34 ORIGINAL RESTAURADA
+# ---------------------------------------------------------
 def extraer_icono_precision(apk_path, app_name):
     mejor_puntuacion = -1
     mejor_data = None
@@ -97,7 +100,7 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
     except: pass
 
 # ---------------------------------------------------------
-# GENERADOR V34 (FIX TIPOS DE DATOS + FORMATO ORIGINAL)
+# GENERADOR V34
 # ---------------------------------------------------------
 def generar_sistema_completo(sheet):
     print("🔄 Generando Sistema V34...")
@@ -108,14 +111,11 @@ def generar_sistema_completo(sheet):
     for r in registros:
         if not r.get('Pkg'): continue
         
-        # --- BLINDAJE DE DATOS (AQUÍ ESTÁ LA MAGIA) ---
-        # Convertimos todo a string (str) obligatoriamente
         nombre = str(r.get('Nombre', 'App')).strip()
-        version = str(r.get('Version', '1.0')).strip() # <--- ESTO ARREGLA EL ERROR "6.5"
+        version = str(r.get('Version', '1.0')).strip()
         link_apk = str(r.get('Link APK', '')).strip()
         pkg = str(r.get('Pkg', '')).strip()
         
-        # HTML Individual
         filename = f"{nombre_seguro(nombre)}.html"
         full_url = f"{REPO_URL_BASE}{filename}"
         
@@ -127,12 +127,11 @@ def generar_sistema_completo(sheet):
         """
         with open(filename, "w", encoding='utf-8') as f: f.write(html_content)
         
-        # Entrada JSON
         app_entry = {
             "id": pkg,
             "url": full_url,
             "name": nombre,
-            "version": version, # Ahora siempre tendrá comillas
+            "version": version,
             "pinned": False,
             "categories": [],
             "preferredApkPath": "",
@@ -140,17 +139,16 @@ def generar_sistema_completo(sheet):
         }
         obtainium_apps.append(app_entry)
 
-    # GUARDADO V34: Volvemos al formato {"apps": [...]}
     export_data = {"apps": obtainium_apps}
     with open("obtainium.json", "w", encoding='utf-8') as f: json.dump(export_data, f, indent=4)
     
     with open("index.html", "w", encoding='utf-8') as f: f.write("<html><body><h1>V34 Online</h1></body></html>")
 
 # ---------------------------------------------------------
-# MAIN
+# MAIN - CON FIX DE SHEETS
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor V34...")
+    print("🚀 Iniciando Motor V34 Restaurado...")
     dbx = dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     drive_service = build('drive', 'v3', credentials=creds)
@@ -158,15 +156,20 @@ def main():
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
     try:
+        # RECARGAR sheet para tener datos frescos
+        sheet = client_gs.open_by_key(SHEET_ID).sheet1
         registros = sheet.get_all_records()
         procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
+        
         query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
         items = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
         nuevos = [i for i in items if i['name'].lower().endswith('.apk') and str(i['id']).strip() not in procesados]
 
         if nuevos:
             notificar(f"👷‍️ <b>Procesando {len(nuevos)} APKs</b>")
-            for item in nuevos:
+            
+            # PROCESAR DE UNA EN UNA Y RECARGAR DESPUÉS DE CADA UNA
+            for idx, item in enumerate(nuevos):
                 temp_apk = "temp.apk"
                 try:
                     request = drive_service.files().get_media(fileId=item['id'])
@@ -194,13 +197,25 @@ def main():
                     l_apk = dbx.sharing_create_shared_link_with_settings(path).url
                     link_apk = l_apk.replace("?dl=0", "?dl=1")
 
+                    # AGREGAR FILA
                     sheet.append_row([nombre, "Publicado", link_apk, apk.version_name, apk.package, link_icon, item['id'], "Dropbox", str(apk.version_code), calcular_hash(temp_apk), str(os.path.getsize(temp_apk))])
+                    
+                    # RECARGAR sheet DESPUÉS de append_row (FIX CRÍTICO)
+                    time.sleep(2)  # Esperar a que Google procese
+                    sheet = client_gs.open_by_key(SHEET_ID).sheet1  # RECARGAR
+                    
                     eliminar_rastros_anteriores(sheet, drive_service, dbx, apk.package, item['id'])
-                    notificar(f"✅ {nombre} v{apk.version_name} listo")
-                except Exception as e: print(e)
+                    notificar(f"✅ {nombre} v{apk.version_name} listo ({idx+1}/{len(nuevos)})")
+                    
+                except Exception as e: 
+                    print(f"[ERROR] {item['name']}: {e}")
+                    notificar(f"❌ Error: {str(e)[:100]}")
                 finally: 
                     if os.path.exists(temp_apk): os.remove(temp_apk)
-    except Exception as e: print(e)
+                    time.sleep(1)  # Rate limiting
+    except Exception as e: 
+        print(f"[ERROR] {e}")
+        notificar(f"🚨 Error: {str(e)[:100]}")
 
     generar_sistema_completo(sheet)
     print("✅ Web V34 Generada.")

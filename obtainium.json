@@ -100,6 +100,16 @@
             "categories": [],
             "preferredApkPath": "",
             "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "org.smarttube.stable",
+            "url": "https://aviquezm.github.io/apk-store-engine/smarttube.html",
+            "name": "SmartTube",
+            "version": "31.63",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
         }
     ]
 }

@@ -125,10 +125,10 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
         print(f"[ERROR] Error en limpieza: {e}")
 
 # ---------------------------------------------------------
-# GENERADOR V38 (HTML CON IDs + REGEX SIN BARRAS INVERTIDAS)
+# GENERADOR V38 (FIX NATIVO OBTAINIUM)
 # ---------------------------------------------------------
 def generar_sistema_completo(sheet):
-    print("🔄 Generando Sistema V38...")
+    print("🔄 Generando Sistema V38 (Fix Nativo Obtainium)...")
     registros = sheet.get_all_records()
     obtainium_apps = []
 
@@ -142,44 +142,62 @@ def generar_sistema_completo(sheet):
         link_apk = str(r.get('Link APK', '')).strip()
         pkg = str(r.get('Pkg', '')).strip()
         
-        # HTML Individual con cache-busting
+        # HTML Individual
         filename = f"{nombre_seguro(nombre)}.html"
-        cache_buster = int(time.time())
-        full_url = f"{REPO_URL_BASE}{filename}?v={cache_buster}"
+        full_url = f"{REPO_URL_BASE}{filename}"
         
-        # HTML ULTRA PREDECIBLE: IDs explícitos para Obtainium
+        # HTML súper simple y limpio para scraping
         html_content = f"""<!DOCTYPE html>
 <html>
 <head><title>{nombre}</title></head>
 <body>
 <h1>{nombre}</h1>
-<div id='app-version'>{version}</div>
-<a id='app-download' href='{link_apk}'>Download APK</a>
+<p>Version: {version}</p>
+<a href="{link_apk}">Descargar APK</a>
 </body>
 </html>"""
         
         with open(filename, "w", encoding='utf-8') as f:
             f.write(html_content)
         
-        # REGEX SIN BARRAS INVERTIDAS (Evita bug de escaping en JSON)
-        app_entry = {
-            "url": full_url,
+        # 1. Diccionario de configuraciones exactas de Obtainium
+        settings_dict = {
+            "customLinkFilterRegex": "\\.apk",
+            "filterByLinkText": False,
+            "versionExtractWholePage": True,
+            "versionExtractionRegEx": "Version:\\s*([0-9a-zA-Z\\.\\-]+)",
+            "matchGroupToUse": "$1",
+            "versionDetection": True,
+            "apkFilterRegEx": "",
+            "invertAPKFilter": False,
+            "autoApkFilterByArch": False,
             "appName": nombre,
-            "appAuthor": pkg,
-            "additionalSettings": {
-                "sourceType": "html",
-                "versionRegex": "id='app-version'>([0-9.]+)<",
-                "downloadLinkRegex": "id='app-download' href='([^']+)'",
-                "pollingIntervalMinutes": 30
-            }
+            "allowInsecure": False,
+            "refreshBeforeDownload": False
+        }
+        
+        # 2. LO CONVERTIMOS A STRING (OBLIGATORIO PARA OBTAINIUM)
+        settings_string = json.dumps(settings_dict, ensure_ascii=False)
+        
+        # 3. Estructura EXACTA del Export de Obtainium
+        app_entry = {
+            "id": pkg,
+            "url": full_url,
+            "author": pkg,
+            "name": nombre,
+            "additionalSettings": settings_string,  # STRING, NO OBJETO
+            "pinned": False,
+            "categories": [],
+            "overrideSource": "HTML"  # OBLIGA A OBTAINIUM A LEER HTML Y NO GITHUB API
         }
         
         obtainium_apps.append(app_entry)
 
-    # GUARDADO: ARRAY DIRECTO
+    # Guardamos el array (formato Bulk Import de Obtainium)
     with open("obtainium.json", "w", encoding='utf-8') as f:
         json.dump(obtainium_apps, f, indent=2, ensure_ascii=False)
     
+    # Validar JSON
     try:
         with open("obtainium.json", "r") as f:
             validado = json.load(f)
@@ -187,8 +205,9 @@ def generar_sistema_completo(sheet):
     except Exception as e:
         print(f"[ERROR] JSON inválido: {e}")
     
+    # Índice con versión visible
     with open("index.html", "w", encoding='utf-8') as f:
-        f.write(f"<html><body><h1>V38 Online - Tienda APK</h1><p>Apps: {len(obtainium_apps)}</p></body></html>")
+        f.write("<html><body><h1>V38 Online - Tienda APK (Fix Nativo)</h1></body></html>")
 
 # ---------------------------------------------------------
 # MAIN
@@ -227,6 +246,7 @@ def main():
             for item in nuevos:
                 temp_apk = "temp.apk"
                 try:
+                    # Descargar APK de Drive
                     request = drive_service.files().get_media(fileId=item['id'])
                     fh = io.BytesIO()
                     downloader = MediaIoBaseDownload(fh, request)
@@ -238,10 +258,12 @@ def main():
                     with open(temp_apk, "wb") as f:
                         f.write(fh.read())
 
+                    # Parsear APK
                     apk = APK(temp_apk)
                     nombre = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
                     icon_data = extraer_icono_precision(temp_apk, apk.application)
                     
+                    # Subir icono a Dropbox
                     link_icon = "https://via.placeholder.com/64"
                     if icon_data:
                         with open("temp.png", "wb") as f:
@@ -256,6 +278,7 @@ def main():
                         link_icon = l.replace("?dl=0", "?dl=1")
                         os.remove("temp.png")
 
+                    # Subir APK a Dropbox
                     path = f"/{nombre}_{apk.version_name}.apk"
                     with open(temp_apk, "rb") as f:
                         dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
@@ -263,6 +286,7 @@ def main():
                     l_apk = dbx.sharing_create_shared_link_with_settings(path).url
                     link_apk = l_apk.replace("?dl=0", "?dl=1")
 
+                    # Agregar a Sheets
                     sheet.append_row([
                         nombre,
                         "Publicado",
@@ -277,6 +301,7 @@ def main():
                         str(os.path.getsize(temp_apk))
                     ])
                     
+                    # Limpiar versiones anteriores
                     eliminar_rastros_anteriores(sheet, drive_service, dbx, apk.package, item['id'])
                     
                     notificar(f"✅ {nombre} v{apk.version_name} listo")
@@ -291,6 +316,7 @@ def main():
         else:
             print("ℹ️  No hay APKs nuevas para procesar")
         
+        # Generar sistema
         generar_sistema_completo(sheet)
         print("✅ Web V38 Generada correctamente")
         

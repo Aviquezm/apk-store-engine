@@ -2,6 +2,46 @@
     "debug": "GENERADO_POR_BOT_V35_CONFIRMADO",
     "apps": [
         {
+            "id": "com.tv.nacionalcr",
+            "url": "https://aviquezm.github.io/apk-store-engine/tv_nacional_cr.html",
+            "name": "TV Nacional CR",
+            "version": "7.03",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.tv.optimizadorram",
+            "url": "https://aviquezm.github.io/apk-store-engine/optimizador_de_ram.html",
+            "name": "Optimizador de Ram",
+            "version": "2.1",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.shazam.android",
+            "url": "https://aviquezm.github.io/apk-store-engine/shazam.html",
+            "name": "Shazam",
+            "version": "16.27.0-260129",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.flightradar24free",
+            "url": "https://aviquezm.github.io/apk-store-engine/flightradar.html",
+            "name": "Flightradar",
+            "version": "10.6.0",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
             "id": "com.protectstar.microguardfree",
             "url": "https://aviquezm.github.io/apk-store-engine/micro_guard.html",
             "name": "Micro Guard",

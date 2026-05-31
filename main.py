@@ -56,39 +56,79 @@ def calcular_hash(file_path):
 def nombre_seguro(texto):
     return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
 
+# ---------------------------------------------------------
+# EXTRACCIÓN DE ICONOS - VERSIÓN ORIGINAL RESTAURADA
+# ---------------------------------------------------------
 def extraer_icono_precision(apk_path, app_name):
+    """Extrae el mejor icono del APK buscando en todas las resoluciones"""
     mejor_puntuacion = -1
     mejor_data = None
+    mejor_nombre = None
+    
     try:
         with zipfile.ZipFile(apk_path, 'r') as z:
-            for nombre in z.namelist():
-                if not (nombre.lower().endswith(('.png', '.webp')) and 'res/' in nombre):
+            # Lista todos los archivos del APK
+            for nombre_archivo in z.namelist():
+                # Solo buscamos PNGs o WebP en carpetas res/
+                if not (nombre_archivo.lower().endswith(('.png', '.webp')) and 'res/' in nombre_archivo):
                     continue
-                if 'notification' in nombre.lower():
+                
+                # Saltamos iconos de notificación
+                if 'notification' in nombre_archivo.lower():
                     continue
+                
                 try:
-                    data = z.read(nombre)
+                    # Leemos la imagen
+                    data = z.read(nombre_archivo)
                     img = Image.open(io.BytesIO(data))
                     w, h = img.size
-                    if w < 48:
+                    
+                    # Skip imágenes muy pequeñas
+                    if w < 48 or h < 48:
                         continue
+                    
+                    # Sistema de puntuación
                     puntuacion = 0
-                    if 'ic_launcher' in nombre:
-                        puntuacion += 500
-                    if w > 100:
-                        puntuacion += 100
+                    
+                    # Prioridad máxima si es ic_launcher
+                    if 'ic_launcher' in nombre_archivo.lower():
+                        puntuacion += 1000
+                    
+                    # Bonus por resolución (mientras más grande, mejor)
+                    if w >= 192:
+                        puntuacion += 300  # xxxhdpi
+                    elif w >= 144:
+                        puntuacion += 200  # xxhdpi
+                    elif w >= 96:
+                        puntuacion += 100  # xhdpi
+                    elif w >= 72:
+                        puntuacion += 50   # hdpi
+                    
+                    # Bonus si está en mipmap (generalmente son los launchers)
+                    if 'mipmap' in nombre_archivo.lower():
+                        puntuacion += 50
+                    
+                    # Si es mejor que el anterior, lo guardamos
                     if puntuacion > mejor_puntuacion:
                         mejor_puntuacion = puntuacion
                         mejor_data = data
-                except:
+                        mejor_nombre = nombre_archivo
+                        
+                except Exception as e:
+                    # Si falla una imagen, continuamos con la siguiente
                     continue
-            return mejor_data
+        
+        if mejor_data:
+            print(f"✅ Icono encontrado: {mejor_nombre} ({mejor_puntuacion} pts)")
+        
+        return mejor_data
+        
     except Exception as e:
-        print(f"[WARN] Error extrayendo icono: {e}")
+        print(f"[ERROR] Extrayendo icono: {e}")
         return None
 
 # ---------------------------------------------------------
-# LIMPIEZA
+# LIMPIEZA - VERSIÓN ORIGINAL
 # ---------------------------------------------------------
 def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_archivo_nuevo):
     try:
@@ -107,40 +147,41 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
                     print(f"[WARN] No se pudo borrar de Drive: {e}")
                 
                 try:
-                    dbx.files_delete_v2(f"/{r.get('Nombre', '').replace(' ', '_')}_v{r.get('Version', '')}.apk")
+                    nombre_viejo = r.get('Nombre', '').replace(' ', '_')
+                    version_vieja = r.get('Version', '')
+                    dbx.files_delete_v2(f"/{nombre_viejo}_v{version_vieja}.apk")
                 except Exception as e:
                     print(f"[WARN] No se pudo borrar de Dropbox: {e}")
                 
-                filas_a_borrar.append(i + 2)
-                time.sleep(0.5)
+                filas_a_borrar.append(i + 2)  # +2 porque las filas empiezan en 1 y hay header
         
+        # Borramos de abajo hacia arriba para no desordenar índices
         if filas_a_borrar:
             for fila_num in sorted(filas_a_borrar, reverse=True):
                 try:
                     sheet.delete_row(fila_num)
-                    time.sleep(1.5)
+                    time.sleep(1.5)  # Rate limiting
                 except Exception as e:
                     print(f"[WARN] Error borrando fila {fila_num}: {e}")
+                    
     except Exception as e:
-        print(f"[ERROR] Error en limpieza: {e}")
+        print(f"[ERROR] En limpieza: {e}")
 
 # ---------------------------------------------------------
-# GENERADOR V38 (CON store.json PARA TU APP ANDROID)
+# GENERADOR V38 RESTAURADO
 # ---------------------------------------------------------
 def generar_sistema_completo(sheet):
-    print("🔄 Generando Sistema V38...")
+    print("🔄 Generando Sistema V38 Restaurado...")
     registros = sheet.get_all_records()
     
-    # Lista para obtainium.json (formato antiguo)
     obtainium_apps = []
-    # Lista para store.json (formato limpio para tu app)
     store_apps = []
 
     for r in registros:
         if not r.get('Pkg'):
             continue
         
-        # --- BLINDAJE DE DATOS ---
+        # Blindaje de datos
         nombre = str(r.get('Nombre', 'App')).strip()
         version = str(r.get('Version', '1.0')).strip()
         link_apk = str(r.get('Link APK', '')).strip()
@@ -165,7 +206,7 @@ def generar_sistema_completo(sheet):
         with open(filename, "w", encoding='utf-8') as f:
             f.write(html_content)
         
-        # Formato para Obtainium (si algún día lo usas)
+        # Obtainium JSON
         settings_dict = {
             "customLinkFilterRegex": "\\.apk",
             "filterByLinkText": False,
@@ -181,7 +222,7 @@ def generar_sistema_completo(sheet):
             "refreshBeforeDownload": False
         }
         
-        app_entry_obtainium = {
+        app_entry = {
             "id": pkg,
             "url": full_url,
             "author": pkg,
@@ -191,9 +232,9 @@ def generar_sistema_completo(sheet):
             "categories": [],
             "overrideSource": "HTML"
         }
-        obtainium_apps.append(app_entry_obtainium)
+        obtainium_apps.append(app_entry)
         
-        # Formato LIMPIO para tu app Android
+        # Store JSON (para tu app Android)
         store_apps.append({
             "pkg": pkg,
             "name": nombre,
@@ -203,25 +244,23 @@ def generar_sistema_completo(sheet):
             "icon": icono if icono else "https://via.placeholder.com/64"
         })
 
-    # Guardar obtainium.json
+    # Guardar JSONs
     with open("obtainium.json", "w", encoding='utf-8') as f:
         json.dump(obtainium_apps, f, indent=2, ensure_ascii=False)
     
-    # Guardar store.json (PARA TU APP ANDROID)
     with open("store.json", "w", encoding='utf-8') as f:
         json.dump(store_apps, f, indent=2, ensure_ascii=False)
     
-    print(f"✅ JSONs generados: {len(obtainium_apps)} apps")
+    print(f"✅ JSONs generados: {len(store_apps)} apps")
     
-    # Índice con versión visible
     with open("index.html", "w", encoding='utf-8') as f:
-        f.write(f"<html><body><h1>V38 Online - Tienda APK (Store Ready)</h1><p>Apps: {len(store_apps)}</p></body></html>")
+        f.write(f"<html><body><h1>V38 Restaurado - Tienda APK</h1><p>Apps: {len(store_apps)}</p></body></html>")
 
 # ---------------------------------------------------------
-# MAIN
+# MAIN - VERSIÓN RESTAURADA CON FIX DE SHEETS
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor V38...")
+    print("🚀 Iniciando Motor V38 Restaurado...")
     
     try:
         dbx = dropbox.Dropbox(
@@ -234,9 +273,11 @@ def main():
         client_gs = gspread.authorize(creds)
         sheet = client_gs.open_by_key(SHEET_ID).sheet1
         
+        # Obtener registros existentes
         registros = sheet.get_all_records()
         procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
         
+        # Buscar nuevos archivos en Drive
         query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
         items = drive_service.files().list(
             q=query,
@@ -249,11 +290,13 @@ def main():
         ]
 
         if nuevos:
-            notificar(f"👷‍️ <b>Procesando {len(nuevos)} APKs</b>")
+            notificar(f"👷‍♂️ <b>Procesando {len(nuevos)} APKs</b>")
             
             for item in nuevos:
                 temp_apk = "temp.apk"
                 try:
+                    # Descargar APK de Drive
+                    print(f"📥 Descargando {item['name']}...")
                     request = drive_service.files().get_media(fileId=item['id'])
                     fh = io.BytesIO()
                     downloader = MediaIoBaseDownload(fh, request)
@@ -265,45 +308,68 @@ def main():
                     with open(temp_apk, "wb") as f:
                         f.write(fh.read())
 
+                    # Parsear APK
+                    print(f"🔍 Analizando {item['name']}...")
                     apk = APK(temp_apk)
+                    
+                    # Nombre limpio (sin versión)
                     nombre = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
+                    if not nombre:
+                        nombre = apk.package.split('.')[-1]
+                    
+                    # Extraer icono
+                    print(f"🎨 Extrayendo icono...")
                     icon_data = extraer_icono_precision(temp_apk, apk.application)
                     
                     link_icon = "https://via.placeholder.com/64"
                     if icon_data:
-                        with open("temp.png", "wb") as f:
-                            f.write(icon_data)
-                        with open("temp.png", "rb") as f:
-                            dbx.files_upload(
-                                f.read(),
-                                f"/icon_{apk.package}.png",
-                                mode=WriteMode('overwrite')
-                            )
-                        l = dbx.sharing_create_shared_link_with_settings(f"/icon_{apk.package}.png").url
-                        link_icon = l.replace("?dl=0", "?dl=1")
-                        os.remove("temp.png")
+                        try:
+                            # Subir icono a Dropbox
+                            with open("temp.png", "wb") as f:
+                                f.write(icon_data)
+                            
+                            with open("temp.png", "rb") as f:
+                                dbx.files_upload(
+                                    f.read(),
+                                    f"/icon_{apk.package}.png",
+                                    mode=WriteMode('overwrite')
+                                )
+                            
+                            l = dbx.sharing_create_shared_link_with_settings(f"/icon_{apk.package}.png").url
+                            link_icon = l.replace("?dl=0", "?dl=1")
+                            os.remove("temp.png")
+                            print(f"✅ Icono subido a Dropbox")
+                            
+                        except Exception as e:
+                            print(f"[WARN] Error subiendo icono: {e}")
 
+                    # Subir APK a Dropbox
+                    print(f"📤 Subiendo APK a Dropbox...")
                     path = f"/{nombre}_{apk.version_name}.apk"
                     with open(temp_apk, "rb") as f:
                         dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
                     
                     l_apk = dbx.sharing_create_shared_link_with_settings(path).url
                     link_apk = l_apk.replace("?dl=0", "?dl=1")
-
-                    sheet.append_row([
-                        nombre,
-                        "Publicado",
-                        link_apk,
-                        apk.version_name,
-                        apk.package,
-                        link_icon,
-                        item['id'],
-                        "Dropbox",
-                        str(apk.version_code),
-                        calcular_hash(temp_apk),
-                        str(os.path.getsize(temp_apk))
-                    ])
                     
+                    # AGREGAR FILA NUEVA (NO REEMPLAZAR)
+                    print(f"📝 Agregando a Google Sheets...")
+                    sheet.append_row([
+                        nombre,                    # Columna A: Nombre
+                        "Publicado",               # Columna B: Estado
+                        link_apk,                  # Columna C: Link APK
+                        apk.version_name,          # Columna D: Version
+                        apk.package,               # Columna E: Pkg
+                        link_icon,                 # Columna F: Icono
+                        item['id'],                # Columna G: ID Drive
+                        "Dropbox",                 # Columna H: CDN
+                        str(apk.version_code),     # Columna I: Version Code
+                        calcular_hash(temp_apk),   # Columna J: Hash
+                        str(os.path.getsize(temp_apk))  # Columna K: Tamaño
+                    ])
+                    print(f"✅ Agregado a Sheets correctamente")
+                    
+                    # Limpiar versiones anteriores
                     eliminar_rastros_anteriores(sheet, drive_service, dbx, apk.package, item['id'])
                     
                     notificar(f"✅ {nombre} v{apk.version_name} listo")
@@ -311,18 +377,23 @@ def main():
                     
                 except Exception as e:
                     print(f"[ERROR] Procesando {item['name']}: {e}")
-                    notificar(f"❌ Error procesando {item['name']}: {str(e)[:100]}")
+                    import traceback
+                    traceback.print_exc()
+                    notificar(f"❌ Error: {str(e)[:100]}")
                 finally:
                     if os.path.exists(temp_apk):
                         os.remove(temp_apk)
         else:
             print("ℹ️  No hay APKs nuevas para procesar")
         
+        # Generar sistema
         generar_sistema_completo(sheet)
         print("✅ Web V38 Generada correctamente")
         
     except Exception as e:
         print(f"[ERROR FATAL] {e}")
+        import traceback
+        traceback.print_exc()
         notificar(f"🚨 <b>Error crítico:</b> {str(e)[:200]}")
         raise
 

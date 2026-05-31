@@ -56,22 +56,42 @@ def extraer_icono_precision(apk_path, app_name):
     try:
         with zipfile.ZipFile(apk_path, 'r') as z:
             for nombre in z.namelist():
-                if not (nombre.lower().endswith(('.png', '.webp')) and 'res/' in nombre): continue
-                if 'notification' in nombre.lower(): continue
+                # 1. Filtro básico: solo imágenes dentro de res/ o mipmap/
+                if not (nombre.lower().endswith(('.png', '.webp')) and ('res/' in nombre or 'mipmap' in nombre)): 
+                    continue
+                # 2. Ignorar iconos de notificación y gráficos genéricos pequeños
+                if 'notification' in nombre.lower() or 'drawable-mdpi' in nombre.lower() or 'background' in nombre.lower(): 
+                    continue
+                
                 try:
                     data = z.read(nombre)
                     img = Image.open(io.BytesIO(data))
                     w, h = img.size
-                    if w < 48: continue
-                    puntuacion = 0
-                    if 'ic_launcher' in nombre: puntuacion += 500
-                    if w > 100: puntuacion += 100
+                    
+                    # 3. Ignorar basura visual muy pequeña
+                    if w < 48: 
+                        continue
+                        
+                    # 4. SISTEMA DE PUNTUACIÓN (El Radar Perfecto)
+                    puntuacion = w * h  # Base: premiar la resolución más alta
+                    
+                    # Bonus extremos por nombres clave de Android
+                    if 'ic_launcher' in nombre.lower() or 'app_icon' in nombre.lower(): 
+                        puntuacion += 1000000  # Prioridad absoluta al icono principal
+                    if 'mipmap' in nombre.lower():
+                        puntuacion += 500000   # Android moderno usa mipmap
+                    if 'xxxhdpi' in nombre.lower() or 'xxhdpi' in nombre.lower():
+                        puntuacion += 100000   # Las mejores calidades
+                        
                     if puntuacion > mejor_puntuacion:
                         mejor_puntuacion = puntuacion
                         mejor_data = data
-                except: continue
+                except: 
+                    continue
+                    
             return mejor_data
-    except: return None
+    except: 
+        return None
 
 # ---------------------------------------------------------
 # LIMPIEZA

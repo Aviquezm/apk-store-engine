@@ -1,111 +1,111 @@
 [
   {
-    "url": "https://aviquezm.github.io/apk-store-engine/shazam.html?v=1780185879",
+    "url": "https://aviquezm.github.io/apk-store-engine/shazam.html?v=1780195589",
     "appName": "Shazam",
     "appAuthor": "com.shazam.android",
     "additionalSettings": {
       "sourceType": "html",
       "versionRegex": "[Vv]ersion[:\\s]+([\\d\\.]+)",
-      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk)[\"\\']",
+      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk[^\"\\']*)[\"\\']",
       "pollingIntervalMinutes": 30
     }
   },
   {
-    "url": "https://aviquezm.github.io/apk-store-engine/flightradar.html?v=1780185879",
+    "url": "https://aviquezm.github.io/apk-store-engine/flightradar.html?v=1780195589",
     "appName": "Flightradar",
     "appAuthor": "com.flightradar24free",
     "additionalSettings": {
       "sourceType": "html",
       "versionRegex": "[Vv]ersion[:\\s]+([\\d\\.]+)",
-      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk)[\"\\']",
+      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk[^\"\\']*)[\"\\']",
       "pollingIntervalMinutes": 30
     }
   },
   {
-    "url": "https://aviquezm.github.io/apk-store-engine/micro_guard.html?v=1780185879",
+    "url": "https://aviquezm.github.io/apk-store-engine/micro_guard.html?v=1780195589",
     "appName": "Micro Guard",
     "appAuthor": "com.protectstar.microguardfree",
     "additionalSettings": {
       "sourceType": "html",
       "versionRegex": "[Vv]ersion[:\\s]+([\\d\\.]+)",
-      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk)[\"\\']",
+      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk[^\"\\']*)[\"\\']",
       "pollingIntervalMinutes": 30
     }
   },
   {
-    "url": "https://aviquezm.github.io/apk-store-engine/truecaller.html?v=1780185879",
+    "url": "https://aviquezm.github.io/apk-store-engine/truecaller.html?v=1780195589",
     "appName": "Truecaller",
     "appAuthor": "com.truecaller",
     "additionalSettings": {
       "sourceType": "html",
       "versionRegex": "[Vv]ersion[:\\s]+([\\d\\.]+)",
-      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk)[\"\\']",
+      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk[^\"\\']*)[\"\\']",
       "pollingIntervalMinutes": 30
     }
   },
   {
-    "url": "https://aviquezm.github.io/apk-store-engine/spotify.html?v=1780185879",
+    "url": "https://aviquezm.github.io/apk-store-engine/spotify.html?v=1780195589",
     "appName": "Spotify",
     "appAuthor": "com.spotify.music",
     "additionalSettings": {
       "sourceType": "html",
       "versionRegex": "[Vv]ersion[:\\s]+([\\d\\.]+)",
-      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk)[\"\\']",
+      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk[^\"\\']*)[\"\\']",
       "pollingIntervalMinutes": 30
     }
   },
   {
-    "url": "https://aviquezm.github.io/apk-store-engine/adguard.html?v=1780185879",
+    "url": "https://aviquezm.github.io/apk-store-engine/adguard.html?v=1780195589",
     "appName": "AdGuard",
     "appAuthor": "com.adguard.android",
     "additionalSettings": {
       "sourceType": "html",
       "versionRegex": "[Vv]ersion[:\\s]+([\\d\\.]+)",
-      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk)[\"\\']",
+      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk[^\"\\']*)[\"\\']",
       "pollingIntervalMinutes": 30
     }
   },
   {
-    "url": "https://aviquezm.github.io/apk-store-engine/calz.html?v=1780185879",
+    "url": "https://aviquezm.github.io/apk-store-engine/calz.html?v=1780195589",
     "appName": "Calz",
     "appAuthor": "com.wachanga.calories",
     "additionalSettings": {
       "sourceType": "html",
       "versionRegex": "[Vv]ersion[:\\s]+([\\d\\.]+)",
-      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk)[\"\\']",
+      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk[^\"\\']*)[\"\\']",
       "pollingIntervalMinutes": 30
     }
   },
   {
-    "url": "https://aviquezm.github.io/apk-store-engine/dead_pixel_fix.html?v=1780185879",
+    "url": "https://aviquezm.github.io/apk-store-engine/dead_pixel_fix.html?v=1780195589",
     "appName": "Dead Pixel Fix",
     "appAuthor": "com.zoox.deadpixelfix",
     "additionalSettings": {
       "sourceType": "html",
       "versionRegex": "[Vv]ersion[:\\s]+([\\d\\.]+)",
-      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk)[\"\\']",
+      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk[^\"\\']*)[\"\\']",
       "pollingIntervalMinutes": 30
     }
   },
   {
-    "url": "https://aviquezm.github.io/apk-store-engine/tv_nacional_cr.html?v=1780185879",
+    "url": "https://aviquezm.github.io/apk-store-engine/tv_nacional_cr.html?v=1780195589",
     "appName": "TV Nacional CR",
     "appAuthor": "com.tv.nacionalcr",
     "additionalSettings": {
       "sourceType": "html",
       "versionRegex": "[Vv]ersion[:\\s]+([\\d\\.]+)",
-      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk)[\"\\']",
+      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk[^\"\\']*)[\"\\']",
       "pollingIntervalMinutes": 30
     }
   },
   {
-    "url": "https://aviquezm.github.io/apk-store-engine/optimizador_de_ram.html?v=1780185879",
+    "url": "https://aviquezm.github.io/apk-store-engine/optimizador_de_ram.html?v=1780195589",
     "appName": "Optimizador de Ram",
     "appAuthor": "com.tv.optimizadorram",
     "additionalSettings": {
       "sourceType": "html",
       "versionRegex": "[Vv]ersion[:\\s]+([\\d\\.]+)",
-      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk)[\"\\']",
+      "downloadLinkRegex": "href=[\"\\']([^\"\\']+\\.apk[^\"\\']*)[\"\\']",
       "pollingIntervalMinutes": 30
     }
   }

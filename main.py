@@ -5,11 +5,9 @@ import time
 import hashlib
 import dropbox
 import gspread
-import zipfile
 import re
 import requests
 from datetime import datetime
-from PIL import Image
 from dropbox.files import WriteMode
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
@@ -32,7 +30,7 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# UTILIDADES Y RADAR DE ICONOS ORIGINAL
+# UTILIDADES
 # ---------------------------------------------------------
 def notificar(mensaje):
     if not TG_TOKEN or not TG_CHAT_ID: return
@@ -49,33 +47,6 @@ def calcular_hash(file_path):
 
 def nombre_seguro(texto):
     return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
-
-def extraer_icono_precision(apk_path, app_name):
-    mejor_puntuacion = -1
-    mejor_data = None
-    try:
-        with zipfile.ZipFile(apk_path, 'r') as z:
-            for nombre in z.namelist():
-                if not (nombre.lower().endswith(('.png', '.webp')) and ('res/' in nombre or 'mipmap' in nombre)): continue
-                if 'notification' in nombre.lower() or 'drawable-mdpi' in nombre.lower() or 'background' in nombre.lower(): continue
-                
-                try:
-                    data = z.read(nombre)
-                    img = Image.open(io.BytesIO(data))
-                    w, h = img.size
-                    if w < 48: continue
-                        
-                    puntuacion = w * h
-                    if 'ic_launcher' in nombre.lower() or 'app_icon' in nombre.lower(): puntuacion += 1000000
-                    if 'mipmap' in nombre.lower(): puntuacion += 500000
-                    if 'xxxhdpi' in nombre.lower() or 'xxhdpi' in nombre.lower(): puntuacion += 100000
-                        
-                    if puntuacion > mejor_puntuacion:
-                        mejor_puntuacion = puntuacion
-                        mejor_data = data
-                except: continue
-            return mejor_data
-    except: return None
 
 # ---------------------------------------------------------
 # LIMPIEZA EN GOOGLE DRIVE Y DROPBOX
@@ -101,14 +72,13 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
     except: pass
 
 # ---------------------------------------------------------
-# GENERADOR V35 (CON LIMPIEZA DE HTML)
+# GENERADOR HTML Y JSON (CON LIMPIEZA DE HUÉRFANOS)
 # ---------------------------------------------------------
 def generar_sistema_completo(sheet):
-    print("🔄 Generando Sistema V35 y limpiando archivos huérfanos...")
+    print("🔄 Generando Sistema y limpiando archivos huérfanos...")
     registros = sheet.get_all_records()
     
     obtainium_apps = []
-    # Lista de archivos que NO se deben borrar
     archivos_html_validos = ["index.html"]
 
     for r in registros:
@@ -119,7 +89,6 @@ def generar_sistema_completo(sheet):
         link_apk = str(r.get('Link APK', '')).strip()
         pkg = str(r.get('Pkg', '')).strip()
         
-        # Generar HTML y registrarlo como "válido"
         filename = f"{nombre_seguro(nombre)}.html"
         archivos_html_validos.append(filename)
         
@@ -145,7 +114,7 @@ def generar_sistema_completo(sheet):
         }
         obtainium_apps.append(app_entry)
 
-    # --- NUEVO: DESTRUCCIÓN DE ARCHIVOS HTML FANTASMAS ---
+    # Limpieza de HTMLs viejos
     try:
         archivos_locales = os.listdir('.')
         for archivo in archivos_locales:
@@ -155,19 +124,19 @@ def generar_sistema_completo(sheet):
     except Exception as e:
         print(f"Error al limpiar HTMLs: {e}")
 
-    # GUARDADO V35
+    # Guardado seguro
     export_data = {
-        "debug": "GENERADO_POR_BOT_V35_CONFIRMADO", 
+        "debug": "GENERADO_POR_BOT_CONFIRMADO", 
         "apps": obtainium_apps
     }
     with open("obtainium.json", "w", encoding='utf-8') as f: json.dump(export_data, f, indent=4)
-    with open("index.html", "w", encoding='utf-8') as f: f.write("<html><body><h1>V35 Online (Limpieza Activa)</h1></body></html>")
+    with open("index.html", "w", encoding='utf-8') as f: f.write("<html><body><h1>Motor Online (Limpieza Activa)</h1></body></html>")
 
 # ---------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor V35...")
+    print("🚀 Iniciando Motor (Modo Alta Velocidad)...")
     dbx = dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     drive_service = build('drive', 'v3', credentials=creds)
@@ -196,15 +165,9 @@ def main():
 
                     apk = APK(temp_apk)
                     nombre = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
-                    icon_data = extraer_icono_precision(temp_apk, apk.application)
                     
-                    link_icon = "https://via.placeholder.com/64"
-                    if icon_data:
-                        with open("temp.png", "wb") as f: f.write(icon_data)
-                        with open("temp.png", "rb") as f: dbx.files_upload(f.read(), f"/icon_{apk.package}.png", mode=WriteMode('overwrite'))
-                        l = dbx.sharing_create_shared_link_with_settings(f"/icon_{apk.package}.png").url
-                        link_icon = l.replace("?dl=0", "?dl=1")
-                        os.remove("temp.png")
+                    # --- AQUÍ ESTÁ EL CAMBIO: ICONO ESTÁTICO DE GITHUB ---
+                    link_icon = f"{REPO_URL_BASE}apk_image.png"
 
                     path = f"/{nombre}_{apk.version_name}.apk"
                     with open(temp_apk, "rb") as f: dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
@@ -220,7 +183,7 @@ def main():
     except Exception as e: print(e)
 
     generar_sistema_completo(sheet)
-    print("✅ Web V35 Generada.")
+    print("✅ Web Generada y Optimizada.")
 
 if __name__ == "__main__":
     main()

@@ -2,10 +2,9 @@ name: Actualizar Tienda APK
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Se ejecuta cada 30 minutos
-  workflow_dispatch:      # Botón manual para forzar la actualización
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
 
-# PERMISOS: La "Llave Maestra" para poder guardar archivos
 permissions:
   contents: write
 
@@ -27,7 +26,7 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Ejecutar Script Maestro (V33)
+      - name: Ejecutar Script Maestro
         env:
           DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
@@ -40,16 +39,13 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: python main.py
 
-      - name: Guardar y Subir Cambios (Blindado)
+      - name: Guardar y Subir Cambios
         run: |
           git config --global user.name "Bot de Tienda"
           git config --global user.email "bot@noreply.github.com"
           
-          # "git add -A" es la opción nuclear: Agrega TODO (Nuevos, Editados y Borrados)
           git add -A
           
-          # Hacemos el commit
-          git commit -m "🚀 Actualización Automática V33" || echo "⚠️ Nada nuevo que guardar"
+          git commit -m "🚀 Actualizado: $(date +'%Y-%m-%d %H:%M')" || echo "⚠️ Nada nuevo que guardar"
           
-          # Empujamos los cambios
           git push

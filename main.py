@@ -32,7 +32,7 @@ SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # ---------------------------------------------------------
-# UTILIDADES
+# UTILIDADES Y RADAR DE ICONOS ORIGINAL
 # ---------------------------------------------------------
 def notificar(mensaje):
     if not TG_TOKEN or not TG_CHAT_ID: return
@@ -56,45 +56,29 @@ def extraer_icono_precision(apk_path, app_name):
     try:
         with zipfile.ZipFile(apk_path, 'r') as z:
             for nombre in z.namelist():
-                # 1. Filtro básico: solo imágenes dentro de res/ o mipmap/
-                if not (nombre.lower().endswith(('.png', '.webp')) and ('res/' in nombre or 'mipmap' in nombre)): 
-                    continue
-                # 2. Ignorar iconos de notificación y gráficos genéricos pequeños
-                if 'notification' in nombre.lower() or 'drawable-mdpi' in nombre.lower() or 'background' in nombre.lower(): 
-                    continue
+                if not (nombre.lower().endswith(('.png', '.webp')) and ('res/' in nombre or 'mipmap' in nombre)): continue
+                if 'notification' in nombre.lower() or 'drawable-mdpi' in nombre.lower() or 'background' in nombre.lower(): continue
                 
                 try:
                     data = z.read(nombre)
                     img = Image.open(io.BytesIO(data))
                     w, h = img.size
-                    
-                    # 3. Ignorar basura visual muy pequeña
-                    if w < 48: 
-                        continue
+                    if w < 48: continue
                         
-                    # 4. SISTEMA DE PUNTUACIÓN (El Radar Perfecto)
-                    puntuacion = w * h  # Base: premiar la resolución más alta
-                    
-                    # Bonus extremos por nombres clave de Android
-                    if 'ic_launcher' in nombre.lower() or 'app_icon' in nombre.lower(): 
-                        puntuacion += 1000000  # Prioridad absoluta al icono principal
-                    if 'mipmap' in nombre.lower():
-                        puntuacion += 500000   # Android moderno usa mipmap
-                    if 'xxxhdpi' in nombre.lower() or 'xxhdpi' in nombre.lower():
-                        puntuacion += 100000   # Las mejores calidades
+                    puntuacion = w * h
+                    if 'ic_launcher' in nombre.lower() or 'app_icon' in nombre.lower(): puntuacion += 1000000
+                    if 'mipmap' in nombre.lower(): puntuacion += 500000
+                    if 'xxxhdpi' in nombre.lower() or 'xxhdpi' in nombre.lower(): puntuacion += 100000
                         
                     if puntuacion > mejor_puntuacion:
                         mejor_puntuacion = puntuacion
                         mejor_data = data
-                except: 
-                    continue
-                    
+                except: continue
             return mejor_data
-    except: 
-        return None
+    except: return None
 
 # ---------------------------------------------------------
-# LIMPIEZA
+# LIMPIEZA EN GOOGLE DRIVE Y DROPBOX
 # ---------------------------------------------------------
 def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_archivo_nuevo):
     try:
@@ -117,25 +101,28 @@ def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_arc
     except: pass
 
 # ---------------------------------------------------------
-# GENERADOR V35 (CON MARCA DE AGUA ANTI-CACHÉ)
+# GENERADOR V35 (CON LIMPIEZA DE HTML)
 # ---------------------------------------------------------
 def generar_sistema_completo(sheet):
-    print("🔄 Generando Sistema V35...")
+    print("🔄 Generando Sistema V35 y limpiando archivos huérfanos...")
     registros = sheet.get_all_records()
     
     obtainium_apps = []
+    # Lista de archivos que NO se deben borrar
+    archivos_html_validos = ["index.html"]
 
     for r in registros:
         if not r.get('Pkg'): continue
         
-        # BLINDAJE DE DATOS (Solución al error del tipado estricto)
         nombre = str(r.get('Nombre', 'App')).strip()
         version = str(r.get('Version', '1.0')).strip()
         link_apk = str(r.get('Link APK', '')).strip()
         pkg = str(r.get('Pkg', '')).strip()
         
-        # HTML Individual
+        # Generar HTML y registrarlo como "válido"
         filename = f"{nombre_seguro(nombre)}.html"
+        archivos_html_validos.append(filename)
+        
         full_url = f"{REPO_URL_BASE}{filename}"
         
         html_content = f"""
@@ -146,7 +133,6 @@ def generar_sistema_completo(sheet):
         """
         with open(filename, "w", encoding='utf-8') as f: f.write(html_content)
         
-        # Entrada JSON
         app_entry = {
             "id": pkg,
             "url": full_url,
@@ -159,14 +145,23 @@ def generar_sistema_completo(sheet):
         }
         obtainium_apps.append(app_entry)
 
-    # GUARDADO V35 CON MARCA DE AGUA (Solución al problema de caché)
+    # --- NUEVO: DESTRUCCIÓN DE ARCHIVOS HTML FANTASMAS ---
+    try:
+        archivos_locales = os.listdir('.')
+        for archivo in archivos_locales:
+            if archivo.endswith('.html') and archivo not in archivos_html_validos:
+                os.remove(archivo)
+                print(f"🗑️ Archivo huérfano eliminado: {archivo}")
+    except Exception as e:
+        print(f"Error al limpiar HTMLs: {e}")
+
+    # GUARDADO V35
     export_data = {
         "debug": "GENERADO_POR_BOT_V35_CONFIRMADO", 
         "apps": obtainium_apps
     }
     with open("obtainium.json", "w", encoding='utf-8') as f: json.dump(export_data, f, indent=4)
-    
-    with open("index.html", "w", encoding='utf-8') as f: f.write("<html><body><h1>V35 Online</h1></body></html>")
+    with open("index.html", "w", encoding='utf-8') as f: f.write("<html><body><h1>V35 Online (Limpieza Activa)</h1></body></html>")
 
 # ---------------------------------------------------------
 # MAIN

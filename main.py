@@ -49,33 +49,42 @@ def nombre_seguro(texto):
     return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
 
 # ---------------------------------------------------------
-# LIMPIEZA EN GOOGLE DRIVE Y DROPBOX
+# SINCRONIZACIÓN ABSOLUTA DE DROPBOX (EL BARRENDERO)
 # ---------------------------------------------------------
-def eliminar_rastros_anteriores(sheet, drive_service, dbx, pkg_nuevo_raw, id_archivo_nuevo):
+def sincronizar_dropbox(sheet, dbx):
+    print("🧹 Escaneando Dropbox para purgar archivos huérfanos...")
     try:
         registros = sheet.get_all_records()
-        filas_a_borrar = []
-        pkg_nuevo = str(pkg_nuevo_raw).strip().lower()
-        for i, r in enumerate(registros):
-            pkg_viejo = str(r.get('Pkg')).strip().lower()
-            id_viejo = str(r.get('ID Drive', '')).strip()
-            if pkg_viejo == pkg_nuevo and id_viejo != id_archivo_nuevo:
-                try: drive_service.files().delete(fileId=id_viejo).execute()
-                except: pass
-                try: dbx.files_delete_v2(f"/{r.get('Nombre', '').replace(' ', '_')}_v{r.get('Version', '')}.apk")
-                except: pass
-                filas_a_borrar.append(i + 2)
-        if filas_a_borrar:
-            for fila_num in sorted(filas_a_borrar, reverse=True):
-                sheet.delete_row(fila_num)
-                time.sleep(1.5)
-    except: pass
+        
+        # 1. Armamos la lista de los archivos que SÍ deben existir
+        archivos_legales = []
+        for r in registros:
+            if not r.get('Pkg'): continue
+            nombre = str(r.get('Nombre')).strip()
+            version = str(r.get('Version')).strip()
+            ruta_esperada = f"/{nombre}_{version}.apk".lower()
+            archivos_legales.append(ruta_esperada)
+        
+        # 2. Revisamos todo lo que hay realmente en Dropbox
+        resultado = dbx.files_list_folder('')
+        for entrada in resultado.entries:
+            if isinstance(entrada, dropbox.files.FileMetadata):
+                # Si el archivo de Dropbox no está en el Excel, se elimina
+                if entrada.path_display.lower() not in archivos_legales:
+                    print(f"🗑️ Eliminando basura de Dropbox: {entrada.path_display}")
+                    try:
+                        dbx.files_delete_v2(entrada.path_display)
+                    except Exception as e:
+                        print(f"No se pudo borrar {entrada.path_display}: {e}")
+                        
+    except Exception as e:
+        print(f"Error en la sincronización de Dropbox: {e}")
 
 # ---------------------------------------------------------
 # GENERADOR HTML Y JSON (CON LIMPIEZA DE HUÉRFANOS)
 # ---------------------------------------------------------
 def generar_sistema_completo(sheet):
-    print("🔄 Generando Sistema y limpiando archivos huérfanos...")
+    print("🔄 Generando Sistema y limpiando HTMLs...")
     registros = sheet.get_all_records()
     
     obtainium_apps = []
@@ -114,23 +123,22 @@ def generar_sistema_completo(sheet):
         }
         obtainium_apps.append(app_entry)
 
-    # Limpieza de HTMLs viejos
+    # Limpieza de HTMLs viejos en GitHub
     try:
         archivos_locales = os.listdir('.')
         for archivo in archivos_locales:
             if archivo.endswith('.html') and archivo not in archivos_html_validos:
                 os.remove(archivo)
-                print(f"🗑️ Archivo huérfano eliminado: {archivo}")
+                print(f"🗑️ HTML huérfano eliminado: {archivo}")
     except Exception as e:
         print(f"Error al limpiar HTMLs: {e}")
 
-    # Guardado seguro
     export_data = {
         "debug": "GENERADO_POR_BOT_CONFIRMADO", 
         "apps": obtainium_apps
     }
     with open("obtainium.json", "w", encoding='utf-8') as f: json.dump(export_data, f, indent=4)
-    with open("index.html", "w", encoding='utf-8') as f: f.write("<html><body><h1>Motor Online (Limpieza Activa)</h1></body></html>")
+    with open("index.html", "w", encoding='utf-8') as f: f.write("<html><body><h1>Motor Online (Espejo Activo)</h1></body></html>")
 
 # ---------------------------------------------------------
 # MAIN
@@ -166,8 +174,8 @@ def main():
                     apk = APK(temp_apk)
                     nombre = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
                     
-                    # --- AQUÍ ESTÁ EL CAMBIO: ICONO ESTÁTICO DE GITHUB ---
-                    link_icon = f"{REPO_URL_BASE}apk_image.png"
+                    # --- NUEVO NOMBRE DEL ICONO ESTÁTICO ---
+                    link_icon = f"{REPO_URL_BASE}default_icon.png"
 
                     path = f"/{nombre}_{apk.version_name}.apk"
                     with open(temp_apk, "rb") as f: dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
@@ -175,15 +183,38 @@ def main():
                     link_apk = l_apk.replace("?dl=0", "?dl=1")
 
                     sheet.append_row([nombre, "Publicado", link_apk, apk.version_name, apk.package, link_icon, item['id'], "Dropbox", str(apk.version_code), calcular_hash(temp_apk), str(os.path.getsize(temp_apk))])
-                    eliminar_rastros_anteriores(sheet, drive_service, dbx, apk.package, item['id'])
+                    
+                    # El francotirador ya no hace falta para Dropbox porque el Barrendero Global hace el trabajo,
+                    # pero lo dejamos para borrar el APK viejo de Google Drive y limpiar la fila vieja del Excel.
+                    try:
+                        filas_a_borrar = []
+                        pkg_nuevo = str(apk.package).strip().lower()
+                        for i, r in enumerate(registros):
+                            pkg_viejo = str(r.get('Pkg')).strip().lower()
+                            id_viejo = str(r.get('ID Drive', '')).strip()
+                            if pkg_viejo == pkg_nuevo and id_viejo != item['id']:
+                                try: drive_service.files().delete(fileId=id_viejo).execute()
+                                except: pass
+                                filas_a_borrar.append(i + 2)
+                        if filas_a_borrar:
+                            for fila_num in sorted(filas_a_borrar, reverse=True):
+                                sheet.delete_row(fila_num)
+                                time.sleep(1.5)
+                    except: pass
+                    
                     notificar(f"✅ {nombre} v{apk.version_name} listo")
                 except Exception as e: print(e)
                 finally: 
                     if os.path.exists(temp_apk): os.remove(temp_apk)
     except Exception as e: print(e)
 
+    # 1. Pasamos la escoba por Dropbox
+    sincronizar_dropbox(sheet, dbx)
+    
+    # 2. Generamos el sitio y limpiamos GitHub
     generar_sistema_completo(sheet)
-    print("✅ Web Generada y Optimizada.")
+    
+    print("✅ Web Generada y Almacenamiento Optimizado.")
 
 if __name__ == "__main__":
     main()

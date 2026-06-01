@@ -1,4 +1,35 @@
 {
     "debug": "GENERADO_POR_BOT_CONFIRMADO",
-    "apps": []
+    "apps": [
+        {
+            "id": "com.tv.nacionalcr",
+            "url": "https://aviquezm.github.io/apk-store-engine/tv_nacional_cr.html",
+            "name": "TV Nacional CR",
+            "version": "7.03",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "com.tv.optimizadorram",
+            "url": "https://aviquezm.github.io/apk-store-engine/optimizador_de_ram.html",
+            "name": "Optimizador de Ram",
+            "version": "2.1",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        },
+        {
+            "id": "org.smarttube.stable",
+            "url": "https://aviquezm.github.io/apk-store-engine/smarttube.html",
+            "name": "SmartTube",
+            "version": "31.63",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": "{\"forceHtml\": true}"
+        }
+    ]
 }

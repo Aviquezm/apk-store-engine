@@ -40,6 +40,16 @@
             "categories": [],
             "preferredApkPath": "",
             "additionalSettings": ""
+        },
+        {
+            "id": "com.tv.nacionalcr",
+            "url": "https://www.dropbox.com/scl/fi/mw8r28fcqjpk69rg42e0d/TV-Nacional-CR_7.03.apk?rlkey=3iolnepygie81jo1wz8k8drws&dl=1",
+            "name": "TV Nacional CR",
+            "version": "7.03",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": ""
         }
     ]
 }

@@ -2,16 +2,6 @@
     "debug": "GENERADO_POR_BOT_CONFIRMADO",
     "apps": [
         {
-            "id": "com.tv.nacionalcr",
-            "url": "https://www.dropbox.com/scl/fi/xmnjfb8o453tdug1dfil0/TV-Nacional-CR_7.03.apk?rlkey=iw5xi3opfnb1i3dp5lvrza1ll&dl=1",
-            "name": "TV Nacional CR",
-            "version": "7.03",
-            "pinned": false,
-            "categories": [],
-            "preferredApkPath": "",
-            "additionalSettings": ""
-        },
-        {
             "id": "com.tv.optimizadorram",
             "url": "https://www.dropbox.com/scl/fi/ncvrxke6y2p7ufjn0maf7/Optimizador-de-Ram_2.1.apk?rlkey=xa5nh65w7m6n8mjqqdl2ew55n&dl=1",
             "name": "Optimizador de Ram",
@@ -36,6 +26,16 @@
             "url": "https://www.dropbox.com/scl/fi/j6qsutsrasi2gcgmoc6ic/FX_9.1.0.8.apk?rlkey=y6lxosm6jxuqwsgal7274qxy3&dl=1",
             "name": "FX",
             "version": "9.1.0.8",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": ""
+        },
+        {
+            "id": "com.android.mgstv",
+            "url": "https://www.dropbox.com/scl/fi/z4ig1q84myepkqbe6sg6e/Xuper_4.99.4.apk?rlkey=h8ihuvz1we1oa694sg12piele&dl=1",
+            "name": "Xuper",
+            "version": "4.99.4",
             "pinned": false,
             "categories": [],
             "preferredApkPath": "",

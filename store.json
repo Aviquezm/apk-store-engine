@@ -1,13 +1,5 @@
 [
   {
-    "pkg": "com.tv.nacionalcr",
-    "name": "TV Nacional CR",
-    "versionName": "7.03",
-    "versionCode": 7,
-    "apkUrl": "https://www.dropbox.com/scl/fi/xmnjfb8o453tdug1dfil0/TV-Nacional-CR_7.03.apk?rlkey=iw5xi3opfnb1i3dp5lvrza1ll&dl=1",
-    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
-  },
-  {
     "pkg": "com.tv.optimizadorram",
     "name": "Optimizador de Ram",
     "versionName": "2.1",
@@ -29,6 +21,14 @@
     "versionName": "9.1.0.8",
     "versionCode": 9108,
     "apkUrl": "https://www.dropbox.com/scl/fi/j6qsutsrasi2gcgmoc6ic/FX_9.1.0.8.apk?rlkey=y6lxosm6jxuqwsgal7274qxy3&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "com.android.mgstv",
+    "name": "Xuper",
+    "versionName": "4.99.4",
+    "versionCode": 49904,
+    "apkUrl": "https://www.dropbox.com/scl/fi/z4ig1q84myepkqbe6sg6e/Xuper_4.99.4.apk?rlkey=h8ihuvz1we1oa694sg12piele&dl=1",
     "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
   }
 ]

@@ -95,7 +95,7 @@ def generar_sistema_completo(sheet):
         
         nombre = str(r.get('Nombre', 'App')).strip()
         version = str(r.get('Version', '1.0')).strip()
-        link_apk = str(r.get('Link APK', '')).strip()
+        link_apk = str(r.get('Link APK', '')).strip().replace("dl=0", "dl=1")
         pkg = str(r.get('Pkg', '')).strip()
         
         filename = f"{nombre_seguro(nombre)}.html"

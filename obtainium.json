@@ -3,7 +3,7 @@
     "apps": [
         {
             "id": "com.tv.nacionalcr",
-            "url": "https://www.dropbox.com/scl/fi/xmnjfb8o453tdug1dfil0/TV-Nacional-CR_7.03.apk?rlkey=iw5xi3opfnb1i3dp5lvrza1ll&dl=0",
+            "url": "https://www.dropbox.com/scl/fi/xmnjfb8o453tdug1dfil0/TV-Nacional-CR_7.03.apk?rlkey=iw5xi3opfnb1i3dp5lvrza1ll&dl=1",
             "name": "TV Nacional CR",
             "version": "7.03",
             "pinned": false,
@@ -13,7 +13,7 @@
         },
         {
             "id": "com.tv.optimizadorram",
-            "url": "https://www.dropbox.com/scl/fi/ncvrxke6y2p7ufjn0maf7/Optimizador-de-Ram_2.1.apk?rlkey=xa5nh65w7m6n8mjqqdl2ew55n&dl=0",
+            "url": "https://www.dropbox.com/scl/fi/ncvrxke6y2p7ufjn0maf7/Optimizador-de-Ram_2.1.apk?rlkey=xa5nh65w7m6n8mjqqdl2ew55n&dl=1",
             "name": "Optimizador de Ram",
             "version": "2.1",
             "pinned": false,
@@ -23,7 +23,7 @@
         },
         {
             "id": "org.smarttube.stable",
-            "url": "https://www.dropbox.com/scl/fi/zja2tlcp7fjgfw5cuw97f/SmartTube_31.63.apk?rlkey=qiknbauytgzklqdy9u2091ubo&dl=0",
+            "url": "https://www.dropbox.com/scl/fi/zja2tlcp7fjgfw5cuw97f/SmartTube_31.63.apk?rlkey=qiknbauytgzklqdy9u2091ubo&dl=1",
             "name": "SmartTube",
             "version": "31.63",
             "pinned": false,

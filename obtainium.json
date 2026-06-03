@@ -60,6 +60,16 @@
             "categories": [],
             "preferredApkPath": "",
             "additionalSettings": ""
+        },
+        {
+            "id": "com.protectstar.microguardfree",
+            "url": "https://www.dropbox.com/scl/fi/fqttzcsxlzm3to6f1wsk5/Micro-Guard_6.5.apk?rlkey=vyommqmga9wbhbi0exs7hd3mi&dl=1",
+            "name": "Micro Guard",
+            "version": "6.5",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": ""
         }
     ]
 }

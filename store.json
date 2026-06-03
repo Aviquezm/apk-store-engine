@@ -46,5 +46,13 @@
     "versionCode": 49904,
     "apkUrl": "https://www.dropbox.com/scl/fi/9jceczc6pmkci5e4hn6v2/Xuper_4.99.4.apk?rlkey=oa7onygecg3025t4njilmg4m1&dl=1",
     "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "com.protectstar.microguardfree",
+    "name": "Micro Guard",
+    "versionName": "6.5",
+    "versionCode": 6500,
+    "apkUrl": "https://www.dropbox.com/scl/fi/fqttzcsxlzm3to6f1wsk5/Micro-Guard_6.5.apk?rlkey=vyommqmga9wbhbi0exs7hd3mi&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
   }
 ]

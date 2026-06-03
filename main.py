@@ -111,15 +111,16 @@ def generar_sistema_completo(sheet):
         """
         with open(filename, "w", encoding='utf-8') as f: f.write(html_content)
         
+        # --- AQUÍ ESTÁ LA MAGIA DE LA NUEVA TIENDA NATIVA ---
         app_entry = {
             "id": pkg,
-            "url": full_url,
+            "url": link_apk,  # Descarga directa del APK desde Dropbox
             "name": nombre,
             "version": version,
             "pinned": False,
             "categories": [],
             "preferredApkPath": "",
-            "additionalSettings": "{\"forceHtml\": true}"
+            "additionalSettings": "" # Limpiamos el flag de Obtainium
         }
         obtainium_apps.append(app_entry)
 
@@ -184,8 +185,6 @@ def main():
 
                     sheet.append_row([nombre, "Publicado", link_apk, apk.version_name, apk.package, link_icon, item['id'], "Dropbox", str(apk.version_code), calcular_hash(temp_apk), str(os.path.getsize(temp_apk))])
                     
-                    # El francotirador ya no hace falta para Dropbox porque el Barrendero Global hace el trabajo,
-                    # pero lo dejamos para borrar el APK viejo de Google Drive y limpiar la fila vieja del Excel.
                     try:
                         filas_a_borrar = []
                         pkg_nuevo = str(apk.package).strip().lower()

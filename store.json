@@ -22,5 +22,21 @@
     "versionCode": 2353,
     "apkUrl": "https://www.dropbox.com/scl/fi/zja2tlcp7fjgfw5cuw97f/SmartTube_31.63.apk?rlkey=qiknbauytgzklqdy9u2091ubo&dl=1",
     "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "com.android.mgstv",
+    "name": "Xuper",
+    "versionName": "4.99.4",
+    "versionCode": 49904,
+    "apkUrl": "https://www.dropbox.com/scl/fi/jqgn3tcoqdcyiu4es6hd1/Xuper_4.99.4.apk?rlkey=79y7oax33q0dqqujf2p2147j4&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "nextapp.fx",
+    "name": "FX",
+    "versionName": "9.1.0.8",
+    "versionCode": 9108,
+    "apkUrl": "https://www.dropbox.com/scl/fi/j6qsutsrasi2gcgmoc6ic/FX_9.1.0.8.apk?rlkey=y6lxosm6jxuqwsgal7274qxy3&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
   }
 ]

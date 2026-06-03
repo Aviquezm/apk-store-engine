@@ -76,13 +76,12 @@ def reconciliar_todo(sheet, drive_service, dbx):
             
             if id_drive and id_drive not in ids_en_drive:
                 print(f"🗑️ DETECTADO: {nombre} v{version} fue ELIMINADO de Drive")
-                filas_a_eliminar.append((idx + 2, nombre, version, id_drive))  # +2 por header
+                filas_a_eliminar.append((idx + 2, nombre, version, id_drive))
         
         # 4. Eliminar de Dropbox y Sheets lo que ya no está en Drive
         if filas_a_eliminar:
             print(f"🧹 Limpiando {len(filas_a_eliminar)} archivos eliminados...")
             
-            # Procesar de ABAJO hacia ARRIBA para no desordenar índices
             for fila_num, nombre, version, id_drive in sorted(filas_a_eliminar, key=lambda x: x[0], reverse=True):
                 
                 # a) Eliminar de Dropbox
@@ -97,7 +96,7 @@ def reconciliar_todo(sheet, drive_service, dbx):
                 try:
                     sheet.delete_row(fila_num)
                     print(f"   ✅ Sheets: Fila {fila_num} eliminada")
-                    time.sleep(1.5)  # Rate limiting
+                    time.sleep(1.5)
                 except Exception as e:
                     print(f"   ⚠️  Error eliminando fila {fila_num}: {e}")
         else:
@@ -109,7 +108,62 @@ def reconciliar_todo(sheet, drive_service, dbx):
         traceback.print_exc()
 
 # ---------------------------------------------------------
-# SINCRONIZACIÓN DE DROPBOX (eliminar huérfanos)
+# DETECTAR CAMBIOS DE NOMBRE
+# ---------------------------------------------------------
+def detectar_cambios_nombre(sheet, drive_service, dbx):
+    """Detecta si el nombre de un archivo en Drive cambió respecto a Sheets"""
+    print("🔍 Detectando cambios de nombre...")
+    
+    try:
+        # 1. Obtener todos los APKs en Drive
+        query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
+        items_drive = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
+        items_apk = [i for i in items_drive if i['name'].lower().endswith('.apk')]
+        
+        # 2. Obtener registros de Sheets
+        registros = sheet.get_all_records()
+        
+        cambios_detectados = 0
+        
+        for item in items_apk:
+            item_id = str(item['id']).strip()
+            item_nombre_archivo = item['name']  # Nombre del archivo en Drive (ej: "Spotify_v9.1.apk")
+            
+            # Buscar en Sheets
+            for r in registros:
+                id_sheet = str(r.get('ID Drive', '')).strip()
+                nombre_sheet = str(r.get('Nombre', '')).strip()
+                version_sheet = str(r.get('Version', '')).strip()
+                
+                # Si el ID coincide
+                if id_sheet == item_id:
+                    # El nombre esperado en Dropbox es: {nombre}_{version}.apk
+                    nombre_esperado_dropbox = f"{nombre_sheet}_{version_sheet}.apk"
+                    
+                    # Si el nombre del archivo en Drive es diferente al esperado
+                    if item_nombre_archivo != nombre_esperado_dropbox:
+                        print(f" DETECTADO: Archivo cambió de '{nombre_esperado_dropbox}' a '{item_nombre_archivo}'")
+                        
+                        # Actualizar el nombre en Sheets (Columna 1 = Nombre)
+                        try:
+                            fila_num = registros.index(r) + 2
+                            sheet.update_cell(fila_num, 1, item_nombre_archivo)
+                            print(f"   ✅ Nombre actualizado en Sheets")
+                            cambios_detectados += 1
+                        except Exception as e:
+                            print(f"   ⚠️  Error actualizando Sheets: {e}")
+                    break
+        
+        if cambios_detectados == 0:
+            print("✅ No hay cambios de nombre detectados")
+        else:
+            print(f"✅ {cambios_detectados} cambio(s) de nombre detectado(s)")
+            
+    except Exception as e:
+        print(f"[ERROR] Detectando cambios de nombre: {e}")
+
+# ---------------------------------------------------------
+# SINCRONIZACIÓN DE DROPBOX
 # ---------------------------------------------------------
 def sincronizar_dropbox(sheet, dbx):
     """Elimina archivos de Dropbox que no están en Sheets"""
@@ -117,7 +171,6 @@ def sincronizar_dropbox(sheet, dbx):
     try:
         registros = sheet.get_all_records()
         
-        # 1. Armamos la lista de archivos que SÍ deben existir
         archivos_legales = []
         for r in registros:
             if not r.get('Pkg'): continue
@@ -126,7 +179,6 @@ def sincronizar_dropbox(sheet, dbx):
             ruta_esperada = f"/{nombre}_{version}.apk".lower()
             archivos_legales.append(ruta_esperada)
         
-        # 2. Revisamos todo lo que hay en Dropbox
         resultado = dbx.files_list_folder('')
         for entrada in resultado.entries:
             if isinstance(entrada, dropbox.files.FileMetadata):
@@ -223,7 +275,7 @@ def generar_sistema_completo(sheet):
         f.write(f"<html><body><h1>V38 Online - Tienda APK</h1><p>Apps: {len(store_apps)}</p></body></html>")
 
 # ---------------------------------------------------------
-# MAIN - CON RECONCILIACIÓN COMPLETA
+# MAIN
 # ---------------------------------------------------------
 def main():
     print("🚀 Iniciando Motor con Reconciliación Completa...")
@@ -237,8 +289,11 @@ def main():
         # PASO 1: RECONCILIACIÓN (Detectar eliminados)
         reconciliar_todo(sheet, drive_service, dbx)
         
-        # PASO 2: PROCESAR NUEVAS APKs
-        sheet = client_gs.open_by_key(SHEET_ID).sheet1
+        # PASO 2: DETECTAR CAMBIOS DE NOMBRE
+        detectar_cambios_nombre(sheet, drive_service, dbx)
+        
+        # PASO 3: PROCESAR NUEVAS APKs
+        sheet = client_gs.open_by_key(SHEET_ID).sheet1  # Recargar
         registros = sheet.get_all_records()
         procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
         
@@ -247,7 +302,7 @@ def main():
         nuevos = [i for i in items if i['name'].lower().endswith('.apk') and str(i['id']).strip() not in procesados]
 
         if nuevos:
-            notificar(f"👷‍️ Procesando {len(nuevos)} APKs nuevas")
+            notificar(f"👷‍♂️ Procesando {len(nuevos)} APKs nuevas")
             
             for item in nuevos:
                 temp_apk = "temp.apk"
@@ -296,10 +351,10 @@ def main():
         traceback.print_exc()
         notificar(f"🚨 Error: {str(e)[:100]}")
 
-    # PASO 3: SINCRONIZAR DROPBOX
+    # PASO 4: SINCRONIZAR DROPBOX
     sincronizar_dropbox(sheet, dbx)
     
-    # PASO 4: GENERAR SITIO WEB
+    # PASO 5: GENERAR SITIO WEB
     generar_sistema_completo(sheet)
     
     print("✅ Reconciliación Completa y Almacenamiento Optimizado.")

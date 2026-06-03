@@ -8,7 +8,7 @@ import gspread
 import re
 import requests
 from datetime import datetime
-from dropbox.files import WriteMode
+from dropbox.files import WriteMode 
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -76,7 +76,7 @@ def sincronizar_dropbox(sheet, dbx):
                         dbx.files_delete_v2(entrada.path_display)
                     except Exception as e:
                         print(f"No se pudo borrar {entrada.path_display}: {e}")
-                        
+                         
     except Exception as e:
         print(f"Error en la sincronización de Dropbox: {e}")
 
@@ -88,41 +88,60 @@ def generar_sistema_completo(sheet):
     registros = sheet.get_all_records()
     
     obtainium_apps = []
+    store_apps = []  # ← AGREGADO: Lista para store.json
     archivos_html_validos = ["index.html"]
 
     for r in registros:
-        if not r.get('Pkg'): continue
+        if not r.get('Pkg'): continue 
         
         nombre = str(r.get('Nombre', 'App')).strip()
         version = str(r.get('Version', '1.0')).strip()
         link_apk = str(r.get('Link APK', '')).strip().replace("dl=0", "dl=1")
         pkg = str(r.get('Pkg', '')).strip()
+        icono = str(r.get('Icono', '')).strip()
+        version_code = str(r.get('Version Code', '0')).strip()
         
         filename = f"{nombre_seguro(nombre)}.html"
         archivos_html_validos.append(filename)
         
         full_url = f"{REPO_URL_BASE}{filename}"
         
-        html_content = f"""
-        <!DOCTYPE html><html><head><title>{nombre}</title></head>
-        <body><h1>{nombre}</h1><p>Version: {version}</p>
-        <a href="{link_apk}">Descargar {nombre} v{version}</a>
-        </body></html>
-        """
-        with open(filename, "w", encoding='utf-8') as f: f.write(html_content)
+        # ← CORREGIDO: HTML válido
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head><title>{nombre}</title></head>
+<body>
+<h1>{nombre}</h1>
+<p>Version: {version}</p>
+<a href="{link_apk}">Descargar {nombre} v{version}</a>
+</body>
+</html>"""
         
-        # --- AQUÍ ESTÁ LA MAGIA DE LA NUEVA TIENDA NATIVA ---
+        with open(filename, "w", encoding='utf-8') as f: 
+            f.write(html_content)
+        
+        # Obtainium JSON
         app_entry = {
             "id": pkg,
-            "url": link_apk,  # Descarga directa del APK desde Dropbox
+            "url": link_apk,
             "name": nombre,
             "version": version,
             "pinned": False,
             "categories": [],
             "preferredApkPath": "",
-            "additionalSettings": "" # Limpiamos el flag de Obtainium
+            "additionalSettings": ""
         }
         obtainium_apps.append(app_entry)
+        
+        # ← AGREGADO: Store JSON (para tu app Android)
+        store_apps.append({
+            "pkg": pkg,
+            "name": nombre,
+            "versionName": version,
+            "versionCode": int(version_code) if version_code.isdigit() else 0,
+            "apkUrl": link_apk,
+            "icon": icono if icono else f"{REPO_URL_BASE}default_icon.png"
+        })
 
     # Limpieza de HTMLs viejos en GitHub
     try:
@@ -134,12 +153,22 @@ def generar_sistema_completo(sheet):
     except Exception as e:
         print(f"Error al limpiar HTMLs: {e}")
 
+    # Guardar obtainium.json
     export_data = {
         "debug": "GENERADO_POR_BOT_CONFIRMADO", 
         "apps": obtainium_apps
     }
-    with open("obtainium.json", "w", encoding='utf-8') as f: json.dump(export_data, f, indent=4)
-    with open("index.html", "w", encoding='utf-8') as f: f.write("<html><body><h1>Motor Online (Espejo Activo)</h1></body></html>")
+    with open("obtainium.json", "w", encoding='utf-8') as f: 
+        json.dump(export_data, f, indent=4)
+    
+    # ← AGREGADO: Guardar store.json
+    with open("store.json", "w", encoding='utf-8') as f: 
+        json.dump(store_apps, f, indent=2, ensure_ascii=False)
+    
+    print(f"✅ JSONs generados: {len(store_apps)} apps")
+    
+    with open("index.html", "w", encoding='utf-8') as f: 
+        f.write(f"<html><body><h1>V38 Online - Tienda APK</h1><p>Apps: {len(store_apps)}</p></body></html>")
 
 # ---------------------------------------------------------
 # MAIN
@@ -160,7 +189,7 @@ def main():
         nuevos = [i for i in items if i['name'].lower().endswith('.apk') and str(i['id']).strip() not in procesados]
 
         if nuevos:
-            notificar(f"👷‍♂️ <b>Procesando {len(nuevos)} APKs</b>")
+            notificar(f"👷‍♂️ Procesando {len(nuevos)} APKs")
             for item in nuevos:
                 temp_apk = "temp.apk"
                 try:
@@ -175,7 +204,6 @@ def main():
                     apk = APK(temp_apk)
                     nombre = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
                     
-                    # --- NUEVO NOMBRE DEL ICONO ESTÁTICO ---
                     link_icon = f"{REPO_URL_BASE}default_icon.png"
 
                     path = f"/{nombre}_{apk.version_name}.apk"

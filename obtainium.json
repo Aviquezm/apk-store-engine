@@ -32,16 +32,6 @@
             "additionalSettings": ""
         },
         {
-            "id": "com.android.mgstv",
-            "url": "https://www.dropbox.com/scl/fi/jqgn3tcoqdcyiu4es6hd1/Xuper_4.99.4.apk?rlkey=79y7oax33q0dqqujf2p2147j4&dl=1",
-            "name": "Xuper",
-            "version": "4.99.4",
-            "pinned": false,
-            "categories": [],
-            "preferredApkPath": "",
-            "additionalSettings": ""
-        },
-        {
             "id": "nextapp.fx",
             "url": "https://www.dropbox.com/scl/fi/j6qsutsrasi2gcgmoc6ic/FX_9.1.0.8.apk?rlkey=y6lxosm6jxuqwsgal7274qxy3&dl=1",
             "name": "FX",

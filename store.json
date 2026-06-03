@@ -38,5 +38,13 @@
     "versionCode": 49904,
     "apkUrl": "https://www.dropbox.com/scl/fi/vez63f4w6g8bk29wyew8h/Xuper_4.99.4.apk?rlkey=aanmwbnodhe6g8yrx4gumrub9&dl=1",
     "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "de.blinkt.openvpn",
+    "name": "OpenVPN for Android",
+    "versionName": "0.7.64",
+    "versionCode": 219,
+    "apkUrl": "https://www.dropbox.com/scl/fi/wpcd8mwnw6nrw1ilfzu1y/OpenVPN-for-Android_0.7.64.apk?rlkey=1rxukhhotnc0yd7na06a5ff1v&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
   }
 ]

@@ -50,6 +50,16 @@
             "categories": [],
             "preferredApkPath": "",
             "additionalSettings": ""
+        },
+        {
+            "id": "de.blinkt.openvpn",
+            "url": "https://www.dropbox.com/scl/fi/wpcd8mwnw6nrw1ilfzu1y/OpenVPN-for-Android_0.7.64.apk?rlkey=1rxukhhotnc0yd7na06a5ff1v&dl=1",
+            "name": "OpenVPN for Android",
+            "version": "0.7.64",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": ""
         }
     ]
 }

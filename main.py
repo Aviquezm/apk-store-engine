@@ -181,7 +181,7 @@ def main():
                     path = f"/{nombre}_{apk.version_name}.apk"
                     with open(temp_apk, "rb") as f: dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
                     l_apk = dbx.sharing_create_shared_link_with_settings(path).url
-                    link_apk = l_apk.replace("?dl=0", "?dl=1")
+                    link_apk = l_apk.replace("dl=0", "dl=1")
 
                     sheet.append_row([nombre, "Publicado", link_apk, apk.version_name, apk.package, link_icon, item['id'], "Dropbox", str(apk.version_code), calcular_hash(temp_apk), str(os.path.getsize(temp_apk))])
                     

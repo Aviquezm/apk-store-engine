@@ -42,20 +42,20 @@
             "additionalSettings": ""
         },
         {
-            "id": "com.android.mgstv",
-            "url": "https://www.dropbox.com/scl/fi/vez63f4w6g8bk29wyew8h/Xuper_4.99.4.apk?rlkey=aanmwbnodhe6g8yrx4gumrub9&dl=1",
-            "name": "Xuper",
-            "version": "4.99.4",
+            "id": "de.blinkt.openvpn",
+            "url": "https://www.dropbox.com/scl/fi/wpcd8mwnw6nrw1ilfzu1y/OpenVPN-for-Android_0.7.64.apk?rlkey=1rxukhhotnc0yd7na06a5ff1v&dl=1",
+            "name": "OpenVPN for Android",
+            "version": "0.7.64",
             "pinned": false,
             "categories": [],
             "preferredApkPath": "",
             "additionalSettings": ""
         },
         {
-            "id": "de.blinkt.openvpn",
-            "url": "https://www.dropbox.com/scl/fi/wpcd8mwnw6nrw1ilfzu1y/OpenVPN-for-Android_0.7.64.apk?rlkey=1rxukhhotnc0yd7na06a5ff1v&dl=1",
-            "name": "OpenVPN for Android",
-            "version": "0.7.64",
+            "id": "com.android.mgstv",
+            "url": "https://www.dropbox.com/scl/fi/9jceczc6pmkci5e4hn6v2/Xuper_4.99.4.apk?rlkey=oa7onygecg3025t4njilmg4m1&dl=1",
+            "name": "Xuper",
+            "version": "4.99.4",
             "pinned": false,
             "categories": [],
             "preferredApkPath": "",

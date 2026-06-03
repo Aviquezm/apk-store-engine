@@ -40,6 +40,16 @@
             "categories": [],
             "preferredApkPath": "",
             "additionalSettings": ""
+        },
+        {
+            "id": "com.android.mgstv",
+            "url": "https://www.dropbox.com/scl/fi/vez63f4w6g8bk29wyew8h/Xuper_4.99.4.apk?rlkey=aanmwbnodhe6g8yrx4gumrub9&dl=1",
+            "name": "Xuper",
+            "version": "4.99.4",
+            "pinned": false,
+            "categories": [],
+            "preferredApkPath": "",
+            "additionalSettings": ""
         }
     ]
 }

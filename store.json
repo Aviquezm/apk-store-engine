@@ -30,5 +30,13 @@
     "versionCode": 7,
     "apkUrl": "https://www.dropbox.com/scl/fi/mw8r28fcqjpk69rg42e0d/TV-Nacional-CR_7.03.apk?rlkey=3iolnepygie81jo1wz8k8drws&dl=1",
     "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "com.android.mgstv",
+    "name": "Xuper",
+    "versionName": "4.99.4",
+    "versionCode": 49904,
+    "apkUrl": "https://www.dropbox.com/scl/fi/vez63f4w6g8bk29wyew8h/Xuper_4.99.4.apk?rlkey=aanmwbnodhe6g8yrx4gumrub9&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
   }
 ]

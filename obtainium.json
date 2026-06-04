@@ -42,6 +42,13 @@
             "name": "Xuper TV",
             "version": "4.99.4",
             "pinned": false
+        },
+        {
+            "id": "nextapp.fx",
+            "url": "https://www.dropbox.com/scl/fi/1op9u0su0hd1j9ar2ovwo/FX_9.1.0.8.apk?rlkey=0dwhkxdki44bjkgcc19yhzzgq&dl=1",
+            "name": "FX",
+            "version": "9.1.0.8",
+            "pinned": false
         }
     ]
 }

@@ -46,5 +46,13 @@
     "versionCode": 49904,
     "apkUrl": "https://www.dropbox.com/scl/fi/b55yuthxojuax0iyb10zm/Xuper-TV_4.99.4.apk?rlkey=qrvwqunh113iuj94ww2w4lupa&dl=1",
     "icon": ""
+  },
+  {
+    "pkg": "nextapp.fx",
+    "name": "FX",
+    "versionName": "9.1.0.8",
+    "versionCode": 9108,
+    "apkUrl": "https://www.dropbox.com/scl/fi/1op9u0su0hd1j9ar2ovwo/FX_9.1.0.8.apk?rlkey=0dwhkxdki44bjkgcc19yhzzgq&dl=1",
+    "icon": ""
   }
 ]

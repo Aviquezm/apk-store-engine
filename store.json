@@ -46,5 +46,13 @@
     "versionCode": 219,
     "apkUrl": "https://www.dropbox.com/scl/fi/0gkm2q1334r28c09r7mgr/OpenVPN_0.7.64.apk?rlkey=hnakggj65tmy7tkdm5h7a2r68&dl=1",
     "icon": ""
+  },
+  {
+    "pkg": "com.android.mgstv",
+    "name": "Xuper TV",
+    "versionName": "4.99.4",
+    "versionCode": 49904,
+    "apkUrl": "https://www.dropbox.com/scl/fi/b55yuthxojuax0iyb10zm/Xuper-TV_4.99.4.apk?rlkey=qrvwqunh113iuj94ww2w4lupa&dl=1",
+    "icon": ""
   }
 ]

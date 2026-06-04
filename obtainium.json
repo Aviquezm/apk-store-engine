@@ -42,6 +42,13 @@
             "name": "OpenVPN",
             "version": "0.7.64",
             "pinned": false
+        },
+        {
+            "id": "com.android.mgstv",
+            "url": "https://www.dropbox.com/scl/fi/b55yuthxojuax0iyb10zm/Xuper-TV_4.99.4.apk?rlkey=qrvwqunh113iuj94ww2w4lupa&dl=1",
+            "name": "Xuper TV",
+            "version": "4.99.4",
+            "pinned": false
         }
     ]
 }

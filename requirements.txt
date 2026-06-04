@@ -1,7 +1,0 @@
-dropbox
-gspread
-oauth2client
-google-api-python-client
-Pillow
-pyaxmlparser
-requests

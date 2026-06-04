@@ -49,118 +49,6 @@ def nombre_seguro(texto):
     return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
 
 # ---------------------------------------------------------
-# 🆕 AGREGADO: RECONCILIACIÓN DRIVE ↔ SHEETS (sin tocar nada más)
-# ---------------------------------------------------------
-def reconciliar_todo(sheet, drive_service, dbx):
-    """Compara Drive, Sheets y Dropbox. Elimina lo que falte en Drive."""
-    print("🔄 INICIANDO RECONCILIACIÓN COMPLETA...")
-    try:
-        # 1. Obtener TODOS los archivos APK en Drive
-        query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
-        items_drive = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
-        ids_en_drive = {item['id'] for item in items_drive if item['name'].lower().endswith('.apk')}
-        
-        print(f"📁 Archivos en Drive: {len(ids_en_drive)}")
-        
-        # 2. Obtener TODOS los registros en Sheets
-        registros = sheet.get_all_records()
-        print(f"📊 Registros en Sheets: {len(registros)}")
-        
-        # 3. Detectar qué IDs en Sheets YA NO ESTÁN en Drive (fueron eliminados)
-        filas_a_eliminar = []
-        for idx, r in enumerate(registros):
-            id_drive = str(r.get('ID Drive', '')).strip()
-            nombre = str(r.get('Nombre', '')).strip()
-            version = str(r.get('Version', '')).strip()
-            
-            if id_drive and id_drive not in ids_en_drive:
-                print(f"🗑️ DETECTADO: {nombre} v{version} fue ELIMINADO de Drive")
-                filas_a_eliminar.append((idx + 2, nombre, version, id_drive))
-        
-        # 4. Eliminar de Dropbox y Sheets lo que ya no está en Drive
-        if filas_a_eliminar:
-            print(f"🧹 Limpiando {len(filas_a_eliminar)} archivos eliminados...")
-            
-            for fila_num, nombre, version, id_drive in sorted(filas_a_eliminar, key=lambda x: x[0], reverse=True):
-                
-                # a) Eliminar de Dropbox
-                ruta_dropbox = f"/{nombre}_{version}.apk"
-                try:
-                    dbx.files_delete_v2(ruta_dropbox)
-                    print(f"   ✅ Dropbox: {ruta_dropbox} eliminado")
-                except Exception as e:
-                    print(f"   ⚠️ No se pudo borrar de Dropbox: {e}")
-                
-                # b) Eliminar fila de Sheets
-                try:
-                    sheet.delete_row(fila_num)
-                    print(f"   ✅ Sheets: Fila {fila_num} eliminada")
-                    time.sleep(1.5)
-                except Exception as e:
-                    print(f"   ⚠️ Error eliminando fila {fila_num}: {e}")
-        else:
-            print("✅ No hay archivos eliminados que limpiar")
-            
-    except Exception as e:
-        print(f"[ERROR] En reconciliación: {e}")
-        import traceback
-        traceback.print_exc()
-
-# ---------------------------------------------------------
-# 🆕 AGREGADO: DETECTAR CAMBIOS DE NOMBRE
-# ---------------------------------------------------------
-def detectar_cambios_nombre(sheet, drive_service):
-    """Detecta si el nombre de un archivo en Drive cambió respecto a Sheets"""
-    print("🔍 Detectando cambios de nombre...")
-    try:
-        # 1. Obtener todos los APKs en Drive
-        query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
-        items_drive = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
-        items_apk = [i for i in items_drive if i['name'].lower().endswith('.apk')]
-        
-        # 2. Obtener registros de Sheets
-        registros = sheet.get_all_records()
-        
-        cambios_detectados = 0
-        
-        for item in items_apk:
-            item_id = str(item['id']).strip()
-            item_nombre_archivo = item['name']
-            
-            # Buscar en Sheets
-            for r in registros:
-                id_sheet = str(r.get('ID Drive', '')).strip()
-                nombre_sheet = str(r.get('Nombre', '')).strip()
-                version_sheet = str(r.get('Version', '')).strip()
-                
-                # Si el ID coincide
-                if id_sheet == item_id:
-                    # El nombre esperado en Dropbox es: {nombre}_{version}.apk
-                    nombre_esperado_dropbox = f"{nombre_sheet}_{version_sheet}.apk"
-                    
-                    # Si el nombre del archivo en Drive es diferente al esperado
-                    if item_nombre_archivo != nombre_esperado_dropbox:
-                        print(f"🔄 DETECTADO: Archivo cambió de '{nombre_esperado_dropbox}' a '{item_nombre_archivo}'")
-                        
-                        # Actualizar el nombre en Sheets (Columna 1 = Nombre)
-                        try:
-                            fila_num = registros.index(r) + 2 
-                            sheet.update_cell(fila_num, 1, item_nombre_archivo)
-                            print(f"   ✅ Nombre actualizado en Sheets")
-                            cambios_detectados += 1
-                        except Exception as e:
-                            print(f"   ⚠️ Error actualizando Sheets: {e}")
-                    break
-        
-        if cambios_detectados == 0:
-            print("✅ No hay cambios de nombre detectados")
-        else:
-            print(f"✅ {cambios_detectados} cambio(s) de nombre detectado(s)")
-            
-    except Exception as e:
-        print(f"[ERROR] Detectando cambios de nombre: {e}")
-
-# ---------------------------------------------------------
 # SINCRONIZACIÓN ABSOLUTA DE DROPBOX (EL BARRENDERO)
 # ---------------------------------------------------------
 def sincronizar_dropbox(sheet, dbx):
@@ -264,16 +152,6 @@ def main():
     client_gs = gspread.authorize(creds)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
-    # 🆕 PASO NUEVO 0: RECONCILIACIÓN (detectar eliminados manualmente de Drive)
-    reconciliar_todo(sheet, drive_service, dbx)
-    
-    # 🆕 PASO NUEVO 0.5: DETECTAR CAMBIOS DE NOMBRE
-    sheet = client_gs.open_by_key(SHEET_ID).sheet1  # Recargar después de eliminar filas
-    detectar_cambios_nombre(sheet, drive_service)
-    
-    # 🆕 Recargar sheet antes de procesar nuevas APKs
-    sheet = client_gs.open_by_key(SHEET_ID).sheet1
-    
     try:
         registros = sheet.get_all_records()
         procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
@@ -307,6 +185,11 @@ def main():
 
                     sheet.append_row([nombre, "Publicado", link_apk, apk.version_name, apk.package, link_icon, item['id'], "Dropbox", str(apk.version_code), calcular_hash(temp_apk), str(os.path.getsize(temp_apk))])
                     
+                    # 🆕 FIX: Recargar registros DESPUÉS de append_row
+                    time.sleep(2)  # Esperar a que Google sincronice
+                    sheet = client_gs.open_by_key(SHEET_ID).sheet1  # Forzar recarga
+                    registros = sheet.get_all_records()  # Actualizar registros
+                    
                     try:
                         filas_a_borrar = []
                         pkg_nuevo = str(apk.package).strip().lower()
@@ -321,6 +204,9 @@ def main():
                             for fila_num in sorted(filas_a_borrar, reverse=True):
                                 sheet.delete_row(fila_num)
                                 time.sleep(1.5)
+                            # 🆕 Recargar sheet después de eliminar filas
+                            sheet = client_gs.open_by_key(SHEET_ID).sheet1
+                            registros = sheet.get_all_records()
                     except: pass
                     
                     notificar(f"✅ {nombre} v{apk.version_name} listo")

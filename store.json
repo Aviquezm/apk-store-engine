@@ -8,14 +8,6 @@
     "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
   },
   {
-    "pkg": "com.redsoft.appkiller",
-    "name": "AppKiller",
-    "versionName": "26.6.1",
-    "versionCode": 46,
-    "apkUrl": "https://www.dropbox.com/scl/fi/ak64f65zdh1wo1ayg7xns/AppKiller_26.6.1.apk?rlkey=2jrtu2hgw4xzxh03zicghb6v0&dl=1",
-    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
-  },
-  {
     "pkg": "com.tv.nacionalcr",
     "name": "TV Nacional CR",
     "versionName": 7.03,
@@ -29,6 +21,38 @@
     "versionName": 2.1,
     "versionCode": 2,
     "apkUrl": "https://www.dropbox.com/scl/fi/lxlgbeppgfx3nbm5cpcqw/Optimizador-de-Ram_2.1.apk?rlkey=di7mm6dssc1pllwvitq8klghk&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "de.blinkt.openvpn",
+    "name": "OpenVPN for Android",
+    "versionName": "0.7.64",
+    "versionCode": 219,
+    "apkUrl": "https://www.dropbox.com/scl/fi/otypjk0yk8ju1u19d4t0q/OpenVPN-for-Android_0.7.64.apk?rlkey=8d1g1opcx8c7ip6hp4n1pmw1a&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "org.smarttube.stable",
+    "name": "SmartTube",
+    "versionName": 31.63,
+    "versionCode": 2353,
+    "apkUrl": "https://www.dropbox.com/scl/fi/h3whl87ozp2tqy4d3gxmb/SmartTube_31.63.apk?rlkey=e32nq1k64cxdo1yeffl1j3c6u&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "nextapp.fx",
+    "name": "FX",
+    "versionName": "9.1.0.8",
+    "versionCode": 9108,
+    "apkUrl": "https://www.dropbox.com/scl/fi/rl6ti1treihm5k1psetyk/FX_9.1.0.8.apk?rlkey=i2tar4s5pkvub8h2w0i02ygah&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "com.protectstar.microguardfree",
+    "name": "Micro Guard",
+    "versionName": 6.5,
+    "versionCode": 6500,
+    "apkUrl": "https://www.dropbox.com/scl/fi/g35iyv71o8hblc9cuh8eh/Micro-Guard_6.5.apk?rlkey=14xpqidppzvat9nb5vwo4n0pj&dl=1",
     "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
   }
 ]

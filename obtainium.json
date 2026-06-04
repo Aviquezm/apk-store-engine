@@ -9,13 +9,6 @@
             "pinned": false
         },
         {
-            "id": "com.redsoft.appkiller",
-            "url": "https://www.dropbox.com/scl/fi/ak64f65zdh1wo1ayg7xns/AppKiller_26.6.1.apk?rlkey=2jrtu2hgw4xzxh03zicghb6v0&dl=1",
-            "name": "AppKiller",
-            "version": "26.6.1",
-            "pinned": false
-        },
-        {
             "id": "com.tv.nacionalcr",
             "url": "https://www.dropbox.com/scl/fi/yysyd6fzoqht6k2ttrcuc/TV-Nacional-CR_7.03.apk?rlkey=tz7ibehd008dpnyq3g1a13kjr&dl=1",
             "name": "TV Nacional CR",
@@ -27,6 +20,34 @@
             "url": "https://www.dropbox.com/scl/fi/lxlgbeppgfx3nbm5cpcqw/Optimizador-de-Ram_2.1.apk?rlkey=di7mm6dssc1pllwvitq8klghk&dl=1",
             "name": "Optimizador de Ram",
             "version": 2.1,
+            "pinned": false
+        },
+        {
+            "id": "de.blinkt.openvpn",
+            "url": "https://www.dropbox.com/scl/fi/otypjk0yk8ju1u19d4t0q/OpenVPN-for-Android_0.7.64.apk?rlkey=8d1g1opcx8c7ip6hp4n1pmw1a&dl=1",
+            "name": "OpenVPN for Android",
+            "version": "0.7.64",
+            "pinned": false
+        },
+        {
+            "id": "org.smarttube.stable",
+            "url": "https://www.dropbox.com/scl/fi/h3whl87ozp2tqy4d3gxmb/SmartTube_31.63.apk?rlkey=e32nq1k64cxdo1yeffl1j3c6u&dl=1",
+            "name": "SmartTube",
+            "version": 31.63,
+            "pinned": false
+        },
+        {
+            "id": "nextapp.fx",
+            "url": "https://www.dropbox.com/scl/fi/rl6ti1treihm5k1psetyk/FX_9.1.0.8.apk?rlkey=i2tar4s5pkvub8h2w0i02ygah&dl=1",
+            "name": "FX",
+            "version": "9.1.0.8",
+            "pinned": false
+        },
+        {
+            "id": "com.protectstar.microguardfree",
+            "url": "https://www.dropbox.com/scl/fi/g35iyv71o8hblc9cuh8eh/Micro-Guard_6.5.apk?rlkey=14xpqidppzvat9nb5vwo4n0pj&dl=1",
+            "name": "Micro Guard",
+            "version": 6.5,
             "pinned": false
         }
     ]

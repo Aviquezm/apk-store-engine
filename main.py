@@ -49,6 +49,111 @@ def nombre_seguro(texto):
     return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
 
 # ---------------------------------------------------------
+# 🆕 RECONCILIACIÓN: Detecta APKs eliminadas de Drive
+# ---------------------------------------------------------
+def reconciliar_todo(sheet, drive_service, dbx):
+    """Compara Drive, Sheets y Dropbox. Elimina lo que falte en Drive."""
+    print("🔄 INICIANDO RECONCILIACIÓN COMPLETA...")
+    try:
+        # 1. Obtener TODOS los archivos APK en Drive
+        query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
+        items_drive = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
+        ids_en_drive = {item['id'] for item in items_drive if item['name'].lower().endswith('.apk')}
+        
+        print(f"📁 Archivos en Drive: {len(ids_en_drive)}")
+        
+        # 2. Obtener TODOS los registros en Sheets
+        registros = sheet.get_all_records()
+        print(f" Registros en Sheets: {len(registros)}")
+        
+        # 3. Detectar qué IDs en Sheets YA NO ESTÁN en Drive (fueron eliminados)
+        filas_a_eliminar = []
+        for idx, r in enumerate(registros):
+            id_drive = str(r.get('ID Drive', '')).strip()
+            nombre = str(r.get('Nombre', '')).strip()
+            version = str(r.get('Version', '')).strip()
+            
+            if id_drive and id_drive not in ids_en_drive:
+                print(f"🗑️ DETECTADO: {nombre} v{version} fue ELIMINADO de Drive")
+                filas_a_eliminar.append((idx + 2, nombre, version, id_drive))
+        
+        # 4. Eliminar de Dropbox y Sheets lo que ya no está en Drive
+        if filas_a_eliminar:
+            print(f"🧹 Limpiando {len(filas_a_eliminar)} archivos eliminados...")
+            
+            for fila_num, nombre, version, id_drive in sorted(filas_a_eliminar, key=lambda x: x[0], reverse=True):
+                
+                # a) Eliminar de Dropbox
+                ruta_dropbox = f"/{nombre}_{version}.apk"
+                try:
+                    dbx.files_delete_v2(ruta_dropbox)
+                    print(f"   ✅ Dropbox: {ruta_dropbox} eliminado")
+                except Exception as e:
+                    print(f"   ️  No se pudo borrar de Dropbox: {e}")
+                
+                # b) Eliminar fila de Sheets
+                try:
+                    sheet.delete_row(fila_num)
+                    print(f"   ✅ Sheets: Fila {fila_num} eliminada")
+                    time.sleep(1.5)
+                except Exception as e:
+                    print(f"   ⚠️  Error eliminando fila {fila_num}: {e}")
+        else:
+            print("✅ No hay archivos eliminados que limpiar")
+            
+    except Exception as e:
+        print(f"[ERROR] En reconciliación: {e}")
+        import traceback
+        traceback.print_exc()
+
+# ---------------------------------------------------------
+# 🆕 RESTAURACIÓN: Sube a Dropbox lo que falte
+# ---------------------------------------------------------
+def restaurar_faltantes_en_dropbox(sheet, drive_service, dbx):
+    """Verifica que todas las APKs del Excel estén en Dropbox"""
+    print("🔄 Verificando integridad de Dropbox vs Excel...")
+    try:
+        # 1. Ver qué hay actualmente en Dropbox
+        resultado = dbx.files_list_folder('')
+        archivos_en_dropbox = [e.path_display.lower() for e in resultado.entries if isinstance(e, dropbox.files.FileMetadata)]
+        
+        # 2. Ver qué dice el Excel (la fuente de la verdad)
+        registros = sheet.get_all_records()
+        
+        for r in registros:
+            if not r.get('Pkg'): continue
+            nombre = str(r.get('Nombre', '')).strip()
+            version = str(r.get('Version', '')).strip()
+            id_drive = str(r.get('ID Drive', '')).strip()
+            
+            # La ruta exacta que deberíamos tener en Dropbox
+            ruta_esperada = f"/{nombre}_{version}.apk"
+            
+            # Si el archivo NO está en Dropbox pero SÍ está en el Excel
+            if ruta_esperada.lower() not in archivos_en_dropbox and id_drive:
+                print(f"⚠️ Faltante detectado: {ruta_esperada}. Restaurando desde Drive...")
+                try:
+                    # Descargar desde Drive
+                    request = drive_service.files().get_media(fileId=id_drive)
+                    fh = io.BytesIO()
+                    downloader = MediaIoBaseDownload(fh, request)
+                    done = False
+                    while not done: _, done = downloader.next_chunk()
+                    fh.seek(0)
+                    with open("temp.apk", "wb") as f: f.write(fh.read())
+                    
+                    # Subir a Dropbox
+                    with open("temp.apk", "rb") as f: 
+                        dbx.files_upload(f.read(), ruta_esperada, mode=WriteMode('overwrite'))
+                    print(f"   ✅ Restaurado en Dropbox: {ruta_esperada}")
+                except Exception as e:
+                    print(f"    Error restaurando {nombre}: {e}")
+                    
+        print("✅ Verificación de integridad terminada.")
+    except Exception as e:
+        print(f"[ERROR] En restauración de faltantes: {e}")
+
+# ---------------------------------------------------------
 # SINCRONIZACIÓN ABSOLUTA DE DROPBOX (EL BARRENDERO)
 # ---------------------------------------------------------
 def sincronizar_dropbox(sheet, dbx):
@@ -153,6 +258,12 @@ def main():
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
     try:
+        # 🆕 PASO 0: RECONCILIACIÓN (detectar eliminados de Drive)
+        reconciliar_todo(sheet, drive_service, dbx)
+        
+        # 🆕 Recargar sheet después de reconciliación
+        sheet = client_gs.open_by_key(SHEET_ID).sheet1
+        
         registros = sheet.get_all_records()
         procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
         query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
@@ -160,7 +271,7 @@ def main():
         nuevos = [i for i in items if i['name'].lower().endswith('.apk') and str(i['id']).strip() not in procesados]
 
         if nuevos:
-            notificar(f"👷‍♂️ Procesando {len(nuevos)} APKs")
+            notificar(f"‍♂️ Procesando {len(nuevos)} APKs")
             for item in nuevos:
                 temp_apk = "temp.apk"
                 try:
@@ -185,10 +296,10 @@ def main():
 
                     sheet.append_row([nombre, "Publicado", link_apk, apk.version_name, apk.package, link_icon, item['id'], "Dropbox", str(apk.version_code), calcular_hash(temp_apk), str(os.path.getsize(temp_apk))])
                     
-                    # 🆕 FIX: Recargar registros DESPUÉS de append_row
-                    time.sleep(2)  # Esperar a que Google sincronice
-                    sheet = client_gs.open_by_key(SHEET_ID).sheet1  # Forzar recarga
-                    registros = sheet.get_all_records()  # Actualizar registros
+                    # 🆕 FIX: Recargar registros DESPUÉS de append_row para evitar que se elimine la APK recién agregada
+                    time.sleep(2)
+                    sheet = client_gs.open_by_key(SHEET_ID).sheet1
+                    registros = sheet.get_all_records()
                     
                     try:
                         filas_a_borrar = []
@@ -214,6 +325,13 @@ def main():
                 finally: 
                     if os.path.exists(temp_apk): os.remove(temp_apk)
     except Exception as e: print(e)
+
+    # 🆕 PASO: Restaurar faltantes en Dropbox antes de barrer
+    restaurar_faltantes_en_dropbox(sheet, drive_service, dbx)
+    
+    #  Recargar sheet antes de sincronizar
+    time.sleep(2)
+    sheet = client_gs.open_by_key(SHEET_ID).sheet1
 
     # 1. Pasamos la escoba por Dropbox
     sincronizar_dropbox(sheet, dbx)

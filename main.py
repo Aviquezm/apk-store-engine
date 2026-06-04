@@ -17,7 +17,6 @@ from pyaxmlparser import APK
 # --- CONFIGURACIÓN ---
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
-REPO_URL_BASE = "https://aviquezm.github.io/apk-store-engine/"
 
 DBX_KEY = os.environ['DROPBOX_APP_KEY']
 DBX_SECRET = os.environ['DROPBOX_APP_SECRET']
@@ -51,9 +50,6 @@ def calcular_hash(file_path):
             sha256.update(data)
     return sha256.hexdigest()
 
-def nombre_seguro(texto):
-    return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
-
 # ---------------------------------------------------------
 # RECONCILIACIÓN TOTAL (ELIMINACIÓN INFALIBLE)
 # ---------------------------------------------------------
@@ -71,11 +67,8 @@ def reconciliar_todo(sheet, drive_service, dbx):
         page_token = response.get('nextPageToken')
         if not page_token: break
     
-    print(f"DEBUG: Se encontraron {len(ids_en_drive)} APKs válidas en Drive.")
-
     todas_las_filas = sheet.get_all_values()
     if len(todas_las_filas) <= 1:
-        print("DEBUG: El Excel está vacío o solo tiene encabezados.")
         return
     
     encabezados = todas_las_filas[0]
@@ -93,29 +86,24 @@ def reconciliar_todo(sheet, drive_service, dbx):
             datos_filtrados.append(fila)
         else:
             nombre = str(fila[col_nombre]).strip()
+            version = str(fila[col_version = encabezados.index('Version')]).strip()
             link = str(fila[col_link]).strip()
-            print(f"DEBUG: La app '{nombre}' fue borrada de Drive. Buscando en Dropbox vía enlace...")
             
-            # 🛠️ LA MAGIA: Usar el Link para encontrar el archivo exacto sin importar su nombre
+            # Notificación de eliminación
+            notificar(f"🗑️ <b>Versión eliminada:</b> Se detectó que <i>{nombre} v{version}</i> ya no está en Drive. Limpiando...")
+            
             try:
-                # A la API de Dropbox le pasamos el link original
                 link_limpio = link.replace("dl=1", "dl=0")
                 metadata = dbx.sharing_get_shared_link_metadata(link_limpio)
-                
                 if metadata and metadata.path_lower:
                     dbx.files_delete_v2(metadata.path_lower)
-                    print(f"   ✅ Dropbox: Archivo físico {metadata.path_lower} destruido con éxito.")
-                else:
-                    print(f"   ⚠️ Dropbox: No se pudo localizar la ruta del archivo mediante el link.")
-            except Exception as e:
-                print(f"   ❌ Dropbox: Error al intentar borrar por link (puede que ya no exista). Detalle: {e}")
+            except:
+                pass
 
-    print("DEBUG: Actualizando Excel por sobreescritura...")
     sheet.clear()
     sheet.append_row(encabezados)
     if datos_filtrados:
         sheet.append_rows(datos_filtrados)
-        print(f"✅ Excel sincronizado con {len(datos_filtrados)} registros limpios.")
 
 # ---------------------------------------------------------
 # DETECTAR CAMBIOS DE NOMBRE
@@ -152,9 +140,9 @@ def detectar_cambios_nombre(sheet, drive_service):
             
             if id_sheet == id_drive_actual:
                 if nombre_sheet != nombre_limpio_drive:
-                    print(f"🔄 Cambio detectado: De '{nombre_sheet}' a '{nombre_limpio_drive}'")
                     sheet.update_cell(i + 1, col_nombre + 1, nombre_limpio_drive)
-                    print(f"   ✅ Excel actualizado.")
+                    # Notificación de cambio de nombre
+                    notificar(f"🔄 <b>Nombre modificado:</b> La app <i>'{nombre_sheet}'</i> ahora se llama <b>'{nombre_limpio_drive}'</b>")
                 break
 
 # ---------------------------------------------------------
@@ -164,47 +152,51 @@ def procesar_y_generar(sheet, drive_service, dbx):
     print("--- PROCESANDO NUEVAS APPS Y GENERANDO JSON ---")
     
     registros = sheet.get_all_records()
-    procesados = []
-    for r in registros:
-        if r.get('ID Drive'):
-            procesados.append(str(r['ID Drive']).strip())
+    procesados = [str(r['ID Drive']).strip() for r in registros if r.get('ID Drive')]
     
     query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
     items = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
     
-    for item in items:
+    # Filtrar cuáles son realmente nuevos
+    nuevos_items = [item for item in items if item['name'].lower().endswith('.apk') and str(item['id']).strip() not in procesados]
+    
+    if nuevos_items:
+        notificar(f"👷‍♂️ <b>¡Nuevas APKs detectadas!</b> Procesando {len(nuevos_items)} archivo(s)...")
+    
+    for item in nuevos_items:
         id_item = str(item['id']).strip()
-        if item['name'].lower().endswith('.apk') and id_item not in procesados:
-            print(f"👷‍♂️ Procesando Nueva App: {item['name']}")
-            
-            request = drive_service.files().get_media(fileId=item['id'])
-            fh = io.BytesIO()
-            downloader = MediaIoBaseDownload(fh, request)
-            while not downloader.next_chunk()[1]: pass
-            fh.seek(0)
-            
-            with open("temp.apk", "wb") as f:
-                f.write(fh.read())
-            
-            apk = APK("temp.apk")
-            nombre = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
-            path = f"/{nombre}_{apk.version_name}.apk"
-            
-            with open("temp.apk", "rb") as f:
-                dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
-            
-            link = dbx.sharing_create_shared_link_with_settings(path).url.replace("dl=0", "dl=1")
-            
-            sheet.append_row([
-                nombre, "Publicado", link, apk.version_name, 
-                apk.package, "", # <--- Celda vacía para que Android Studio ponga la imagen local
-                id_item, "Dropbox", str(apk.version_code), 
-                calcular_hash("temp.apk"), str(os.path.getsize("temp.apk"))
-            ])
-            os.remove("temp.apk")
-            print(f"   ✅ App {nombre} v{apk.version_name} lista y agregada.")
+        nombre_base = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
+        
+        notificar(f"⏳ Extrayendo y subiendo: <b>{nombre_base}</b>...")
+        
+        request = drive_service.files().get_media(fileId=item['id'])
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, request)
+        while not downloader.next_chunk()[1]: pass
+        fh.seek(0)
+        
+        with open("temp.apk", "wb") as f:
+            f.write(fh.read())
+        
+        apk = APK("temp.apk")
+        nombre = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
+        path = f"/{nombre}_{apk.version_name}.apk"
+        
+        with open("temp.apk", "rb") as f:
+            dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
+        
+        link = dbx.sharing_create_shared_link_with_settings(path).url.replace("dl=0", "dl=1")
+        
+        # Array exacto de 10 columnas (sin la columna de Link Icono)
+        sheet.append_row([
+            nombre, "Publicado", link, apk.version_name, 
+            apk.package, id_item, "Dropbox", str(apk.version_code), 
+            calcular_hash("temp.apk"), str(os.path.getsize("temp.apk"))
+        ])
+        os.remove("temp.apk")
+        
+        notificar(f"✅ <b>App publicada:</b> {nombre} v{apk.version_name} ya está en la tienda.")
 
-    print("DEBUG: Escribiendo JSONs finales...")
     registros_finales = sheet.get_all_records()
     
     lista_obtainium = []
@@ -226,7 +218,7 @@ def procesar_y_generar(sheet, drive_service, dbx):
                 "versionName": r['Version'],
                 "versionCode": int(r['Version Code'] if str(r['Version Code']).isdigit() else 0),
                 "apkUrl": r['Link APK'].replace("dl=0", "dl=1"),
-                "icon": str(r.get('Icono', '')).strip() 
+                "icon": "" # En blanco siempre, gestionado desde Android Studio
             })
             
     with open("obtainium.json", "w", encoding='utf-8') as f:
@@ -234,8 +226,6 @@ def procesar_y_generar(sheet, drive_service, dbx):
         
     with open("store.json", "w", encoding='utf-8') as f:
         json.dump(lista_store, f, indent=2, ensure_ascii=False)
-        
-    print(f"✅ Archivos JSON generados correctamente con {len(lista_store)} apps.")
 
 # ---------------------------------------------------------
 # MAIN
@@ -251,5 +241,3 @@ if __name__ == "__main__":
     reconciliar_todo(sheet, drive_service, dbx)
     detectar_cambios_nombre(sheet, drive_service)
     procesar_y_generar(sheet, drive_service, dbx)
-    
-    print("--- PROCESO FINALIZADO ---")

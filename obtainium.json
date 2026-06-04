@@ -1,4 +1,33 @@
 {
     "debug": "BOT",
-    "apps": []
+    "apps": [
+        {
+            "id": "com.android.mgstv",
+            "url": "https://www.dropbox.com/scl/fi/sworpjdpiifnbyfcjhi6e/Xuper_4.99.4.apk?rlkey=2wf7c1umskh0yxwuc2tuhs2g4&dl=1",
+            "name": "Xuper",
+            "version": "4.99.4",
+            "pinned": false
+        },
+        {
+            "id": "com.redsoft.appkiller",
+            "url": "https://www.dropbox.com/scl/fi/ak64f65zdh1wo1ayg7xns/AppKiller_26.6.1.apk?rlkey=2jrtu2hgw4xzxh03zicghb6v0&dl=1",
+            "name": "AppKiller",
+            "version": "26.6.1",
+            "pinned": false
+        },
+        {
+            "id": "com.tv.nacionalcr",
+            "url": "https://www.dropbox.com/scl/fi/yysyd6fzoqht6k2ttrcuc/TV-Nacional-CR_7.03.apk?rlkey=tz7ibehd008dpnyq3g1a13kjr&dl=1",
+            "name": "TV Nacional CR",
+            "version": 7.03,
+            "pinned": false
+        },
+        {
+            "id": "com.tv.optimizadorram",
+            "url": "https://www.dropbox.com/scl/fi/lxlgbeppgfx3nbm5cpcqw/Optimizador-de-Ram_2.1.apk?rlkey=di7mm6dssc1pllwvitq8klghk&dl=1",
+            "name": "Optimizador de Ram",
+            "version": 2.1,
+            "pinned": false
+        }
+    ]
 }

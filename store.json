@@ -1,1 +1,34 @@
-[]
+[
+  {
+    "pkg": "com.android.mgstv",
+    "name": "Xuper",
+    "versionName": "4.99.4",
+    "versionCode": 49904,
+    "apkUrl": "https://www.dropbox.com/scl/fi/sworpjdpiifnbyfcjhi6e/Xuper_4.99.4.apk?rlkey=2wf7c1umskh0yxwuc2tuhs2g4&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "com.redsoft.appkiller",
+    "name": "AppKiller",
+    "versionName": "26.6.1",
+    "versionCode": 46,
+    "apkUrl": "https://www.dropbox.com/scl/fi/ak64f65zdh1wo1ayg7xns/AppKiller_26.6.1.apk?rlkey=2jrtu2hgw4xzxh03zicghb6v0&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "com.tv.nacionalcr",
+    "name": "TV Nacional CR",
+    "versionName": 7.03,
+    "versionCode": 7,
+    "apkUrl": "https://www.dropbox.com/scl/fi/yysyd6fzoqht6k2ttrcuc/TV-Nacional-CR_7.03.apk?rlkey=tz7ibehd008dpnyq3g1a13kjr&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "com.tv.optimizadorram",
+    "name": "Optimizador de Ram",
+    "versionName": 2.1,
+    "versionCode": 2,
+    "apkUrl": "https://www.dropbox.com/scl/fi/lxlgbeppgfx3nbm5cpcqw/Optimizador-de-Ram_2.1.apk?rlkey=di7mm6dssc1pllwvitq8klghk&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  }
+]

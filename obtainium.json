@@ -23,13 +23,6 @@
             "pinned": false
         },
         {
-            "id": "nextapp.fx",
-            "url": "https://www.dropbox.com/scl/fi/rl6ti1treihm5k1psetyk/FX_9.1.0.8.apk?rlkey=i2tar4s5pkvub8h2w0i02ygah&dl=1",
-            "name": "FX",
-            "version": "9.1.0.8",
-            "pinned": false
-        },
-        {
             "id": "com.protectstar.microguardfree",
             "url": "https://www.dropbox.com/scl/fi/g35iyv71o8hblc9cuh8eh/Micro-Guard_6.5.apk?rlkey=14xpqidppzvat9nb5vwo4n0pj&dl=1",
             "name": "Micro Guard",

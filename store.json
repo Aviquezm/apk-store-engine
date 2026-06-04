@@ -24,14 +24,6 @@
     "icon": ""
   },
   {
-    "pkg": "nextapp.fx",
-    "name": "FX",
-    "versionName": "9.1.0.8",
-    "versionCode": 9108,
-    "apkUrl": "https://www.dropbox.com/scl/fi/rl6ti1treihm5k1psetyk/FX_9.1.0.8.apk?rlkey=i2tar4s5pkvub8h2w0i02ygah&dl=1",
-    "icon": ""
-  },
-  {
     "pkg": "com.protectstar.microguardfree",
     "name": "Micro Guard",
     "versionName": 6.5,

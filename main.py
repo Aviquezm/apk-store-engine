@@ -55,7 +55,7 @@ def nombre_seguro(texto):
     return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
 
 # ---------------------------------------------------------
-# RECONCILIACIÓN TOTAL (SOBREESCRITURA SEGURA)
+# RECONCILIACIÓN TOTAL (ELIMINACIÓN INFALIBLE)
 # ---------------------------------------------------------
 def reconciliar_todo(sheet, drive_service, dbx):
     print("--- INICIANDO RECONCILIACIÓN ---")
@@ -82,7 +82,7 @@ def reconciliar_todo(sheet, drive_service, dbx):
     datos_actuales = todas_las_filas[1:]
     col_id_drive = encabezados.index('ID Drive')
     col_nombre = encabezados.index('Nombre')
-    col_version = encabezados.index('Version')
+    col_link = encabezados.index('Link APK')
     
     datos_filtrados = []
     
@@ -93,25 +93,22 @@ def reconciliar_todo(sheet, drive_service, dbx):
             datos_filtrados.append(fila)
         else:
             nombre = str(fila[col_nombre]).strip()
-            version = str(fila[col_version]).strip()
-            print(f"DEBUG: La app '{nombre}' fue borrada de Drive. Eliminando...")
+            link = str(fila[col_link]).strip()
+            print(f"DEBUG: La app '{nombre}' fue borrada de Drive. Buscando en Dropbox vía enlace...")
             
-            # 🛠️ CORRECCIÓN AQUÍ: Búsqueda exacta en Dropbox para evitar fallos por mayúsculas
-            ruta_dropbox_esperada = f"/{nombre}_{version}.apk".lower()
+            # 🛠️ LA MAGIA: Usar el Link para encontrar el archivo exacto sin importar su nombre
             try:
-                resultado = dbx.files_list_folder('')
-                encontrado = False
-                for entrada in resultado.entries:
-                    if isinstance(entrada, dropbox.files.FileMetadata):
-                        if entrada.path_lower == ruta_dropbox_esperada:
-                            dbx.files_delete_v2(entrada.path_display)
-                            print(f"   ✅ Dropbox: {entrada.path_display} eliminado.")
-                            encontrado = True
-                            break
-                if not encontrado:
-                    print(f"   ⚠️ Dropbox: No se encontró '{ruta_dropbox_esperada}' (quizás ya no existía).")
+                # A la API de Dropbox le pasamos el link original
+                link_limpio = link.replace("dl=1", "dl=0")
+                metadata = dbx.sharing_get_shared_link_metadata(link_limpio)
+                
+                if metadata and metadata.path_lower:
+                    dbx.files_delete_v2(metadata.path_lower)
+                    print(f"   ✅ Dropbox: Archivo físico {metadata.path_lower} destruido con éxito.")
+                else:
+                    print(f"   ⚠️ Dropbox: No se pudo localizar la ruta del archivo mediante el link.")
             except Exception as e:
-                print(f"   ❌ Error en Dropbox al intentar borrar: {e}")
+                print(f"   ❌ Dropbox: Error al intentar borrar por link (puede que ya no exista). Detalle: {e}")
 
     print("DEBUG: Actualizando Excel por sobreescritura...")
     sheet.clear()
@@ -121,12 +118,11 @@ def reconciliar_todo(sheet, drive_service, dbx):
         print(f"✅ Excel sincronizado con {len(datos_filtrados)} registros limpios.")
 
 # ---------------------------------------------------------
-# DETECTAR CAMBIOS DE NOMBRE (CON TIJERAS INTELIGENTES)
+# DETECTAR CAMBIOS DE NOMBRE
 # ---------------------------------------------------------
 def detectar_cambios_nombre(sheet, drive_service):
     print("--- DETECTANDO CAMBIOS DE NOMBRE ---")
     
-    # 1. Obtener archivos desde Drive
     ids_en_drive = []
     page_token = None
     while True:
@@ -138,7 +134,6 @@ def detectar_cambios_nombre(sheet, drive_service):
         page_token = response.get('nextPageToken')
         if not page_token: break
             
-    # 2. Leer Excel
     todas_las_filas = sheet.get_all_values()
     if len(todas_las_filas) <= 1: return
     
@@ -148,8 +143,6 @@ def detectar_cambios_nombre(sheet, drive_service):
     
     for item in ids_en_drive:
         id_drive_actual = str(item['id']).strip()
-        
-        # ✂️ LAS TIJERAS
         nombre_limpio_drive = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
         
         for i, fila in enumerate(todas_las_filas):
@@ -165,19 +158,17 @@ def detectar_cambios_nombre(sheet, drive_service):
                 break
 
 # ---------------------------------------------------------
-# PROCESAMIENTO Y GENERACIÓN (PASO A PASO)
+# PROCESAMIENTO Y GENERACIÓN 
 # ---------------------------------------------------------
 def procesar_y_generar(sheet, drive_service, dbx):
     print("--- PROCESANDO NUEVAS APPS Y GENERANDO JSON ---")
     
-    # 1. Obtener registros existentes
     registros = sheet.get_all_records()
     procesados = []
     for r in registros:
         if r.get('ID Drive'):
             procesados.append(str(r['ID Drive']).strip())
     
-    # 2. Buscar nuevos en Drive
     query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
     items = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
     
@@ -196,7 +187,6 @@ def procesar_y_generar(sheet, drive_service, dbx):
                 f.write(fh.read())
             
             apk = APK("temp.apk")
-            
             nombre = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
             path = f"/{nombre}_{apk.version_name}.apk"
             
@@ -207,14 +197,13 @@ def procesar_y_generar(sheet, drive_service, dbx):
             
             sheet.append_row([
                 nombre, "Publicado", link, apk.version_name, 
-                apk.package, "", # <--- Celda vacía para la imagen local en Android Studio
+                apk.package, "", # <--- Celda vacía para que Android Studio ponga la imagen local
                 id_item, "Dropbox", str(apk.version_code), 
                 calcular_hash("temp.apk"), str(os.path.getsize("temp.apk"))
             ])
             os.remove("temp.apk")
             print(f"   ✅ App {nombre} v{apk.version_name} lista y agregada.")
 
-    # 3. Generar JSONs
     print("DEBUG: Escribiendo JSONs finales...")
     registros_finales = sheet.get_all_records()
     
@@ -237,7 +226,7 @@ def procesar_y_generar(sheet, drive_service, dbx):
                 "versionName": r['Version'],
                 "versionCode": int(r['Version Code'] if str(r['Version Code']).isdigit() else 0),
                 "apkUrl": r['Link APK'].replace("dl=0", "dl=1"),
-                "icon": str(r.get('Icono', '')).strip() # <--- Pasa vacío si no hay ícono
+                "icon": str(r.get('Icono', '')).strip() 
             })
             
     with open("obtainium.json", "w", encoding='utf-8') as f:

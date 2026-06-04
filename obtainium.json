@@ -42,6 +42,13 @@
             "name": "Micro Guard",
             "version": 6.5,
             "pinned": false
+        },
+        {
+            "id": "de.blinkt.openvpn",
+            "url": "https://www.dropbox.com/scl/fi/0gkm2q1334r28c09r7mgr/OpenVPN_0.7.64.apk?rlkey=hnakggj65tmy7tkdm5h7a2r68&dl=1",
+            "name": "OpenVPN",
+            "version": "0.7.64",
+            "pinned": false
         }
     ]
 }

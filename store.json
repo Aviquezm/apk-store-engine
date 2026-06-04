@@ -46,5 +46,13 @@
     "versionCode": 6500,
     "apkUrl": "https://www.dropbox.com/scl/fi/g35iyv71o8hblc9cuh8eh/Micro-Guard_6.5.apk?rlkey=14xpqidppzvat9nb5vwo4n0pj&dl=1",
     "icon": ""
+  },
+  {
+    "pkg": "de.blinkt.openvpn",
+    "name": "OpenVPN",
+    "versionName": "0.7.64",
+    "versionCode": 219,
+    "apkUrl": "https://www.dropbox.com/scl/fi/0gkm2q1334r28c09r7mgr/OpenVPN_0.7.64.apk?rlkey=hnakggj65tmy7tkdm5h7a2r68&dl=1",
+    "icon": ""
   }
 ]

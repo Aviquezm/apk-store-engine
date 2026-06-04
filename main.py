@@ -52,10 +52,9 @@ def nombre_seguro(texto):
 # RECONCILIACIÓN COMPLETA: DRIVE ↔ SHEETS ↔ DROPBOX
 # ---------------------------------------------------------
 def reconciliar_todo(sheet, drive_service, dbx):
-    """Compara Drive, Sheets y Dropbox. Elimina lo que falte en Drive."""
     print("🔄 INICIANDO RECONCILIACIÓN COMPLETA...")
     try:
-        # 1. Obtener TODOS los archivos APK en Drive (CON PAGINACIÓN)
+        # 1. Obtener TODOS los archivos APK en Drive
         ids_en_drive = set()
         page_token = None
         while True:
@@ -77,14 +76,10 @@ def reconciliar_todo(sheet, drive_service, dbx):
                 
         print(f"📁 Archivos APK válidos en Drive: {len(ids_en_drive)}")
         
-        # 2. Obtener TODOS los registros en Sheets
         registros = sheet.get_all_records()
         print(f"📊 Registros leídos en Sheets: {len(registros)}")
         
-        if registros:
-            print(f"📝 Columnas detectadas: {list(registros[0].keys())}")
-        
-        # 3. Detectar qué IDs en Sheets YA NO ESTÁN en Drive
+        # 2. Detectar qué IDs en Sheets YA NO ESTÁN en Drive
         filas_a_eliminar = []
         for idx, r in enumerate(registros):
             id_drive = str(r.get('ID Drive', '')).strip()
@@ -92,22 +87,20 @@ def reconciliar_todo(sheet, drive_service, dbx):
             version = str(r.get('Version', '')).strip()
             pkg = str(r.get('Pkg', '')).strip()
             
-            # Ignorar filas totalmente en blanco en el Excel
-            if not nombre and not pkg:
-                continue
+            if not nombre and not pkg: continue
                 
-            if id_drive:
-                if id_drive not in ids_en_drive:
-                    print(f"🗑️ DETECTADO: '{nombre}' v{version} fue ELIMINADO de Drive.")
-                    filas_a_eliminar.append((nombre, version, id_drive))
-            else:
-                print(f"⚠️ Fila {idx + 2} ('{nombre}') no tiene 'ID Drive'. Se ignorará.")
+            if id_drive and id_drive not in ids_en_drive:
+                print(f"🗑️ DETECTADO: '{nombre}' v{version} fue ELIMINADO de Drive.")
+                # Anotamos la coordenada matemática (idx + 2) de la fila
+                filas_a_eliminar.append((idx + 2, nombre, version))
         
-        # 4. Eliminar de Dropbox y Sheets lo que ya no está en Drive
+        # 3. Eliminar de Dropbox y Sheets
         if filas_a_eliminar:
             print(f"🧹 Limpiando {len(filas_a_eliminar)} archivos eliminados...")
             
-            for nombre, version, id_drive in filas_a_eliminar:
+            # ORDEN INVERSO: Borramos de abajo hacia arriba para no dañar los índices numéricos
+            for fila_num, nombre, version in sorted(filas_a_eliminar, key=lambda x: x[0], reverse=True):
+                
                 # a) Eliminar de Dropbox
                 ruta_dropbox_esperada = f"/{nombre}_{version}.apk".lower()
                 try:
@@ -121,22 +114,18 @@ def reconciliar_todo(sheet, drive_service, dbx):
                 except Exception as e:
                     print(f"   ⚠️ No se pudo borrar de Dropbox: {e}")
                 
-                # b) Eliminar fila de Sheets (Buscador exacto)
+                # b) Eliminar fila de Sheets usando la coordenada matemática
                 try:
-                    celda = sheet.find(id_drive)
-                    if celda:
-                        sheet.delete_row(celda.row)
-                        print(f"   ✅ Sheets: Fila de '{nombre}' eliminada correctamente")
-                        time.sleep(1.5)
+                    sheet.delete_row(fila_num)
+                    print(f"   ✅ Sheets: Fila {fila_num} ('{nombre}') eliminada correctamente")
+                    time.sleep(1.5)
                 except Exception as e:
-                    print(f"   ⚠️ Error buscando/eliminando fila en Sheets: {e}")
+                    print(f"   ⚠️ Error eliminando fila {fila_num} en Sheets: {e}")
         else:
             print("✅ Todo está sincronizado. No hay archivos eliminados que limpiar.")
             
     except Exception as e:
         print(f"[ERROR] En reconciliación: {e}")
-        import traceback
-        traceback.print_exc()
 
 # ---------------------------------------------------------
 # DETECTAR CAMBIOS DE NOMBRE
@@ -176,8 +165,6 @@ def detectar_cambios_nombre(sheet, drive_service):
         
         if cambios_detectados == 0:
             print("✅ No hay cambios de nombre detectados")
-        else:
-            print(f"✅ {cambios_detectados} cambio(s) de nombre detectado(s)")
             
     except Exception as e:
         print(f"[ERROR] Detectando cambios de nombre: {e}")
@@ -246,7 +233,6 @@ def sincronizar_dropbox(sheet, dbx):
                         dbx.files_delete_v2(entrada.path_display)
                     except Exception as e:
                         print(f"   No se pudo borrar: {e}")
-                         
     except Exception as e:
         print(f"Error en sincronización de Dropbox: {e}")
 
@@ -350,7 +336,7 @@ def main():
         detectar_cambios_nombre(sheet, drive_service)
         
         # PASO 3: PROCESAR NUEVAS APKs
-        sheet = client_gs.open_by_key(SHEET_ID).sheet1  # Recargar
+        sheet = client_gs.open_by_key(SHEET_ID).sheet1
         registros = sheet.get_all_records()
         procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
         
@@ -395,24 +381,26 @@ def main():
                     sheet = client_gs.open_by_key(SHEET_ID).sheet1
                     registros = sheet.get_all_records()
                     
-                    # Limpieza de versiones anteriores por Package Name (Con buscador exacto)
+                    # Limpieza de versiones anteriores por Package Name (Coordenada Matemática Inversa)
                     try:
+                        filas_a_borrar = []
                         pkg_nuevo = str(apk.package).strip().lower()
-                        for r in registros:
+                        for i, r in enumerate(registros):
                             pkg_viejo = str(r.get('Pkg')).strip().lower()
                             id_viejo = str(r.get('ID Drive', '')).strip()
                             
                             if pkg_viejo == pkg_nuevo and id_viejo and id_viejo != item['id']:
                                 try: drive_service.files().delete(fileId=id_viejo).execute()
                                 except: pass
+                                filas_a_borrar.append(i + 2)
                                 
+                        if filas_a_borrar:
+                            for fila_num in sorted(filas_a_borrar, reverse=True):
                                 try:
-                                    celda = sheet.find(id_viejo)
-                                    if celda:
-                                        sheet.delete_row(celda.row)
-                                        time.sleep(1.5)
+                                    sheet.delete_row(fila_num)
+                                    time.sleep(1.5)
                                 except Exception as e:
-                                    print(f"   ⚠️ Error borrando fila vieja: {e}")
+                                    print(f"   ⚠️ Error borrando fila vieja {fila_num}: {e}")
                                     
                         sheet = client_gs.open_by_key(SHEET_ID).sheet1
                         registros = sheet.get_all_records()
@@ -432,9 +420,6 @@ def main():
             
     except Exception as e: 
         print(f"[ERROR] En procesamiento: {e}")
-        import traceback
-        traceback.print_exc()
-        notificar(f" Error: {str(e)[:100]}")
 
     restaurar_faltantes_en_dropbox(sheet, drive_service, dbx)
     

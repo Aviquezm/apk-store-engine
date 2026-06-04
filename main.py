@@ -96,12 +96,22 @@ def reconciliar_todo(sheet, drive_service, dbx):
             version = str(fila[col_version]).strip()
             print(f"DEBUG: La app '{nombre}' fue borrada de Drive. Eliminando...")
             
-            ruta_dropbox = f"/{nombre}_{version}.apk".lower()
+            # 🛠️ CORRECCIÓN AQUÍ: Búsqueda exacta en Dropbox para evitar fallos por mayúsculas
+            ruta_dropbox_esperada = f"/{nombre}_{version}.apk".lower()
             try:
-                dbx.files_delete_v2(ruta_dropbox)
-                print(f"   ✅ Dropbox: {ruta_dropbox} eliminado.")
-            except:
-                pass
+                resultado = dbx.files_list_folder('')
+                encontrado = False
+                for entrada in resultado.entries:
+                    if isinstance(entrada, dropbox.files.FileMetadata):
+                        if entrada.path_lower == ruta_dropbox_esperada:
+                            dbx.files_delete_v2(entrada.path_display)
+                            print(f"   ✅ Dropbox: {entrada.path_display} eliminado.")
+                            encontrado = True
+                            break
+                if not encontrado:
+                    print(f"   ⚠️ Dropbox: No se encontró '{ruta_dropbox_esperada}' (quizás ya no existía).")
+            except Exception as e:
+                print(f"   ❌ Error en Dropbox al intentar borrar: {e}")
 
     print("DEBUG: Actualizando Excel por sobreescritura...")
     sheet.clear()
@@ -139,7 +149,7 @@ def detectar_cambios_nombre(sheet, drive_service):
     for item in ids_en_drive:
         id_drive_actual = str(item['id']).strip()
         
-        # ✂️ LAS TIJERAS: Recorta " _v4.99.apk" o " v6.5.apk" y deja solo el nombre real
+        # ✂️ LAS TIJERAS
         nombre_limpio_drive = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
         
         for i, fila in enumerate(todas_las_filas):
@@ -147,7 +157,6 @@ def detectar_cambios_nombre(sheet, drive_service):
             id_sheet = str(fila[col_id_drive]).strip() if col_id_drive < len(fila) else ""
             nombre_sheet = str(fila[col_nombre]).strip() if col_nombre < len(fila) else ""
             
-            # Si el ID coincide, comparamos los nombres limpios
             if id_sheet == id_drive_actual:
                 if nombre_sheet != nombre_limpio_drive:
                     print(f"🔄 Cambio detectado: De '{nombre_sheet}' a '{nombre_limpio_drive}'")
@@ -188,7 +197,6 @@ def procesar_y_generar(sheet, drive_service, dbx):
             
             apk = APK("temp.apk")
             
-            # Al ser nueva, si tú ya le pusiste nombre bonito en Drive, usamos las mismas tijeras
             nombre = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
             path = f"/{nombre}_{apk.version_name}.apk"
             
@@ -199,14 +207,14 @@ def procesar_y_generar(sheet, drive_service, dbx):
             
             sheet.append_row([
                 nombre, "Publicado", link, apk.version_name, 
-                apk.package, "", # <--- CAMBIO AQUÍ: Celda vacía para que Android Studio lo maneje
+                apk.package, "", # <--- Celda vacía para la imagen local en Android Studio
                 id_item, "Dropbox", str(apk.version_code), 
                 calcular_hash("temp.apk"), str(os.path.getsize("temp.apk"))
             ])
             os.remove("temp.apk")
             print(f"   ✅ App {nombre} v{apk.version_name} lista y agregada.")
 
-    # 3. Generar JSONs (Leemos fresco del Excel por si hubo cambios de nombre)
+    # 3. Generar JSONs
     print("DEBUG: Escribiendo JSONs finales...")
     registros_finales = sheet.get_all_records()
     
@@ -229,7 +237,7 @@ def procesar_y_generar(sheet, drive_service, dbx):
                 "versionName": r['Version'],
                 "versionCode": int(r['Version Code'] if str(r['Version Code']).isdigit() else 0),
                 "apkUrl": r['Link APK'].replace("dl=0", "dl=1"),
-                "icon": str(r.get('Icono', '')).strip() # <--- CAMBIO AQUÍ: Envía lo que tenga el Excel (vacío si no hay nada)
+                "icon": str(r.get('Icono', '')).strip() # <--- Pasa vacío si no hay ícono
             })
             
     with open("obtainium.json", "w", encoding='utf-8') as f:

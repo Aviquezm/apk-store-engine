@@ -56,6 +56,13 @@
             "name": "Duolingo",
             "version": "6.82.3",
             "pinned": false
+        },
+        {
+            "id": "eu.darken.sdmse",
+            "url": "https://www.dropbox.com/scl/fi/0n2ips89uxcsuszenvocn/SD-Maid-SE_1.5.1-rc0.apk?rlkey=cx91225ibpygn4126g8ozqi32&dl=1",
+            "name": "SD Maid SE",
+            "version": "1.5.1-rc0",
+            "pinned": false
         }
     ]
 }

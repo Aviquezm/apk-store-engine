@@ -62,5 +62,13 @@
     "versionCode": 2377,
     "apkUrl": "https://www.dropbox.com/scl/fi/4w9e8dk6y1fbgsthhzotu/Duolingo_6.82.3.apk?rlkey=2d34zg35jvbcstvom4h505atc&dl=1",
     "icon": ""
+  },
+  {
+    "pkg": "eu.darken.sdmse",
+    "name": "SD Maid SE",
+    "versionName": "1.5.1-rc0",
+    "versionCode": 10501000,
+    "apkUrl": "https://www.dropbox.com/scl/fi/0n2ips89uxcsuszenvocn/SD-Maid-SE_1.5.1-rc0.apk?rlkey=cx91225ibpygn4126g8ozqi32&dl=1",
+    "icon": ""
   }
 ]

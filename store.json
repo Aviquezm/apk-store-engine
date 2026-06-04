@@ -54,5 +54,13 @@
     "versionCode": 49904,
     "apkUrl": "https://www.dropbox.com/scl/fi/4w87h11xni7hdjkwoa1cr/Xuper_4.99.4.apk?rlkey=7kexbkb8tm3r7vftqwtwzgch1&dl=1",
     "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
+  },
+  {
+    "pkg": "com.redsoft.appkiller",
+    "name": "AppKiller",
+    "versionName": "26.6.1",
+    "versionCode": 46,
+    "apkUrl": "https://www.dropbox.com/scl/fi/0j6eg5olo05utns7o2m3q/AppKiller_26.6.1.apk?rlkey=i6mtv546pjq3818fh3dmzzm4q&dl=1",
+    "icon": "https://aviquezm.github.io/apk-store-engine/default_icon.png"
   }
 ]

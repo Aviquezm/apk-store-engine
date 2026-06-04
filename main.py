@@ -175,7 +175,7 @@ def procesar_y_generar(sheet, drive_service, dbx):
     for item in items:
         id_item = str(item['id']).strip()
         if item['name'].lower().endswith('.apk') and id_item not in procesados:
-            print(f"👷♂️ Procesando Nueva App: {item['name']}")
+            print(f"👷‍♂️ Procesando Nueva App: {item['name']}")
             
             request = drive_service.files().get_media(fileId=item['id'])
             fh = io.BytesIO()
@@ -199,7 +199,7 @@ def procesar_y_generar(sheet, drive_service, dbx):
             
             sheet.append_row([
                 nombre, "Publicado", link, apk.version_name, 
-                apk.package, f"{REPO_URL_BASE}default_icon.png", 
+                apk.package, "", # <--- CAMBIO AQUÍ: Celda vacía para que Android Studio lo maneje
                 id_item, "Dropbox", str(apk.version_code), 
                 calcular_hash("temp.apk"), str(os.path.getsize("temp.apk"))
             ])
@@ -229,7 +229,7 @@ def procesar_y_generar(sheet, drive_service, dbx):
                 "versionName": r['Version'],
                 "versionCode": int(r['Version Code'] if str(r['Version Code']).isdigit() else 0),
                 "apkUrl": r['Link APK'].replace("dl=0", "dl=1"),
-                "icon": r['Icono'] if r.get('Icono') else f"{REPO_URL_BASE}default_icon.png"
+                "icon": str(r.get('Icono', '')).strip() # <--- CAMBIO AQUÍ: Envía lo que tenga el Excel (vacío si no hay nada)
             })
             
     with open("obtainium.json", "w", encoding='utf-8') as f:

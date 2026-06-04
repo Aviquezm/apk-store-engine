@@ -1,13 +1,5 @@
 [
   {
-    "pkg": "com.android.mgstv",
-    "name": "Xuper TV",
-    "versionName": "4.99.4",
-    "versionCode": 49904,
-    "apkUrl": "https://www.dropbox.com/scl/fi/sworpjdpiifnbyfcjhi6e/Xuper_4.99.4.apk?rlkey=2wf7c1umskh0yxwuc2tuhs2g4&dl=1",
-    "icon": ""
-  },
-  {
     "pkg": "com.tv.nacionalcr",
     "name": "TV Nacional CR",
     "versionName": 7.03,

@@ -2,13 +2,6 @@
     "debug": "BOT",
     "apps": [
         {
-            "id": "com.android.mgstv",
-            "url": "https://www.dropbox.com/scl/fi/sworpjdpiifnbyfcjhi6e/Xuper_4.99.4.apk?rlkey=2wf7c1umskh0yxwuc2tuhs2g4&dl=1",
-            "name": "Xuper TV",
-            "version": "4.99.4",
-            "pinned": false
-        },
-        {
             "id": "com.tv.nacionalcr",
             "url": "https://www.dropbox.com/scl/fi/yysyd6fzoqht6k2ttrcuc/TV-Nacional-CR_7.03.apk?rlkey=tz7ibehd008dpnyq3g1a13kjr&dl=1",
             "name": "TV Nacional CR",

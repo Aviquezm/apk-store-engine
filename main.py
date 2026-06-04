@@ -7,6 +7,7 @@ import dropbox
 import gspread
 import re
 import requests
+from datetime import datetime
 from dropbox.files import WriteMode
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
@@ -43,7 +44,6 @@ def notificar(mensaje):
 def calcular_hash(file_path):
     sha256 = hashlib.sha256()
     with open(file_path, "rb") as f:
-        # Leemos en bloques para no saturar la memoria
         while True:
             data = f.read(4096)
             if not data:
@@ -55,29 +55,24 @@ def nombre_seguro(texto):
     return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
 
 # ---------------------------------------------------------
-# RECONCILIACIÓN TOTAL (EXPLICADA PASO A PASO)
+# RECONCILIACIÓN TOTAL (SOBREESCRITURA SEGURA)
 # ---------------------------------------------------------
 def reconciliar_todo(sheet, drive_service, dbx):
     print("--- INICIANDO RECONCILIACIÓN ---")
     
-    # 1. Obtener archivos desde Drive
     ids_en_drive = []
     page_token = None
     while True:
         query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
         response = drive_service.files().list(q=query, pageSize=1000, fields="nextPageToken, files(id, name)", pageToken=page_token).execute()
-        
         for item in response.get('files', []):
             if item['name'].lower().endswith('.apk'):
                 ids_en_drive.append(item['id'])
-        
         page_token = response.get('nextPageToken')
-        if not page_token:
-            break
+        if not page_token: break
     
-    print(f"DEBUG: Se encontraron {len(ids_en_drive)} APKs en Drive.")
+    print(f"DEBUG: Se encontraron {len(ids_en_drive)} APKs válidas en Drive.")
 
-    # 2. Obtener datos del Excel
     todas_las_filas = sheet.get_all_values()
     if len(todas_las_filas) <= 1:
         print("DEBUG: El Excel está vacío o solo tiene encabezados.")
@@ -85,46 +80,87 @@ def reconciliar_todo(sheet, drive_service, dbx):
     
     encabezados = todas_las_filas[0]
     datos_actuales = todas_las_filas[1:]
-    
     col_id_drive = encabezados.index('ID Drive')
     col_nombre = encabezados.index('Nombre')
     col_version = encabezados.index('Version')
     
     datos_filtrados = []
     
-    # 3. Filtrar
     for fila in datos_actuales:
-        # Verificación manual de existencia
-        id_fila = str(fila[col_id_drive]).strip()
+        id_fila = str(fila[col_id_drive]).strip() if col_id_drive < len(fila) else ""
         
         if id_fila in ids_en_drive:
-            # Si existe, la mantenemos en la lista
             datos_filtrados.append(fila)
         else:
-            # Si NO existe, notificamos y borramos de Dropbox
             nombre = str(fila[col_nombre]).strip()
             version = str(fila[col_version]).strip()
-            print(f"DEBUG: La app {nombre} no está en Drive. Eliminando...")
+            print(f"DEBUG: La app '{nombre}' fue borrada de Drive. Eliminando...")
             
             ruta_dropbox = f"/{nombre}_{version}.apk".lower()
             try:
                 dbx.files_delete_v2(ruta_dropbox)
-                print(f"✅ Dropbox: {ruta_dropbox} eliminado.")
+                print(f"   ✅ Dropbox: {ruta_dropbox} eliminado.")
             except:
-                print(f"⚠️ Dropbox: No se pudo borrar {ruta_dropbox}")
+                pass
 
-    # 4. Sobreescribir el Excel con los datos limpios
-    print("DEBUG: Actualizando Excel...")
+    print("DEBUG: Actualizando Excel por sobreescritura...")
     sheet.clear()
     sheet.append_row(encabezados)
     if datos_filtrados:
         sheet.append_rows(datos_filtrados)
-        print(f"✅ Excel actualizado con {len(datos_filtrados)} registros.")
+        print(f"✅ Excel sincronizado con {len(datos_filtrados)} registros limpios.")
+
+# ---------------------------------------------------------
+# DETECTAR CAMBIOS DE NOMBRE (CON TIJERAS INTELIGENTES)
+# ---------------------------------------------------------
+def detectar_cambios_nombre(sheet, drive_service):
+    print("--- DETECTANDO CAMBIOS DE NOMBRE ---")
+    
+    # 1. Obtener archivos desde Drive
+    ids_en_drive = []
+    page_token = None
+    while True:
+        query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
+        response = drive_service.files().list(q=query, pageSize=1000, fields="nextPageToken, files(id, name)", pageToken=page_token).execute()
+        for item in response.get('files', []):
+            if item['name'].lower().endswith('.apk'):
+                ids_en_drive.append(item)
+        page_token = response.get('nextPageToken')
+        if not page_token: break
+            
+    # 2. Leer Excel
+    todas_las_filas = sheet.get_all_values()
+    if len(todas_las_filas) <= 1: return
+    
+    encabezados = todas_las_filas[0]
+    col_id_drive = encabezados.index('ID Drive')
+    col_nombre = encabezados.index('Nombre')
+    
+    for item in ids_en_drive:
+        id_drive_actual = str(item['id']).strip()
+        
+        # ✂️ LAS TIJERAS: Recorta " _v4.99.apk" o " v6.5.apk" y deja solo el nombre real
+        nombre_limpio_drive = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
+        
+        for i, fila in enumerate(todas_las_filas):
+            if i == 0: continue
+            id_sheet = str(fila[col_id_drive]).strip() if col_id_drive < len(fila) else ""
+            nombre_sheet = str(fila[col_nombre]).strip() if col_nombre < len(fila) else ""
+            
+            # Si el ID coincide, comparamos los nombres limpios
+            if id_sheet == id_drive_actual:
+                if nombre_sheet != nombre_limpio_drive:
+                    print(f"🔄 Cambio detectado: De '{nombre_sheet}' a '{nombre_limpio_drive}'")
+                    sheet.update_cell(i + 1, col_nombre + 1, nombre_limpio_drive)
+                    print(f"   ✅ Excel actualizado.")
+                break
 
 # ---------------------------------------------------------
 # PROCESAMIENTO Y GENERACIÓN (PASO A PASO)
 # ---------------------------------------------------------
 def procesar_y_generar(sheet, drive_service, dbx):
+    print("--- PROCESANDO NUEVAS APPS Y GENERANDO JSON ---")
+    
     # 1. Obtener registros existentes
     registros = sheet.get_all_records()
     procesados = []
@@ -139,9 +175,8 @@ def procesar_y_generar(sheet, drive_service, dbx):
     for item in items:
         id_item = str(item['id']).strip()
         if item['name'].lower().endswith('.apk') and id_item not in procesados:
-            print(f"--- PROCESANDO NUEVA APP: {item['name']} ---")
+            print(f"👷♂️ Procesando Nueva App: {item['name']}")
             
-            # Descargar
             request = drive_service.files().get_media(fileId=item['id'])
             fh = io.BytesIO()
             downloader = MediaIoBaseDownload(fh, request)
@@ -151,18 +186,17 @@ def procesar_y_generar(sheet, drive_service, dbx):
             with open("temp.apk", "wb") as f:
                 f.write(fh.read())
             
-            # Analizar
             apk = APK("temp.apk")
-            nombre = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
+            
+            # Al ser nueva, si tú ya le pusiste nombre bonito en Drive, usamos las mismas tijeras
+            nombre = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
             path = f"/{nombre}_{apk.version_name}.apk"
             
-            # Subir a Dropbox
             with open("temp.apk", "rb") as f:
                 dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
             
             link = dbx.sharing_create_shared_link_with_settings(path).url.replace("dl=0", "dl=1")
             
-            # Agregar al Excel
             sheet.append_row([
                 nombre, "Publicado", link, apk.version_name, 
                 apk.package, f"{REPO_URL_BASE}default_icon.png", 
@@ -170,13 +204,15 @@ def procesar_y_generar(sheet, drive_service, dbx):
                 calcular_hash("temp.apk"), str(os.path.getsize("temp.apk"))
             ])
             os.remove("temp.apk")
-            print(f"✅ App {nombre} agregada exitosamente.")
+            print(f"   ✅ App {nombre} v{apk.version_name} lista y agregada.")
 
-    # 3. Generar JSONs (Formato detallado)
+    # 3. Generar JSONs (Leemos fresco del Excel por si hubo cambios de nombre)
+    print("DEBUG: Escribiendo JSONs finales...")
     registros_finales = sheet.get_all_records()
     
-    # Construir JSON para Obtainium
     lista_obtainium = []
+    lista_store = []
+    
     for r in registros_finales:
         if r.get('Pkg'):
             lista_obtainium.append({
@@ -187,10 +223,6 @@ def procesar_y_generar(sheet, drive_service, dbx):
                 "pinned": False
             })
             
-    # Construir JSON para tu App
-    lista_store = []
-    for r in registros_finales:
-        if r.get('Pkg'):
             lista_store.append({
                 "pkg": r['Pkg'],
                 "name": r['Nombre'],
@@ -206,7 +238,7 @@ def procesar_y_generar(sheet, drive_service, dbx):
     with open("store.json", "w", encoding='utf-8') as f:
         json.dump(lista_store, f, indent=2, ensure_ascii=False)
         
-    print("✅ JSONs generados correctamente.")
+    print(f"✅ Archivos JSON generados correctamente con {len(lista_store)} apps.")
 
 # ---------------------------------------------------------
 # MAIN
@@ -214,14 +246,13 @@ def procesar_y_generar(sheet, drive_service, dbx):
 if __name__ == "__main__":
     print("🚀 Iniciando Motor...")
     
-    # Conexiones
     dbx = dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     drive_service = build('drive', 'v3', credentials=creds)
     sheet = gspread.authorize(creds).open_by_key(SHEET_ID).sheet1
     
-    # Ejecución explícita
     reconciliar_todo(sheet, drive_service, dbx)
+    detectar_cambios_nombre(sheet, drive_service)
     procesar_y_generar(sheet, drive_service, dbx)
     
     print("--- PROCESO FINALIZADO ---")

@@ -1,35 +1,4 @@
 {
     "debug": "BOT",
-    "apps": [
-        {
-            "id": "com.redsoft.appkiller",
-            "url": "https://www.dropbox.com/scl/fi/806okveok5l9ne4i7zqjl/AppKiller_26.6.1.apk?rlkey=r91dfvufguf5dkwhl0i6k6xdc&dl=1",
-            "name": "AppKiller v26.6.1.apk",
-            "version": "26.6.1",
-            "pinned": false,
-            "categories": [],
-            "preferredApkPath": "",
-            "additionalSettings": ""
-        },
-        {
-            "id": "com.tv.nacionalcr",
-            "url": "https://www.dropbox.com/scl/fi/ki5ojro31zjjqas5khh34/TV-Nacional-CR_7.03.apk?rlkey=zreh27ye3wbqsqmytaqjc133r&dl=1",
-            "name": "TV Nacional CR",
-            "version": "7.03",
-            "pinned": false,
-            "categories": [],
-            "preferredApkPath": "",
-            "additionalSettings": ""
-        },
-        {
-            "id": "com.protectstar.microguardfree",
-            "url": "https://www.dropbox.com/scl/fi/zv2z9gzzgbtezez1rrgnh/Micro-Guard_6.5.apk?rlkey=6gnc67t9pqevf6erl01eny1lx&dl=1",
-            "name": "Micro Guard v6.5.apk",
-            "version": "6.5",
-            "pinned": false,
-            "categories": [],
-            "preferredApkPath": "",
-            "additionalSettings": ""
-        }
-    ]
+    "apps": []
 }

@@ -8,22 +8,22 @@ import gspread
 import re
 import requests
 from datetime import datetime
-from dropbox.files import WriteMode 
+from dropbox.files import WriteMode
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
-from pyaxmlparser import APK 
+from pyaxmlparser import APK
 
 # --- CONFIGURACIÓN ---
 DRIVE_FOLDER_ID = os.environ['DRIVE_FOLDER_ID']
 SHEET_ID = os.environ['SHEET_ID']
-REPO_URL_BASE = "https://aviquezm.github.io/apk-store-engine/" 
+REPO_URL_BASE = "https://aviquezm.github.io/apk-store-engine/"
 
 DBX_KEY = os.environ['DROPBOX_APP_KEY']
 DBX_SECRET = os.environ['DROPBOX_APP_SECRET']
 DBX_REFRESH_TOKEN = os.environ['DROPBOX_REFRESH_TOKEN']
 
-TG_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN') 
+TG_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 TG_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
 
 SERVICE_ACCOUNT_JSON = json.loads(os.environ['GOOGLE_SERVICE_ACCOUNT_JSON'])
@@ -49,7 +49,7 @@ def nombre_seguro(texto):
     return re.sub(r'[^a-zA-Z0-9]', '_', str(texto).strip().lower())
 
 # ---------------------------------------------------------
-# 🆕 RECONCILIACIÓN: Detecta APKs eliminadas de Drive
+# RECONCILIACIÓN COMPLETA: DRIVE ↔ SHEETS ↔ DROPBOX
 # ---------------------------------------------------------
 def reconciliar_todo(sheet, drive_service, dbx):
     """Compara Drive, Sheets y Dropbox. Elimina lo que falte en Drive."""
@@ -64,7 +64,7 @@ def reconciliar_todo(sheet, drive_service, dbx):
         
         # 2. Obtener TODOS los registros en Sheets
         registros = sheet.get_all_records()
-        print(f" Registros en Sheets: {len(registros)}")
+        print(f"📊 Registros en Sheets: {len(registros)}")
         
         # 3. Detectar qué IDs en Sheets YA NO ESTÁN en Drive (fueron eliminados)
         filas_a_eliminar = []
@@ -89,7 +89,7 @@ def reconciliar_todo(sheet, drive_service, dbx):
                     dbx.files_delete_v2(ruta_dropbox)
                     print(f"   ✅ Dropbox: {ruta_dropbox} eliminado")
                 except Exception as e:
-                    print(f"   ️  No se pudo borrar de Dropbox: {e}")
+                    print(f"   ️ No se pudo borrar de Dropbox: {e}")
                 
                 # b) Eliminar fila de Sheets
                 try:
@@ -97,7 +97,7 @@ def reconciliar_todo(sheet, drive_service, dbx):
                     print(f"   ✅ Sheets: Fila {fila_num} eliminada")
                     time.sleep(1.5)
                 except Exception as e:
-                    print(f"   ⚠️  Error eliminando fila {fila_num}: {e}")
+                    print(f"   ⚠️ Error eliminando fila {fila_num}: {e}")
         else:
             print("✅ No hay archivos eliminados que limpiar")
             
@@ -107,7 +107,61 @@ def reconciliar_todo(sheet, drive_service, dbx):
         traceback.print_exc()
 
 # ---------------------------------------------------------
-# 🆕 RESTAURACIÓN: Sube a Dropbox lo que falte
+# DETECTAR CAMBIOS DE NOMBRE
+# ---------------------------------------------------------
+def detectar_cambios_nombre(sheet, drive_service):
+    """Detecta si el nombre de un archivo en Drive cambió respecto a Sheets"""
+    print("🔍 Detectando cambios de nombre...")
+    try:
+        # 1. Obtener todos los APKs en Drive
+        query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
+        items_drive = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
+        items_apk = [i for i in items_drive if i['name'].lower().endswith('.apk')]
+        
+        # 2. Obtener registros de Sheets
+        registros = sheet.get_all_records()
+        
+        cambios_detectados = 0
+        
+        for item in items_apk:
+            item_id = str(item['id']).strip()
+            item_nombre_archivo = item['name']
+            
+            # Buscar en Sheets
+            for r in registros:
+                id_sheet = str(r.get('ID Drive', '')).strip()
+                nombre_sheet = str(r.get('Nombre', '')).strip()
+                version_sheet = str(r.get('Version', '')).strip()
+                
+                # Si el ID coincide
+                if id_sheet == item_id:
+                    # El nombre esperado en Dropbox es: {nombre}_{version}.apk
+                    nombre_esperado_dropbox = f"{nombre_sheet}_{version_sheet}.apk"
+                    
+                    # Si el nombre del archivo en Drive es diferente al esperado
+                    if item_nombre_archivo != nombre_esperado_dropbox:
+                        print(f"🔄 DETECTADO: Archivo cambió de '{nombre_esperado_dropbox}' a '{item_nombre_archivo}'")
+                        
+                        # Actualizar el nombre en Sheets (Columna 1 = Nombre)
+                        try:
+                            fila_num = registros.index(r) + 2 
+                            sheet.update_cell(fila_num, 1, item_nombre_archivo)
+                            print(f"   ✅ Nombre actualizado en Sheets")
+                            cambios_detectados += 1
+                        except Exception as e:
+                            print(f"   ⚠️ Error actualizando Sheets: {e}")
+                    break
+        
+        if cambios_detectados == 0:
+            print("✅ No hay cambios de nombre detectados")
+        else:
+            print(f"✅ {cambios_detectados} cambio(s) de nombre detectado(s)")
+            
+    except Exception as e:
+        print(f"[ERROR] Detectando cambios de nombre: {e}")
+
+# ---------------------------------------------------------
+# RESTAURACIÓN DE APKs FALTANTES EN DROPBOX
 # ---------------------------------------------------------
 def restaurar_faltantes_en_dropbox(sheet, drive_service, dbx):
     """Verifica que todas las APKs del Excel estén en Dropbox"""
@@ -147,21 +201,20 @@ def restaurar_faltantes_en_dropbox(sheet, drive_service, dbx):
                         dbx.files_upload(f.read(), ruta_esperada, mode=WriteMode('overwrite'))
                     print(f"   ✅ Restaurado en Dropbox: {ruta_esperada}")
                 except Exception as e:
-                    print(f"    Error restaurando {nombre}: {e}")
+                    print(f"   ⚠️ Error restaurando {nombre}: {e}")
                     
         print("✅ Verificación de integridad terminada.")
     except Exception as e:
         print(f"[ERROR] En restauración de faltantes: {e}")
 
 # ---------------------------------------------------------
-# SINCRONIZACIÓN ABSOLUTA DE DROPBOX (EL BARRENDERO)
+# SINCRONIZACIÓN DE DROPBOX
 # ---------------------------------------------------------
 def sincronizar_dropbox(sheet, dbx):
+    """Elimina archivos de Dropbox que no están en Sheets"""
     print("🧹 Escaneando Dropbox para purgar archivos huérfanos...")
     try:
         registros = sheet.get_all_records()
-        
-        # 1. Armamos la lista de los archivos que SÍ deben existir
         archivos_legales = []
         for r in registros:
             if not r.get('Pkg'): continue
@@ -170,29 +223,28 @@ def sincronizar_dropbox(sheet, dbx):
             ruta_esperada = f"/{nombre}_{version}.apk".lower()
             archivos_legales.append(ruta_esperada)
         
-        # 2. Revisamos todo lo que hay realmente en Dropbox
         resultado = dbx.files_list_folder('')
         for entrada in resultado.entries:
             if isinstance(entrada, dropbox.files.FileMetadata):
-                # Si el archivo de Dropbox no está en el Excel, se elimina
                 if entrada.path_display.lower() not in archivos_legales:
-                    print(f"🗑️ Eliminando basura de Dropbox: {entrada.path_display}")
+                    print(f"🗑️ Eliminando huérfano de Dropbox: {entrada.path_display}")
                     try:
                         dbx.files_delete_v2(entrada.path_display)
                     except Exception as e:
-                        print(f"No se pudo borrar {entrada.path_display}: {e}")
+                        print(f"   No se pudo borrar: {e}")
                          
     except Exception as e:
-        print(f"Error en la sincronización de Dropbox: {e}")
+        print(f"Error en sincronización de Dropbox: {e}")
 
 # ---------------------------------------------------------
-# GENERADOR HTML Y JSON (CON LIMPIEZA DE HUÉRFANOS)
+# GENERADOR HTML Y JSON
 # ---------------------------------------------------------
 def generar_sistema_completo(sheet):
-    print("🔄 Generando Sistema y limpiando HTMLs...")
+    print("🔄 Generando Sistema completo...")
     registros = sheet.get_all_records()
     
     obtainium_apps = []
+    store_apps = []
     archivos_html_validos = ["index.html"]
 
     for r in registros:
@@ -202,34 +254,45 @@ def generar_sistema_completo(sheet):
         version = str(r.get('Version', '1.0')).strip()
         link_apk = str(r.get('Link APK', '')).strip().replace("dl=0", "dl=1")
         pkg = str(r.get('Pkg', '')).strip()
+        icono = str(r.get('Icono', '')).strip()
+        version_code = str(r.get('Version Code', '0')).strip()
         
         filename = f"{nombre_seguro(nombre)}.html"
         archivos_html_validos.append(filename)
         
-        full_url = f"{REPO_URL_BASE}{filename}"
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head><title>{nombre}</title></head>
+<body>
+<h1>{nombre}</h1>
+<p>Version: {version}</p>
+<a href="{link_apk}">Descargar {nombre} v{version}</a>
+</body>
+</html>"""
+        with open(filename, "w", encoding='utf-8') as f: 
+            f.write(html_content)
         
-        html_content = f"""
-        
-{nombre}
-Version: {version}
-[Descargar {nombre} v{version}]({link_apk})
-        """
-        with open(filename, "w", encoding='utf-8') as f: f.write(html_content)
-        
-        # --- AQUÍ ESTÁ LA MAGIA DE LA NUEVA TIENDA NATIVA ---
         app_entry = {
             "id": pkg,
-            "url": link_apk,  # Descarga directa del APK desde Dropbox
+            "url": link_apk,
             "name": nombre,
             "version": version,
             "pinned": False,
             "categories": [],
             "preferredApkPath": "",
-            "additionalSettings": "" # Limpiamos el flag de Obtainium
+            "additionalSettings": ""
         }
         obtainium_apps.append(app_entry)
+        
+        store_apps.append({
+            "pkg": pkg,
+            "name": nombre,
+            "versionName": version,
+            "versionCode": int(version_code) if version_code.isdigit() else 0,
+            "apkUrl": link_apk,
+            "icon": icono if icono else f"{REPO_URL_BASE}default_icon.png"
+        })
 
-    # Limpieza de HTMLs viejos en GitHub
     try:
         archivos_locales = os.listdir('.')
         for archivo in archivos_locales:
@@ -243,14 +306,22 @@ Version: {version}
         "debug": "GENERADO_POR_BOT_CONFIRMADO", 
         "apps": obtainium_apps
     }
-    with open("obtainium.json", "w", encoding='utf-8') as f: json.dump(export_data, f, indent=4)
-    with open("index.html", "w", encoding='utf-8') as f: f.write("<html><body><h1>Motor Online (Espejo Activo)</h1></body></html>")
+    with open("obtainium.json", "w", encoding='utf-8') as f: 
+        json.dump(export_data, f, indent=4)
+
+    with open("store.json", "w", encoding='utf-8') as f: 
+        json.dump(store_apps, f, indent=2, ensure_ascii=False)
+
+    print(f"✅ JSONs generados: {len(store_apps)} apps")
+
+    with open("index.html", "w", encoding='utf-8') as f: 
+        f.write(f"<html><body><h1>V38 Online - Tienda APK</h1><p>Apps: {len(store_apps)}</p></body></html>")
 
 # ---------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------
 def main():
-    print("🚀 Iniciando Motor (Modo Alta Velocidad)...")
+    print("🚀 Iniciando Motor con Reconciliación Completa...")
     dbx = dropbox.Dropbox(app_key=DBX_KEY, app_secret=DBX_SECRET, oauth2_refresh_token=DBX_REFRESH_TOKEN)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(SERVICE_ACCOUNT_JSON, SCOPE)
     drive_service = build('drive', 'v3', credentials=creds)
@@ -258,20 +329,24 @@ def main():
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
     
     try:
-        # 🆕 PASO 0: RECONCILIACIÓN (detectar eliminados de Drive)
+        # PASO 1: RECONCILIACIÓN (Detectar eliminados)
         reconciliar_todo(sheet, drive_service, dbx)
         
-        # 🆕 Recargar sheet después de reconciliación
-        sheet = client_gs.open_by_key(SHEET_ID).sheet1
+        # PASO 2: DETECTAR CAMBIOS DE NOMBRE
+        detectar_cambios_nombre(sheet, drive_service)
         
+        # PASO 3: PROCESAR NUEVAS APKs
+        sheet = client_gs.open_by_key(SHEET_ID).sheet1  # Recargar
         registros = sheet.get_all_records()
         procesados = {str(r.get('ID Drive')).strip() for r in registros if r.get('ID Drive')}
+        
         query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
         items = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
         nuevos = [i for i in items if i['name'].lower().endswith('.apk') and str(i['id']).strip() not in procesados]
 
         if nuevos:
-            notificar(f"‍♂️ Procesando {len(nuevos)} APKs")
+            notificar(f"👷♂️ Procesando {len(nuevos)} APKs nuevas")
+            
             for item in nuevos:
                 temp_apk = "temp.apk"
                 try:
@@ -286,7 +361,6 @@ def main():
                     apk = APK(temp_apk)
                     nombre = re.sub(r'\s*v?\d+.*$', '', apk.application).strip()
                     
-                    # --- NUEVO NOMBRE DEL ICONO ESTÁTICO ---
                     link_icon = f"{REPO_URL_BASE}default_icon.png"
 
                     path = f"/{nombre}_{apk.version_name}.apk"
@@ -294,13 +368,21 @@ def main():
                     l_apk = dbx.sharing_create_shared_link_with_settings(path).url
                     link_apk = l_apk.replace("dl=0", "dl=1")
 
-                    sheet.append_row([nombre, "Publicado", link_apk, apk.version_name, apk.package, link_icon, item['id'], "Dropbox", str(apk.version_code), calcular_hash(temp_apk), str(os.path.getsize(temp_apk))])
+                    sheet.append_row([
+                        nombre, "Publicado", link_apk, apk.version_name, 
+                        apk.package, link_icon, item['id'], "Dropbox", 
+                        str(apk.version_code), calcular_hash(temp_apk), 
+                        str(os.path.getsize(temp_apk))
+                    ])
+                    
+                    print(f"✅ Agregado a Sheets: {nombre} v{apk.version_name}")
                     
                     # 🆕 FIX: Recargar registros DESPUÉS de append_row para evitar que se elimine la APK recién agregada
                     time.sleep(2)
                     sheet = client_gs.open_by_key(SHEET_ID).sheet1
                     registros = sheet.get_all_records()
                     
+                    # Limpieza de versiones anteriores por Package Name
                     try:
                         filas_a_borrar = []
                         pkg_nuevo = str(apk.package).strip().lower()
@@ -321,25 +403,36 @@ def main():
                     except: pass
                     
                     notificar(f"✅ {nombre} v{apk.version_name} listo")
-                except Exception as e: print(e)
+                    time.sleep(2)
+                    
+                except Exception as e: 
+                    print(f"[ERROR] Procesando {item['name']}: {e}")
+                    notificar(f"❌ Error: {str(e)[:100]}")
                 finally: 
                     if os.path.exists(temp_apk): os.remove(temp_apk)
-    except Exception as e: print(e)
+        else:
+            print("ℹ️ No hay APKs nuevas para procesar")
+            
+    except Exception as e: 
+        print(f"[ERROR] En procesamiento: {e}")
+        import traceback
+        traceback.print_exc()
+        notificar(f" Error: {str(e)[:100]}")
 
     # 🆕 PASO: Restaurar faltantes en Dropbox antes de barrer
     restaurar_faltantes_en_dropbox(sheet, drive_service, dbx)
     
-    #  Recargar sheet antes de sincronizar
+    # Recargar sheet antes de sincronizar
     time.sleep(2)
     sheet = client_gs.open_by_key(SHEET_ID).sheet1
 
-    # 1. Pasamos la escoba por Dropbox
+    # PASO 4: SINCRONIZAR DROPBOX
     sincronizar_dropbox(sheet, dbx)
-    
-    # 2. Generamos el sitio y limpiamos GitHub
+
+    # PASO 5: GENERAR SITIO WEB
     generar_sistema_completo(sheet)
-    
-    print("✅ Web Generada y Almacenamiento Optimizado.")
+
+    print("✅ Reconciliación Completa y Almacenamiento Optimizado.")
 
 if __name__ == "__main__":
     main()

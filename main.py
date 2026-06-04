@@ -73,8 +73,10 @@ def reconciliar_todo(sheet, drive_service, dbx):
     
     encabezados = todas_las_filas[0]
     datos_actuales = todas_las_filas[1:]
+    
     col_id_drive = encabezados.index('ID Drive')
     col_nombre = encabezados.index('Nombre')
+    col_version = encabezados.index('Version') 
     col_link = encabezados.index('Link APK')
     
     datos_filtrados = []
@@ -86,7 +88,7 @@ def reconciliar_todo(sheet, drive_service, dbx):
             datos_filtrados.append(fila)
         else:
             nombre = str(fila[col_nombre]).strip()
-            version = str(fila[col_version = encabezados.index('Version')]).strip()
+            version = str(fila[col_version]).strip()
             link = str(fila[col_link]).strip()
             
             # Notificación de eliminación

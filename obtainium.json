@@ -4,7 +4,7 @@
         {
             "id": "nextapp.fx",
             "url": "https://www.dropbox.com/scl/fi/6kqwmqrgfxuwxg3i3ir48/FX_9.1.0.8.apk?rlkey=1ecbwxwjm039ymqhj0u07dz7m&dl=1",
-            "name": "FX",
+            "name": "FX v9.1.0.8.apk",
             "version": "9.1.0.8",
             "pinned": false,
             "categories": [],
@@ -14,7 +14,7 @@
         {
             "id": "org.smarttube.stable",
             "url": "https://www.dropbox.com/scl/fi/yzmm99faynfn231dynv82/SmartTube_31.63.apk?rlkey=35eivlkutplia3sh12xd5gmit&dl=1",
-            "name": "SmartTube",
+            "name": "SmartTube Universal_v31.63.apk",
             "version": "31.63",
             "pinned": false,
             "categories": [],
@@ -24,7 +24,7 @@
         {
             "id": "com.protectstar.microguardfree",
             "url": "https://www.dropbox.com/scl/fi/ce7v6f4zex7zzf6oawo4u/Micro-Guard_6.5.apk?rlkey=rqaeol8z9v0hqk1tyk7yggh89&dl=1",
-            "name": "Micro Guard",
+            "name": "Micro Guard v6.5.apk",
             "version": "6.5",
             "pinned": false,
             "categories": [],
@@ -34,7 +34,7 @@
         {
             "id": "com.tv.nacionalcr",
             "url": "https://www.dropbox.com/scl/fi/98bbtzaimlzqviwzi57fm/TV-Nacional-CR_7.03.apk?rlkey=73ld64u5d8ubmqza27ylh8tog&dl=1",
-            "name": "TV Nacional CR",
+            "name": "TV Nacional CR v7.03.apk",
             "version": "7.03",
             "pinned": false,
             "categories": [],
@@ -44,7 +44,7 @@
         {
             "id": "com.tv.optimizadorram",
             "url": "https://www.dropbox.com/scl/fi/nntshhcr2mtp8qyr06eh0/Optimizador-de-Ram_2.1.apk?rlkey=tyz0v4ty78znffzfx43f4z3ps&dl=1",
-            "name": "Optimizador de Ram",
+            "name": "Optimizador de Ram v2.1.apk",
             "version": "2.1",
             "pinned": false,
             "categories": [],
@@ -54,7 +54,7 @@
         {
             "id": "de.blinkt.openvpn",
             "url": "https://www.dropbox.com/scl/fi/at23ioemap1kwfgoc0oi0/OpenVPN-for-Android_0.7.64.apk?rlkey=ru649d8fk2363iegr3smz1df5&dl=1",
-            "name": "OpenVPN for Android",
+            "name": "OpenVPN_0.7.64.apk",
             "version": "0.7.64",
             "pinned": false,
             "categories": [],
@@ -64,7 +64,7 @@
         {
             "id": "com.android.mgstv",
             "url": "https://www.dropbox.com/scl/fi/4w87h11xni7hdjkwoa1cr/Xuper_4.99.4.apk?rlkey=7kexbkb8tm3r7vftqwtwzgch1&dl=1",
-            "name": "Xuper",
+            "name": "Xuper TV_v4.99.4.apk",
             "version": "4.99.4",
             "pinned": false,
             "categories": [],

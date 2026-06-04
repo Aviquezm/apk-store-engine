@@ -1,7 +1,7 @@
 [
   {
     "pkg": "com.android.mgstv",
-    "name": "Xuper",
+    "name": "Xuper TV",
     "versionName": "4.99.4",
     "versionCode": 49904,
     "apkUrl": "https://www.dropbox.com/scl/fi/sworpjdpiifnbyfcjhi6e/Xuper_4.99.4.apk?rlkey=2wf7c1umskh0yxwuc2tuhs2g4&dl=1",
@@ -25,7 +25,7 @@
   },
   {
     "pkg": "de.blinkt.openvpn",
-    "name": "OpenVPN for Android",
+    "name": "OpenVPN",
     "versionName": "0.7.64",
     "versionCode": 219,
     "apkUrl": "https://www.dropbox.com/scl/fi/otypjk0yk8ju1u19d4t0q/OpenVPN-for-Android_0.7.64.apk?rlkey=8d1g1opcx8c7ip6hp4n1pmw1a&dl=1",
@@ -33,7 +33,7 @@
   },
   {
     "pkg": "org.smarttube.stable",
-    "name": "SmartTube",
+    "name": "SmartTube Universal",
     "versionName": 31.63,
     "versionCode": 2353,
     "apkUrl": "https://www.dropbox.com/scl/fi/h3whl87ozp2tqy4d3gxmb/SmartTube_31.63.apk?rlkey=e32nq1k64cxdo1yeffl1j3c6u&dl=1",

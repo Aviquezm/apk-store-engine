@@ -49,6 +49,13 @@
             "name": "FX",
             "version": "9.1.0.8",
             "pinned": false
+        },
+        {
+            "id": "com.duolingo",
+            "url": "https://www.dropbox.com/scl/fi/4w9e8dk6y1fbgsthhzotu/Duolingo_6.82.3.apk?rlkey=2d34zg35jvbcstvom4h505atc&dl=1",
+            "name": "Duolingo",
+            "version": "6.82.3",
+            "pinned": false
         }
     ]
 }

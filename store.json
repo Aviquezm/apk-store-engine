@@ -54,5 +54,13 @@
     "versionCode": 9108,
     "apkUrl": "https://www.dropbox.com/scl/fi/1op9u0su0hd1j9ar2ovwo/FX_9.1.0.8.apk?rlkey=0dwhkxdki44bjkgcc19yhzzgq&dl=1",
     "icon": ""
+  },
+  {
+    "pkg": "com.duolingo",
+    "name": "Duolingo",
+    "versionName": "6.82.3",
+    "versionCode": 2377,
+    "apkUrl": "https://www.dropbox.com/scl/fi/4w9e8dk6y1fbgsthhzotu/Duolingo_6.82.3.apk?rlkey=2d34zg35jvbcstvom4h505atc&dl=1",
+    "icon": ""
   }
 ]

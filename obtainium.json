@@ -63,6 +63,41 @@
             "name": "SD Maid SE",
             "version": "1.5.1-rc0",
             "pinned": false
+        },
+        {
+            "id": "com.overlook.android.fing",
+            "url": "https://www.dropbox.com/scl/fi/3z3gy6olblc49w29wmswv/Fing_12.11.7.apk?rlkey=rrn137voys0einvmwd2g3kzv5&dl=1",
+            "name": "Fing",
+            "version": "12.11.7",
+            "pinned": false
+        },
+        {
+            "id": "com.wachanga.calories",
+            "url": "https://www.dropbox.com/scl/fi/bminq3mll6mhvo3u8z5ne/Calz_1.32.0.apk?rlkey=dv7vrl9qvvuhpf7xrfrfet8hy&dl=1",
+            "name": "Calz",
+            "version": "1.32.0",
+            "pinned": false
+        },
+        {
+            "id": "com.adguard.android",
+            "url": "https://www.dropbox.com/scl/fi/1ujkiig6lpeioywn894ys/AdGuard_4.14.68.apk?rlkey=797wnyevvjsn89jpvmwq8h4ll&dl=1",
+            "name": "AdGuard",
+            "version": "4.14.68",
+            "pinned": false
+        },
+        {
+            "id": "com.shazam.android",
+            "url": "https://www.dropbox.com/scl/fi/5pfxe5wt5b84jbw2boyux/Shazam_16.40.0-260430.apk?rlkey=zsbeaaod5qmyga121xxxaki5o&dl=1",
+            "name": "Shazam",
+            "version": "16.40.0-260430",
+            "pinned": false
+        },
+        {
+            "id": "com.truecaller",
+            "url": "https://www.dropbox.com/scl/fi/2n9hm7ronhw2s3oo3ktl3/Truecaller_26.19.5.apk?rlkey=zfixc3m464yp40v9kahmd2sal&dl=1",
+            "name": "Truecaller",
+            "version": "26.19.5",
+            "pinned": false
         }
     ]
 }

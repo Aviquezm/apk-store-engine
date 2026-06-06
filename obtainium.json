@@ -16,13 +16,6 @@
             "pinned": false
         },
         {
-            "id": "org.smarttube.stable",
-            "url": "https://www.dropbox.com/scl/fi/h3whl87ozp2tqy4d3gxmb/SmartTube_31.63.apk?rlkey=e32nq1k64cxdo1yeffl1j3c6u&dl=1",
-            "name": "SmartTube Universal",
-            "version": "31.63",
-            "pinned": false
-        },
-        {
             "id": "com.protectstar.microguardfree",
             "url": "https://www.dropbox.com/scl/fi/g35iyv71o8hblc9cuh8eh/Micro-Guard_6.5.apk?rlkey=14xpqidppzvat9nb5vwo4n0pj&dl=1",
             "name": "Micro Guard",
@@ -160,6 +153,13 @@
             "url": "https://www.dropbox.com/scl/fi/z9nw5lxuwvbdxpbkwc76i/Spotify_9.1.40.1486.apk?rlkey=x81zp7bf9zncp6pg8sg83fcb5&dl=1",
             "name": "Spotify",
             "version": "9.1.40.1486",
+            "pinned": false
+        },
+        {
+            "id": "org.smarttube.stable",
+            "url": "https://www.dropbox.com/scl/fi/myhm9azj4i38lj5ow5pob/SmartTube_stable_31.73.apk?rlkey=7nx8ok7xmrwu02u678nb8z6gh&dl=1",
+            "name": "SmartTube_stable",
+            "version": "31.73",
             "pinned": false
         }
     ]

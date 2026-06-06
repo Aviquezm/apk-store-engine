@@ -104,14 +104,6 @@
     "icon": ""
   },
   {
-    "pkg": "com.truecaller",
-    "name": "Truecaller",
-    "versionName": "26.19.5",
-    "versionCode": 2619005,
-    "apkUrl": "https://www.dropbox.com/scl/fi/2n9hm7ronhw2s3oo3ktl3/Truecaller_26.19.5.apk?rlkey=zfixc3m464yp40v9kahmd2sal&dl=1",
-    "icon": ""
-  },
-  {
     "pkg": "com.yablio.sendfilestotv",
     "name": "Send Files To TV",
     "versionName": "1.4",

@@ -154,13 +154,6 @@
             "name": "Spotify",
             "version": "9.1.40.1486",
             "pinned": false
-        },
-        {
-            "id": "org.smarttube.stable",
-            "url": "https://www.dropbox.com/scl/fi/edp0o9ohn80qdd88l8it5/SmartTube-Universal_31.63.apk?rlkey=xru7olihybmydgmyjafa1nhwr&dl=1",
-            "name": "SmartTube Universal",
-            "version": "31.63",
-            "pinned": false
         }
     ]
 }

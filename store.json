@@ -174,13 +174,5 @@
     "versionCode": 140519586,
     "apkUrl": "https://www.dropbox.com/scl/fi/z9nw5lxuwvbdxpbkwc76i/Spotify_9.1.40.1486.apk?rlkey=x81zp7bf9zncp6pg8sg83fcb5&dl=1",
     "icon": ""
-  },
-  {
-    "pkg": "org.smarttube.stable",
-    "name": "SmartTube Universal",
-    "versionName": "31.63",
-    "versionCode": 2353,
-    "apkUrl": "https://www.dropbox.com/scl/fi/edp0o9ohn80qdd88l8it5/SmartTube-Universal_31.63.apk?rlkey=xru7olihybmydgmyjafa1nhwr&dl=1",
-    "icon": ""
   }
 ]

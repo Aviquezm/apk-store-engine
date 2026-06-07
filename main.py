@@ -147,7 +147,7 @@ def detectar_cambios_nombre(sheet, drive_service):
                 break
 
 # ---------------------------------------------------------
-# PROCESAMIENTO Y LIMPIEZA AUTOMÁTICA
+# PROCESAMIENTO Y LIMPIEZA INTELIGENTE (VERSIÓN MATEMÁTICA)
 # ---------------------------------------------------------
 def procesar_y_generar(sheet, drive_service, dbx):
     print("--- PROCESANDO NUEVAS APPS Y GENERANDO JSON ---")
@@ -158,7 +158,6 @@ def procesar_y_generar(sheet, drive_service, dbx):
     query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
     items = drive_service.files().list(q=query, fields="files(id, name)").execute().get('files', [])
     
-    # Filtrar cuáles son realmente nuevos
     nuevos_items = [item for item in items if item['name'].lower().endswith('.apk') and str(item['id']).strip() not in procesados]
     
     if nuevos_items:
@@ -168,7 +167,7 @@ def procesar_y_generar(sheet, drive_service, dbx):
         id_item = str(item['id']).strip()
         nombre_base = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
         
-        notificar(f"⏳ Extrayendo y subiendo: <b>{nombre_base}</b>...")
+        notificar(f"⏳ Extrayendo y analizando: <b>{nombre_base}</b>...")
         
         request = drive_service.files().get_media(fileId=item['id'])
         fh = io.BytesIO()
@@ -182,61 +181,74 @@ def procesar_y_generar(sheet, drive_service, dbx):
         apk = APK("temp.apk")
         nuevo_pkg = apk.package
         nueva_version = apk.version_name
+        
+        # EL CEREBRO: Extraemos el número entero real
+        nuevo_version_code = int(apk.version_code) if apk.version_code else 0
         nombre_final = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
 
+        es_actualizacion_valida = True
+
         # ---------------------------------------------------------
-        # 🧹 ELIMINADOR DE VERSIONES ANTIGUAS (Módulo Conserje)
+        # 🧠 EL CONSERJE INTELIGENTE
         # ---------------------------------------------------------
         registros_actualizados = sheet.get_all_records()
         for i, r in enumerate(registros_actualizados):
             if r.get('Pkg') == nuevo_pkg:
-                old_id_drive = str(r.get('ID Drive')).strip()
-                old_link = str(r.get('Link APK')).strip()
-                old_version = str(r.get('Version')).strip()
+                viejo_code_str = str(r.get('Version Code')).strip()
+                viejo_version_code = int(viejo_code_str) if viejo_code_str.isdigit() else 0
                 
-                notificar(f"🧹 <b>Limpieza automática:</b> Destruyendo versión anterior (v{old_version}) de {nombre_final}...")
-                
-                # 1. Eliminar archivo de Google Drive
-                if old_id_drive:
-                    try:
-                        drive_service.files().delete(fileId=old_id_drive).execute()
+                # COMPARACIÓN MATEMÁTICA
+                if nuevo_version_code > viejo_version_code:
+                    old_id_drive = str(r.get('ID Drive')).strip()
+                    old_link = str(r.get('Link APK')).strip()
+                    old_version = str(r.get('Version')).strip()
+                    
+                    notificar(f"🧹 <b>Actualización confirmada:</b> Reemplazando v{old_version} por v{nueva_version}...")
+                    
+                    # Destruir versión inferior
+                    if old_id_drive:
+                        try: drive_service.files().delete(fileId=old_id_drive).execute()
+                        except: pass
+                    
+                    if old_link:
+                        try:
+                            link_limpio = old_link.replace("dl=1", "dl=0")
+                            metadata = dbx.sharing_get_shared_link_metadata(link_limpio)
+                            if metadata and metadata.path_lower:
+                                dbx.files_delete_v2(metadata.path_lower)
+                        except: pass
+                    
+                    try: sheet.delete_rows(i + 2)
                     except: pass
-                
-                # 2. Eliminar archivo de Dropbox
-                if old_link:
-                    try:
-                        link_limpio = old_link.replace("dl=1", "dl=0")
-                        metadata = dbx.sharing_get_shared_link_metadata(link_limpio)
-                        if metadata and metadata.path_lower:
-                            dbx.files_delete_v2(metadata.path_lower)
+                else:
+                    # RECHAZO: El archivo subido es igual o más viejo que el de la tienda
+                    es_actualizacion_valida = False
+                    notificar(f"⚠️ <b>Rechazo automático:</b> Se detectó {nombre_final} v{nueva_version}, pero la tienda ya tiene una versión igual o superior. Eliminando archivo de Drive...")
+                    
+                    # Borramos la basura que acabas de subir a Drive
+                    try: drive_service.files().delete(fileId=id_item).execute()
                     except: pass
-                
-                # 3. Eliminar la fila vieja del Google Sheet (índice + 2 por el encabezado)
-                try:
-                    sheet.delete_rows(i + 2)
-                except: pass
-                
-                break # Una vez borrada la vieja, salimos del buscador
+                    
+                break 
         # ---------------------------------------------------------
         
-        path = f"/{nombre_final}_{nueva_version}.apk"
+        if es_actualizacion_valida:
+            path = f"/{nombre_final}_{nueva_version}.apk"
+            
+            with open("temp.apk", "rb") as f:
+                dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
+            
+            link = dbx.sharing_create_shared_link_with_settings(path).url.replace("dl=0", "dl=1")
+            
+            sheet.append_row([
+                nombre_final, "Publicado", link, nueva_version, 
+                nuevo_pkg, id_item, "Dropbox", str(nuevo_version_code), 
+                calcular_hash("temp.apk"), str(os.path.getsize("temp.apk"))
+            ])
+            notificar(f"✅ <b>App publicada con éxito:</b> {nombre_final} v{nueva_version} ya está en la tienda.")
         
-        with open("temp.apk", "rb") as f:
-            dbx.files_upload(f.read(), path, mode=WriteMode('overwrite'))
-        
-        link = dbx.sharing_create_shared_link_with_settings(path).url.replace("dl=0", "dl=1")
-        
-        # Array exacto de 10 columnas
-        sheet.append_row([
-            nombre_final, "Publicado", link, nueva_version, 
-            nuevo_pkg, id_item, "Dropbox", str(apk.version_code), 
-            calcular_hash("temp.apk"), str(os.path.getsize("temp.apk"))
-        ])
         os.remove("temp.apk")
-        
-        notificar(f"✅ <b>App actualizada y publicada:</b> {nombre_final} v{nueva_version} ya está en la tienda.")
 
-    # Volvemos a leer los registros finales, ya sin la basura
     registros_finales = sheet.get_all_records()
     
     lista_obtainium = []

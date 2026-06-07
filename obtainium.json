@@ -161,6 +161,13 @@
             "name": "SmartTube Universal",
             "version": "31.73",
             "pinned": false
+        },
+        {
+            "id": "com.tv.apkstore",
+            "url": "https://www.dropbox.com/scl/fi/4tlz6uattig70yhhc1my7/Apk-Store_1.2.apk?rlkey=egxsrw7ejpoktoxj120sgst9s&dl=1",
+            "name": "Apk Store",
+            "version": "1.2",
+            "pinned": false
         }
     ]
 }

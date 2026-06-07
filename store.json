@@ -96,14 +96,6 @@
     "icon": ""
   },
   {
-    "pkg": "com.yablio.sendfilestotv",
-    "name": "Send Files To TV",
-    "versionName": "1.4",
-    "versionCode": 59,
-    "apkUrl": "https://www.dropbox.com/scl/fi/hg55b2soufdfkpx3zhkpk/Send-Files-To-TV_1.4.apk?rlkey=9x2tf17b1igendvw33xho607g&dl=1",
-    "icon": ""
-  },
-  {
     "pkg": "ipnossoft.rma.free",
     "name": "BetterSleep",
     "versionName": "25.18",
@@ -189,6 +181,14 @@
     "versionName": "1.2",
     "versionCode": 1,
     "apkUrl": "https://www.dropbox.com/scl/fi/4tlz6uattig70yhhc1my7/Apk-Store_1.2.apk?rlkey=egxsrw7ejpoktoxj120sgst9s&dl=1",
+    "icon": ""
+  },
+  {
+    "pkg": "com.yablio.sendfilestotv",
+    "name": "Send Files To TV",
+    "versionName": "1.4.22b",
+    "versionCode": 68,
+    "apkUrl": "https://www.dropbox.com/scl/fi/13b3h4goljyuv1d45ko5i/Send-Files-To-TV_1.4.22b.apk?rlkey=k5v9nomto5in6agvr53e8rh62&dl=1",
     "icon": ""
   }
 ]

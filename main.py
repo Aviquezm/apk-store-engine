@@ -50,6 +50,17 @@ def calcular_hash(file_path):
             sha256.update(data)
     return sha256.hexdigest()
 
+def expulsar_de_drive(drive_service, file_id, folder_id):
+    try:
+        # Intento 1: Borrado total
+        drive_service.files().delete(fileId=file_id).execute()
+    except:
+        # Intento 2: Si Google lo bloquea por permisos, lo saca de la carpeta de la tienda
+        try:
+            drive_service.files().update(fileId=file_id, removeParents=folder_id).execute()
+        except:
+            pass
+
 # ---------------------------------------------------------
 # RECONCILIACIÓN TOTAL (ELIMINACIÓN INFALIBLE)
 # ---------------------------------------------------------
@@ -205,10 +216,9 @@ def procesar_y_generar(sheet, drive_service, dbx):
                     
                     notificar(f"🧹 <b>Actualización confirmada:</b> Reemplazando v{old_version} por v{nueva_version}...")
                     
-                    # Destruir versión inferior
+                    # Destruir o expulsar versión inferior de Drive
                     if old_id_drive:
-                        try: drive_service.files().delete(fileId=old_id_drive).execute()
-                        except: pass
+                        expulsar_de_drive(drive_service, old_id_drive, DRIVE_FOLDER_ID)
                     
                     if old_link:
                         try:
@@ -226,8 +236,7 @@ def procesar_y_generar(sheet, drive_service, dbx):
                     notificar(f"⚠️ <b>Rechazo automático:</b> Se detectó {nombre_final} v{nueva_version}, pero la tienda ya tiene una versión igual o superior. Eliminando archivo de Drive...")
                     
                     # Borramos la basura que acabas de subir a Drive
-                    try: drive_service.files().delete(fileId=id_item).execute()
-                    except: pass
+                    expulsar_de_drive(drive_service, id_item, DRIVE_FOLDER_ID)
                     
                 break 
         # ---------------------------------------------------------

@@ -30,13 +30,6 @@
             "pinned": false
         },
         {
-            "id": "com.android.mgstv",
-            "url": "https://www.dropbox.com/scl/fi/b55yuthxojuax0iyb10zm/Xuper-TV_4.99.4.apk?rlkey=qrvwqunh113iuj94ww2w4lupa&dl=1",
-            "name": "Xuper TV",
-            "version": "4.99.4",
-            "pinned": false
-        },
-        {
             "id": "nextapp.fx",
             "url": "https://www.dropbox.com/scl/fi/1op9u0su0hd1j9ar2ovwo/FX_9.1.0.8.apk?rlkey=0dwhkxdki44bjkgcc19yhzzgq&dl=1",
             "name": "FX",
@@ -167,6 +160,13 @@
             "url": "https://www.dropbox.com/scl/fi/vtbjkbqtiq1rcy9mcwcjw/Apk-Store_2.3.apk?rlkey=vlqragfgj5g8o5ounkca56nxt&dl=1",
             "name": "Apk Store",
             "version": "2.3",
+            "pinned": false
+        },
+        {
+            "id": "com.android.mgstv",
+            "url": "https://www.dropbox.com/scl/fi/v1ksphbbny153j0t93b14/Xuper-TV_5.1.5.apk?rlkey=tipfqitx90de55x7n8xse2yd9&dl=1",
+            "name": "Xuper TV",
+            "version": "5.1.5",
             "pinned": false
         }
     ]

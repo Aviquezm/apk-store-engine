@@ -168,14 +168,6 @@
     "icon": ""
   },
   {
-    "pkg": "com.tv.apkstore",
-    "name": "Apk Store",
-    "versionName": "2.0",
-    "versionCode": 2,
-    "apkUrl": "https://www.dropbox.com/scl/fi/30es89gynmclrgqouiggk/Apk-Store_2.0.apk?rlkey=1y8ahttxc77wxtiy3jdy7rjoa&dl=1",
-    "icon": ""
-  },
-  {
     "pkg": "com.spotify.music",
     "name": "Spotify",
     "versionName": "9.1.40.1486",
@@ -189,6 +181,14 @@
     "versionName": "11.4.0",
     "versionCode": 110403670,
     "apkUrl": "https://www.dropbox.com/scl/fi/grmsf8axz7ukwgiqm6omd/Flightradar24_11.4.0.apk?rlkey=2483v0h6d3nvcmeiljeywxbbl&dl=1",
+    "icon": ""
+  },
+  {
+    "pkg": "com.tv.apkstore",
+    "name": "Apk Store",
+    "versionName": "2.1",
+    "versionCode": 3,
+    "apkUrl": "https://www.dropbox.com/scl/fi/hp1jaimhj6vlboynfnd1d/Apk-Store_2.1.apk?rlkey=1tmni4f2bmlzhdwylf3uc8tb6&dl=1",
     "icon": ""
   }
 ]

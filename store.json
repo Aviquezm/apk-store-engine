@@ -5,7 +5,8 @@
     "versionName": "7.03",
     "versionCode": 7,
     "apkUrl": "https://www.dropbox.com/scl/fi/yysyd6fzoqht6k2ttrcuc/TV-Nacional-CR_7.03.apk?rlkey=tz7ibehd008dpnyq3g1a13kjr&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "0.3 MB"
   },
   {
     "pkg": "com.tv.optimizadorram",
@@ -13,7 +14,8 @@
     "versionName": "2.1",
     "versionCode": 2,
     "apkUrl": "https://www.dropbox.com/scl/fi/lxlgbeppgfx3nbm5cpcqw/Optimizador-de-Ram_2.1.apk?rlkey=di7mm6dssc1pllwvitq8klghk&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "1.7 MB"
   },
   {
     "pkg": "com.protectstar.microguardfree",
@@ -21,7 +23,8 @@
     "versionName": "6.5",
     "versionCode": 6500,
     "apkUrl": "https://www.dropbox.com/scl/fi/g35iyv71o8hblc9cuh8eh/Micro-Guard_6.5.apk?rlkey=14xpqidppzvat9nb5vwo4n0pj&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "9.7 MB"
   },
   {
     "pkg": "de.blinkt.openvpn",
@@ -29,7 +32,8 @@
     "versionName": "0.7.64",
     "versionCode": 219,
     "apkUrl": "https://www.dropbox.com/scl/fi/0gkm2q1334r28c09r7mgr/OpenVPN_0.7.64.apk?rlkey=hnakggj65tmy7tkdm5h7a2r68&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "44.6 MB"
   },
   {
     "pkg": "nextapp.fx",
@@ -37,7 +41,8 @@
     "versionName": "9.1.0.8",
     "versionCode": 9108,
     "apkUrl": "https://www.dropbox.com/scl/fi/1op9u0su0hd1j9ar2ovwo/FX_9.1.0.8.apk?rlkey=0dwhkxdki44bjkgcc19yhzzgq&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "11.5 MB"
   },
   {
     "pkg": "com.duolingo",
@@ -45,7 +50,8 @@
     "versionName": "6.82.3",
     "versionCode": 2377,
     "apkUrl": "https://www.dropbox.com/scl/fi/4w9e8dk6y1fbgsthhzotu/Duolingo_6.82.3.apk?rlkey=2d34zg35jvbcstvom4h505atc&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "145.0 MB"
   },
   {
     "pkg": "eu.darken.sdmse",
@@ -53,7 +59,8 @@
     "versionName": "1.5.1-rc0",
     "versionCode": 10501000,
     "apkUrl": "https://www.dropbox.com/scl/fi/0n2ips89uxcsuszenvocn/SD-Maid-SE_1.5.1-rc0.apk?rlkey=cx91225ibpygn4126g8ozqi32&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "10.9 MB"
   },
   {
     "pkg": "com.overlook.android.fing",
@@ -61,7 +68,8 @@
     "versionName": "12.11.7",
     "versionCode": 121107004,
     "apkUrl": "https://www.dropbox.com/scl/fi/3z3gy6olblc49w29wmswv/Fing_12.11.7.apk?rlkey=rrn137voys0einvmwd2g3kzv5&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "43.2 MB"
   },
   {
     "pkg": "com.wachanga.calories",
@@ -69,7 +77,8 @@
     "versionName": "1.32.0",
     "versionCode": 563,
     "apkUrl": "https://www.dropbox.com/scl/fi/bminq3mll6mhvo3u8z5ne/Calz_1.32.0.apk?rlkey=dv7vrl9qvvuhpf7xrfrfet8hy&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "130.6 MB"
   },
   {
     "pkg": "com.adguard.android",
@@ -77,7 +86,8 @@
     "versionName": "4.14.68",
     "versionCode": 10330100,
     "apkUrl": "https://www.dropbox.com/scl/fi/1ujkiig6lpeioywn894ys/AdGuard_4.14.68.apk?rlkey=797wnyevvjsn89jpvmwq8h4ll&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "61.0 MB"
   },
   {
     "pkg": "com.shazam.android",
@@ -85,7 +95,8 @@
     "versionName": "16.40.0-260430",
     "versionCode": 1604000,
     "apkUrl": "https://www.dropbox.com/scl/fi/5pfxe5wt5b84jbw2boyux/Shazam_16.40.0-260430.apk?rlkey=zsbeaaod5qmyga121xxxaki5o&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "37.8 MB"
   },
   {
     "pkg": "ipnossoft.rma.free",
@@ -93,7 +104,8 @@
     "versionName": "25.18",
     "versionCode": 24973,
     "apkUrl": "https://www.dropbox.com/scl/fi/an4cewspz3z568ig407gz/BetterSleep_25.18.apk?rlkey=8mkwjvpq7jrul1rw7t4v6mre5&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "280.0 MB"
   },
   {
     "pkg": "com.translate.talkingtranslator",
@@ -101,7 +113,8 @@
     "versionName": "3.4.7",
     "versionCode": 238,
     "apkUrl": "https://www.dropbox.com/scl/fi/5b0re3bf2qfqfjbumpjvk/Talking-Translator_3.4.7.apk?rlkey=cpsgms30a9c4z9uk4oo9da5gc&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "60.9 MB"
   },
   {
     "pkg": "com.plantparentai.app",
@@ -109,7 +122,8 @@
     "versionName": "1.101",
     "versionCode": 127,
     "apkUrl": "https://www.dropbox.com/scl/fi/eb8kx2ezsrd3624nfeexj/Plant-Parent_1.101.apk?rlkey=i29h8p65f8xk4sh33tqvjkac4&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "48.5 MB"
   },
   {
     "pkg": "com.codeway.aitutor",
@@ -117,7 +131,8 @@
     "versionName": "2.2.6",
     "versionCode": 568,
     "apkUrl": "https://www.dropbox.com/scl/fi/lsauepsjo0zx8q0uk9j0t/Learna-AI_2.2.6.apk?rlkey=usyjio3q22sxtx2igzwlwdkq0&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "69.3 MB"
   },
   {
     "pkg": "com.elasthink.lyricstraining",
@@ -125,7 +140,8 @@
     "versionName": "2.5.1",
     "versionCode": 183,
     "apkUrl": "https://www.dropbox.com/scl/fi/xj7d2hr1vhjt1waby3jky/LingoClip_2.5.1.apk?rlkey=s8jmyqw581csc0itlzzcjbgpz&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "4.4 MB"
   },
   {
     "pkg": "com.glasswire.android",
@@ -133,7 +149,8 @@
     "versionName": "3.0.395r",
     "versionCode": 395,
     "apkUrl": "https://www.dropbox.com/scl/fi/q1ar4ruxqqtpxuf1pfacf/GlassWire_3.0.395r.apk?rlkey=xnrw2f4hoic7pfxwg9y2p5jl6&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "12.1 MB"
   },
   {
     "pkg": "org.smarttube.stable",
@@ -141,7 +158,8 @@
     "versionName": "31.73",
     "versionCode": 2363,
     "apkUrl": "https://www.dropbox.com/scl/fi/tyyz5ck2cufi1r6sawyyk/SmartTube-Universal_31.73.apk?rlkey=mpsiw3uxh24ecsauoclg0tur0&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "33.2 MB"
   },
   {
     "pkg": "com.yablio.sendfilestotv",
@@ -149,7 +167,8 @@
     "versionName": "1.4.22b",
     "versionCode": 68,
     "apkUrl": "https://www.dropbox.com/scl/fi/66s5gy1py554n9y2qmwlc/Send-Files-To-TV_1.4.22b.apk?rlkey=j6pon9d1xnhor7i0b56jbs69q&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "10.0 MB"
   },
   {
     "pkg": "com.spotify.music",
@@ -157,7 +176,8 @@
     "versionName": "9.1.40.1486",
     "versionCode": 140519586,
     "apkUrl": "https://www.dropbox.com/scl/fi/yc8i83jves5e1pemg1b57/Spotify_9.1.40.1486.apk?rlkey=gxdszw5npvz62cqv999tg87su&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "101.6 MB"
   },
   {
     "pkg": "com.flightradar24free",
@@ -165,7 +185,8 @@
     "versionName": "11.4.0",
     "versionCode": 110403670,
     "apkUrl": "https://www.dropbox.com/scl/fi/grmsf8axz7ukwgiqm6omd/Flightradar24_11.4.0.apk?rlkey=2483v0h6d3nvcmeiljeywxbbl&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "50.1 MB"
   },
   {
     "pkg": "com.android.mgstv",
@@ -173,7 +194,8 @@
     "versionName": "5.1.5",
     "versionCode": 50105,
     "apkUrl": "https://www.dropbox.com/scl/fi/v1ksphbbny153j0t93b14/Xuper-TV_5.1.5.apk?rlkey=tipfqitx90de55x7n8xse2yd9&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "33.7 MB"
   },
   {
     "pkg": "com.fitonomy.health.fitness",
@@ -181,7 +203,8 @@
     "versionName": "7.3.4",
     "versionCode": 2296,
     "apkUrl": "https://www.dropbox.com/scl/fi/8o1v1hj12g7f3devbf63z/Fitonomy_7.3.4.apk?rlkey=5bceb0n802oyg3861j8xphzon&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "66.2 MB"
   },
   {
     "pkg": "com.truecaller",
@@ -189,7 +212,8 @@
     "versionName": "26.23.5",
     "versionCode": 2623005,
     "apkUrl": "https://www.dropbox.com/scl/fi/0ronsniwei6xttn9rd3fg/Truecaller_26.23.5.apk?rlkey=weq77l8qwn5rt19smwy6tcpxq&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "103.2 MB"
   },
   {
     "pkg": "com.lyfta",
@@ -197,7 +221,8 @@
     "versionName": "1.528",
     "versionCode": 528,
     "apkUrl": "https://www.dropbox.com/scl/fi/f8m1qjh0f7i7yroleje17/Lyfta_1.528.apk?rlkey=mmsouni46p7yygwi8scvmdwg7&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "41.5 MB"
   },
   {
     "pkg": "com.dreamstudio.naturesounds",
@@ -205,7 +230,8 @@
     "versionName": "18.0",
     "versionCode": 120,
     "apkUrl": "https://www.dropbox.com/scl/fi/1gm0xy9ackaaurs7qb5b0/Nature-Sounds_18.0.apk?rlkey=cnz25omsg6dd1ficxiyxyanaq&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "48.2 MB"
   },
   {
     "pkg": "pilatesworkout.yogaworkout.loseweight.workoutapps",
@@ -213,7 +239,8 @@
     "versionName": "1.6.1",
     "versionCode": 85,
     "apkUrl": "https://www.dropbox.com/scl/fi/2hjerd71n9sa7sa9itja9/Pilates-Workout-at-Home_1.6.1.apk?rlkey=q8tbp1q0v3ed4xtobtm3kq0kg&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "85.1 MB"
   },
   {
     "pkg": "com.gaiam.yogastudio",
@@ -221,7 +248,8 @@
     "versionName": "3.5.0",
     "versionCode": 253,
     "apkUrl": "https://www.dropbox.com/scl/fi/9dtxu4yq6a34qak1miys5/Yoga-Studio_3.5.0.apk?rlkey=5jvh0l23iub0oukh3s0zdymeg&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "145.2 MB"
   },
   {
     "pkg": "com.diet.pixsterstudio.ketodietican",
@@ -229,7 +257,8 @@
     "versionName": "11.6",
     "versionCode": 134,
     "apkUrl": "https://www.dropbox.com/scl/fi/5tmuoqx1yiefqppmjfc9u/Keto-Diet-Tracker_11.6.apk?rlkey=fm1upo94b8jixicyxk2k6woc5&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "33.9 MB"
   },
   {
     "pkg": "com.tv.apkstore",
@@ -237,6 +266,7 @@
     "versionName": "2.6",
     "versionCode": 8,
     "apkUrl": "https://www.dropbox.com/scl/fi/1xaotam39be8g87u7qreo/Apk-Store_2.6.apk?rlkey=x4ca7h972lcy20hlw7ho5jplc&dl=1",
-    "icon": ""
+    "icon": "",
+    "size": "5.9 MB"
   }
 ]

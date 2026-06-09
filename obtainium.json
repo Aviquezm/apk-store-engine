@@ -203,6 +203,13 @@
             "name": "Yoga Studio",
             "version": "3.5.0",
             "pinned": false
+        },
+        {
+            "id": "com.diet.pixsterstudio.ketodietican",
+            "url": "https://www.dropbox.com/scl/fi/5tmuoqx1yiefqppmjfc9u/Keto-Diet-Tracker_11.6.apk?rlkey=fm1upo94b8jixicyxk2k6woc5&dl=1",
+            "name": "Keto Diet Tracker",
+            "version": "11.6",
+            "pinned": false
         }
     ]
 }

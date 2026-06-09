@@ -230,5 +230,13 @@
     "versionCode": 253,
     "apkUrl": "https://www.dropbox.com/scl/fi/9dtxu4yq6a34qak1miys5/Yoga-Studio_3.5.0.apk?rlkey=5jvh0l23iub0oukh3s0zdymeg&dl=1",
     "icon": ""
+  },
+  {
+    "pkg": "com.diet.pixsterstudio.ketodietican",
+    "name": "Keto Diet Tracker",
+    "versionName": "11.6",
+    "versionCode": 134,
+    "apkUrl": "https://www.dropbox.com/scl/fi/5tmuoqx1yiefqppmjfc9u/Keto-Diet-Tracker_11.6.apk?rlkey=fm1upo94b8jixicyxk2k6woc5&dl=1",
+    "icon": ""
   }
 ]

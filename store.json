@@ -168,14 +168,6 @@
     "icon": ""
   },
   {
-    "pkg": "com.tv.apkstore",
-    "name": "Apk Store",
-    "versionName": "2.3",
-    "versionCode": 5,
-    "apkUrl": "https://www.dropbox.com/scl/fi/vtbjkbqtiq1rcy9mcwcjw/Apk-Store_2.3.apk?rlkey=vlqragfgj5g8o5ounkca56nxt&dl=1",
-    "icon": ""
-  },
-  {
     "pkg": "com.android.mgstv",
     "name": "Xuper TV",
     "versionName": "5.1.5",
@@ -237,6 +229,14 @@
     "versionName": "11.6",
     "versionCode": 134,
     "apkUrl": "https://www.dropbox.com/scl/fi/5tmuoqx1yiefqppmjfc9u/Keto-Diet-Tracker_11.6.apk?rlkey=fm1upo94b8jixicyxk2k6woc5&dl=1",
+    "icon": ""
+  },
+  {
+    "pkg": "com.tv.apkstore",
+    "name": "Apk Store",
+    "versionName": "2.6",
+    "versionCode": 8,
+    "apkUrl": "https://www.dropbox.com/scl/fi/1xaotam39be8g87u7qreo/Apk-Store_2.6.apk?rlkey=x4ca7h972lcy20hlw7ho5jplc&dl=1",
     "icon": ""
   }
 ]

@@ -149,13 +149,6 @@
             "pinned": false
         },
         {
-            "id": "com.tv.apkstore",
-            "url": "https://www.dropbox.com/scl/fi/vtbjkbqtiq1rcy9mcwcjw/Apk-Store_2.3.apk?rlkey=vlqragfgj5g8o5ounkca56nxt&dl=1",
-            "name": "Apk Store",
-            "version": "2.3",
-            "pinned": false
-        },
-        {
             "id": "com.android.mgstv",
             "url": "https://www.dropbox.com/scl/fi/v1ksphbbny153j0t93b14/Xuper-TV_5.1.5.apk?rlkey=tipfqitx90de55x7n8xse2yd9&dl=1",
             "name": "Xuper TV",
@@ -209,6 +202,13 @@
             "url": "https://www.dropbox.com/scl/fi/5tmuoqx1yiefqppmjfc9u/Keto-Diet-Tracker_11.6.apk?rlkey=fm1upo94b8jixicyxk2k6woc5&dl=1",
             "name": "Keto Diet Tracker",
             "version": "11.6",
+            "pinned": false
+        },
+        {
+            "id": "com.tv.apkstore",
+            "url": "https://www.dropbox.com/scl/fi/1xaotam39be8g87u7qreo/Apk-Store_2.6.apk?rlkey=x4ca7h972lcy20hlw7ho5jplc&dl=1",
+            "name": "Apk Store",
+            "version": "2.6",
             "pinned": false
         }
     ]

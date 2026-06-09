@@ -208,14 +208,6 @@
     "icon": ""
   },
   {
-    "pkg": "com.dailyyoga.inc",
-    "name": "Daily Yoga",
-    "versionName": "8.91.00",
-    "versionCode": 409,
-    "apkUrl": "https://www.dropbox.com/scl/fi/lruwr9qssbhuu6i9r858i/Daily-Yoga_8.91.00.apk?rlkey=b6xxtmn52pa4pie0x8smnzou4&dl=1",
-    "icon": ""
-  },
-  {
     "pkg": "com.dreamstudio.naturesounds",
     "name": "Nature Sounds",
     "versionName": "18.0",
@@ -229,6 +221,14 @@
     "versionName": "1.6.1",
     "versionCode": 85,
     "apkUrl": "https://www.dropbox.com/scl/fi/2hjerd71n9sa7sa9itja9/Pilates-Workout-at-Home_1.6.1.apk?rlkey=q8tbp1q0v3ed4xtobtm3kq0kg&dl=1",
+    "icon": ""
+  },
+  {
+    "pkg": "com.gaiam.yogastudio",
+    "name": "Yoga Studio",
+    "versionName": "3.5.0",
+    "versionCode": 253,
+    "apkUrl": "https://www.dropbox.com/scl/fi/9dtxu4yq6a34qak1miys5/Yoga-Studio_3.5.0.apk?rlkey=5jvh0l23iub0oukh3s0zdymeg&dl=1",
     "icon": ""
   }
 ]

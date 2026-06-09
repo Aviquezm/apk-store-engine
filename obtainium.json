@@ -184,13 +184,6 @@
             "pinned": false
         },
         {
-            "id": "com.dailyyoga.inc",
-            "url": "https://www.dropbox.com/scl/fi/lruwr9qssbhuu6i9r858i/Daily-Yoga_8.91.00.apk?rlkey=b6xxtmn52pa4pie0x8smnzou4&dl=1",
-            "name": "Daily Yoga",
-            "version": "8.91.00",
-            "pinned": false
-        },
-        {
             "id": "com.dreamstudio.naturesounds",
             "url": "https://www.dropbox.com/scl/fi/1gm0xy9ackaaurs7qb5b0/Nature-Sounds_18.0.apk?rlkey=cnz25omsg6dd1ficxiyxyanaq&dl=1",
             "name": "Nature Sounds",
@@ -202,6 +195,13 @@
             "url": "https://www.dropbox.com/scl/fi/2hjerd71n9sa7sa9itja9/Pilates-Workout-at-Home_1.6.1.apk?rlkey=q8tbp1q0v3ed4xtobtm3kq0kg&dl=1",
             "name": "Pilates Workout at Home",
             "version": "1.6.1",
+            "pinned": false
+        },
+        {
+            "id": "com.gaiam.yogastudio",
+            "url": "https://www.dropbox.com/scl/fi/9dtxu4yq6a34qak1miys5/Yoga-Studio_3.5.0.apk?rlkey=5jvh0l23iub0oukh3s0zdymeg&dl=1",
+            "name": "Yoga Studio",
+            "version": "3.5.0",
             "pinned": false
         }
     ]

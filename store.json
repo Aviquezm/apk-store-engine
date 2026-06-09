@@ -136,14 +136,6 @@
     "icon": ""
   },
   {
-    "pkg": "com.truecaller",
-    "name": "Truecaller",
-    "versionName": "26.22.7",
-    "versionCode": 2622007,
-    "apkUrl": "https://www.dropbox.com/scl/fi/fxue9ae9wmyr6onhf1avj/Truecaller_26.22.7.apk?rlkey=eqyqbsk4arr6lmqpt48h56utr&dl=1",
-    "icon": ""
-  },
-  {
     "pkg": "org.smarttube.stable",
     "name": "SmartTube Universal",
     "versionName": "31.73",
@@ -189,6 +181,54 @@
     "versionName": "5.1.5",
     "versionCode": 50105,
     "apkUrl": "https://www.dropbox.com/scl/fi/v1ksphbbny153j0t93b14/Xuper-TV_5.1.5.apk?rlkey=tipfqitx90de55x7n8xse2yd9&dl=1",
+    "icon": ""
+  },
+  {
+    "pkg": "com.fitonomy.health.fitness",
+    "name": "Fitonomy",
+    "versionName": "7.3.4",
+    "versionCode": 2296,
+    "apkUrl": "https://www.dropbox.com/scl/fi/8o1v1hj12g7f3devbf63z/Fitonomy_7.3.4.apk?rlkey=5bceb0n802oyg3861j8xphzon&dl=1",
+    "icon": ""
+  },
+  {
+    "pkg": "com.truecaller",
+    "name": "Truecaller",
+    "versionName": "26.23.5",
+    "versionCode": 2623005,
+    "apkUrl": "https://www.dropbox.com/scl/fi/0ronsniwei6xttn9rd3fg/Truecaller_26.23.5.apk?rlkey=weq77l8qwn5rt19smwy6tcpxq&dl=1",
+    "icon": ""
+  },
+  {
+    "pkg": "com.lyfta",
+    "name": "Lyfta",
+    "versionName": "1.528",
+    "versionCode": 528,
+    "apkUrl": "https://www.dropbox.com/scl/fi/f8m1qjh0f7i7yroleje17/Lyfta_1.528.apk?rlkey=mmsouni46p7yygwi8scvmdwg7&dl=1",
+    "icon": ""
+  },
+  {
+    "pkg": "com.dailyyoga.inc",
+    "name": "Daily Yoga",
+    "versionName": "8.91.00",
+    "versionCode": 409,
+    "apkUrl": "https://www.dropbox.com/scl/fi/lruwr9qssbhuu6i9r858i/Daily-Yoga_8.91.00.apk?rlkey=b6xxtmn52pa4pie0x8smnzou4&dl=1",
+    "icon": ""
+  },
+  {
+    "pkg": "com.dreamstudio.naturesounds",
+    "name": "Nature Sounds",
+    "versionName": "18.0",
+    "versionCode": 120,
+    "apkUrl": "https://www.dropbox.com/scl/fi/1gm0xy9ackaaurs7qb5b0/Nature-Sounds_18.0.apk?rlkey=cnz25omsg6dd1ficxiyxyanaq&dl=1",
+    "icon": ""
+  },
+  {
+    "pkg": "pilatesworkout.yogaworkout.loseweight.workoutapps",
+    "name": "Pilates Workout at Home",
+    "versionName": "1.6.1",
+    "versionCode": 85,
+    "apkUrl": "https://www.dropbox.com/scl/fi/2hjerd71n9sa7sa9itja9/Pilates-Workout-at-Home_1.6.1.apk?rlkey=q8tbp1q0v3ed4xtobtm3kq0kg&dl=1",
     "icon": ""
   }
 ]

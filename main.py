@@ -186,29 +186,26 @@ def procesar_y_generar(sheet, drive_service, dbx):
         with open("temp.apk", "wb") as f:
             f.write(fh.read())
         
-        # 🛡️ ESCUDO ANTI-CRASHEOS
         try:
             apk = APK("temp.apk")
             nuevo_pkg = apk.package
             nueva_version = apk.version_name
             nuevo_version_code = int(apk.version_code) if apk.version_code else 0
         except Exception as e:
-            notificar(f"❌ <b>Error de Lectura:</b> No se pudo analizar <b>{nombre_base}</b>. El archivo está corrupto o altamente protegido. Deberás subir otra versión.")
+            notificar(f"❌ <b>Error de Lectura:</b> No se pudo analizar <b>{nombre_base}</b>. El archivo está corrupto. Expulsando de Drive...")
             os.remove("temp.apk")
-            continue # Salta a la siguiente APK sin apagar el robot
+            expulsar_de_drive(drive_service, id_item, DRIVE_FOLDER_ID)
+            continue
 
         nombre_final = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
         
         es_actualizacion_valida = True
-        es_nueva_app = True # Asumimos que es nueva hasta que se demuestre lo contrario
+        es_nueva_app = True
 
-        # ---------------------------------------------------------
-        # 🧠 EL CONSERJE INTELIGENTE
-        # ---------------------------------------------------------
         registros_actualizados = sheet.get_all_records()
         for i, r in enumerate(registros_actualizados):
             if r.get('Pkg') == nuevo_pkg:
-                es_nueva_app = False # Ya existía, es una actualización
+                es_nueva_app = False
                 
                 viejo_code_str = str(r.get('Version Code')).strip()
                 viejo_version_code = int(viejo_code_str) if viejo_code_str.isdigit() else 0
@@ -239,7 +236,6 @@ def procesar_y_generar(sheet, drive_service, dbx):
                     expulsar_de_drive(drive_service, id_item, DRIVE_FOLDER_ID)
                     
                 break 
-        # ---------------------------------------------------------
         
         if es_actualizacion_valida:
             path = f"/{nombre_final}_{nueva_version}.apk"
@@ -255,7 +251,6 @@ def procesar_y_generar(sheet, drive_service, dbx):
                 calcular_hash("temp.apk"), str(os.path.getsize("temp.apk"))
             ])
             
-            # 📢 NOTIFICACIÓN DIFERENCIADA
             if es_nueva_app:
                 notificar(f"🎉 <b>¡Nueva App Agregada!</b> {nombre_final} v{nueva_version} se ha unido a tu catálogo.")
             else:
@@ -270,6 +265,16 @@ def procesar_y_generar(sheet, drive_service, dbx):
     
     for r in registros_finales:
         if r.get('Pkg'):
+            
+            # 🚀 LÓGICA PARA CONVERTIR BYTES A MEGABYTES DIRECTAMENTE DESDE EL EXCEL
+            peso_str = ""
+            keys = list(r.keys())
+            if len(keys) >= 10: # Si existe la columna 10 (que es donde guardamos el tamaño)
+                val = str(r[keys[9]]).strip()
+                if val.isdigit():
+                    mb = round(int(val) / (1024 * 1024), 1)
+                    peso_str = f"{mb} MB"
+            
             lista_obtainium.append({
                 "id": r['Pkg'],
                 "url": r['Link APK'].replace("dl=0", "dl=1"),
@@ -284,7 +289,8 @@ def procesar_y_generar(sheet, drive_service, dbx):
                 "versionName": str(r['Version']),
                 "versionCode": int(r['Version Code'] if str(r['Version Code']).isdigit() else 0),
                 "apkUrl": r['Link APK'].replace("dl=0", "dl=1"),
-                "icon": ""
+                "icon": "",
+                "size": peso_str # 👈 AQUÍ SE INYECTA EL TAMAÑO AL JSON
             })
             
     with open("obtainium.json", "w", encoding='utf-8') as f:
@@ -293,9 +299,6 @@ def procesar_y_generar(sheet, drive_service, dbx):
     with open("store.json", "w", encoding='utf-8') as f:
         json.dump(lista_store, f, indent=2, ensure_ascii=False)
 
-# ---------------------------------------------------------
-# MAIN
-# ---------------------------------------------------------
 if __name__ == "__main__":
     print("🚀 Iniciando Motor...")
     

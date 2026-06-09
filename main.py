@@ -52,17 +52,15 @@ def calcular_hash(file_path):
 
 def expulsar_de_drive(drive_service, file_id, folder_id):
     try:
-        # Intento 1: Borrado total
         drive_service.files().delete(fileId=file_id).execute()
     except:
-        # Intento 2: Si Google lo bloquea por permisos, lo saca de la carpeta de la tienda
         try:
             drive_service.files().update(fileId=file_id, removeParents=folder_id).execute()
         except:
             pass
 
 # ---------------------------------------------------------
-# RECONCILIACIÓN TOTAL (ELIMINACIÓN INFALIBLE)
+# RECONCILIACIÓN TOTAL
 # ---------------------------------------------------------
 def reconciliar_todo(sheet, drive_service, dbx):
     print("--- INICIANDO RECONCILIACIÓN ---")
@@ -102,7 +100,6 @@ def reconciliar_todo(sheet, drive_service, dbx):
             version = str(fila[col_version]).strip()
             link = str(fila[col_link]).strip()
             
-            # Notificación de eliminación manual
             notificar(f"🗑️ <b>Versión eliminada:</b> Se detectó que <i>{nombre} v{version}</i> ya no está en Drive. Limpiando...")
             
             try:
@@ -158,7 +155,7 @@ def detectar_cambios_nombre(sheet, drive_service):
                 break
 
 # ---------------------------------------------------------
-# PROCESAMIENTO Y LIMPIEZA INTELIGENTE (VERSIÓN MATEMÁTICA)
+# PROCESAMIENTO Y LIMPIEZA INTELIGENTE
 # ---------------------------------------------------------
 def procesar_y_generar(sheet, drive_service, dbx):
     print("--- PROCESANDO NUEVAS APPS Y GENERANDO JSON ---")
@@ -172,7 +169,7 @@ def procesar_y_generar(sheet, drive_service, dbx):
     nuevos_items = [item for item in items if item['name'].lower().endswith('.apk') and str(item['id']).strip() not in procesados]
     
     if nuevos_items:
-        notificar(f"👷‍♂️ <b>¡Nuevas APKs detectadas!</b> Procesando {len(nuevos_items)} archivo(s)...")
+        notificar(f"👷‍♂️ <b>¡Procesando {len(nuevos_items)} archivo(s) nuevo(s)!</b>")
     
     for item in nuevos_items:
         id_item = str(item['id']).strip()
@@ -189,15 +186,21 @@ def procesar_y_generar(sheet, drive_service, dbx):
         with open("temp.apk", "wb") as f:
             f.write(fh.read())
         
-        apk = APK("temp.apk")
-        nuevo_pkg = apk.package
-        nueva_version = apk.version_name
-        
-        # EL CEREBRO: Extraemos el número entero real
-        nuevo_version_code = int(apk.version_code) if apk.version_code else 0
-        nombre_final = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
+        # 🛡️ ESCUDO ANTI-CRASHEOS
+        try:
+            apk = APK("temp.apk")
+            nuevo_pkg = apk.package
+            nueva_version = apk.version_name
+            nuevo_version_code = int(apk.version_code) if apk.version_code else 0
+        except Exception as e:
+            notificar(f"❌ <b>Error de Lectura:</b> No se pudo analizar <b>{nombre_base}</b>. El archivo está corrupto o altamente protegido. Deberás subir otra versión.")
+            os.remove("temp.apk")
+            continue # Salta a la siguiente APK sin apagar el robot
 
+        nombre_final = re.sub(r'([ _]v?\d+.*\.apk|\.apk)$', '', item['name'], flags=re.IGNORECASE).strip()
+        
         es_actualizacion_valida = True
+        es_nueva_app = True # Asumimos que es nueva hasta que se demuestre lo contrario
 
         # ---------------------------------------------------------
         # 🧠 EL CONSERJE INTELIGENTE
@@ -205,18 +208,18 @@ def procesar_y_generar(sheet, drive_service, dbx):
         registros_actualizados = sheet.get_all_records()
         for i, r in enumerate(registros_actualizados):
             if r.get('Pkg') == nuevo_pkg:
+                es_nueva_app = False # Ya existía, es una actualización
+                
                 viejo_code_str = str(r.get('Version Code')).strip()
                 viejo_version_code = int(viejo_code_str) if viejo_code_str.isdigit() else 0
                 
-                # COMPARACIÓN MATEMÁTICA
                 if nuevo_version_code > viejo_version_code:
                     old_id_drive = str(r.get('ID Drive')).strip()
                     old_link = str(r.get('Link APK')).strip()
                     old_version = str(r.get('Version')).strip()
                     
-                    notificar(f"🧹 <b>Actualización confirmada:</b> Reemplazando v{old_version} por v{nueva_version}...")
+                    notificar(f"🧹 <b>Actualización detectada:</b> Reemplazando v{old_version} por v{nueva_version}...")
                     
-                    # Destruir o expulsar versión inferior de Drive
                     if old_id_drive:
                         expulsar_de_drive(drive_service, old_id_drive, DRIVE_FOLDER_ID)
                     
@@ -231,11 +234,8 @@ def procesar_y_generar(sheet, drive_service, dbx):
                     try: sheet.delete_rows(i + 2)
                     except: pass
                 else:
-                    # RECHAZO: El archivo subido es igual o más viejo que el de la tienda
                     es_actualizacion_valida = False
                     notificar(f"⚠️ <b>Rechazo automático:</b> Se detectó {nombre_final} v{nueva_version}, pero la tienda ya tiene una versión igual o superior. Eliminando archivo de Drive...")
-                    
-                    # Borramos la basura que acabas de subir a Drive
                     expulsar_de_drive(drive_service, id_item, DRIVE_FOLDER_ID)
                     
                 break 
@@ -254,7 +254,12 @@ def procesar_y_generar(sheet, drive_service, dbx):
                 nuevo_pkg, id_item, "Dropbox", str(nuevo_version_code), 
                 calcular_hash("temp.apk"), str(os.path.getsize("temp.apk"))
             ])
-            notificar(f"✅ <b>App publicada con éxito:</b> {nombre_final} v{nueva_version} ya está en la tienda.")
+            
+            # 📢 NOTIFICACIÓN DIFERENCIADA
+            if es_nueva_app:
+                notificar(f"🎉 <b>¡Nueva App Agregada!</b> {nombre_final} v{nueva_version} se ha unido a tu catálogo.")
+            else:
+                notificar(f"✅ <b>App Actualizada con éxito:</b> {nombre_final} ya está en la v{nueva_version}.")
         
         os.remove("temp.apk")
 

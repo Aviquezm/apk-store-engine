@@ -203,13 +203,6 @@
             "name": "Pilates Workout at Home",
             "version": "1.6.1",
             "pinned": false
-        },
-        {
-            "id": "com.spotify.music.clone1",
-            "url": "https://www.dropbox.com/scl/fi/igcsuelab91drxlx9a94f/Spotify_9.1.36.1948.apk?rlkey=jf0n1cksicczsenevi0isozhp&dl=1",
-            "name": "Spotify",
-            "version": "9.1.36.1948",
-            "pinned": false
         }
     ]
 }

@@ -250,5 +250,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/5tmuoqx1yiefqppmjfc9u/Keto-Diet-Tracker_11.6.apk?rlkey=fm1upo94b8jixicyxk2k6woc5&dl=1",
     "icon": "",
     "size": "33.9 MB"
+  },
+  {
+    "pkg": "com.tv.apkstore",
+    "name": "Apk Store",
+    "versionName": "2.8",
+    "versionCode": 10,
+    "apkUrl": "https://www.dropbox.com/scl/fi/sz5ox27ivpzhft9n4a36v/Apk-Store_2.8.apk?rlkey=dyfua5ivjzr5jr62vbhckla8r&dl=1",
+    "icon": "",
+    "size": "5.9 MB"
   }
 ]

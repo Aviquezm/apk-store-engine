@@ -2,13 +2,6 @@
     "debug": "BOT",
     "apps": [
         {
-            "id": "com.tv.nacionalcr",
-            "url": "https://www.dropbox.com/scl/fi/yysyd6fzoqht6k2ttrcuc/TV-Nacional-CR_7.03.apk?rlkey=tz7ibehd008dpnyq3g1a13kjr&dl=1",
-            "name": "TV Nacional CR",
-            "version": "7.03",
-            "pinned": false
-        },
-        {
             "id": "com.tv.optimizadorram",
             "url": "https://www.dropbox.com/scl/fi/lxlgbeppgfx3nbm5cpcqw/Optimizador-de-Ram_2.1.apk?rlkey=di7mm6dssc1pllwvitq8klghk&dl=1",
             "name": "Optimizador de Ram",
@@ -202,6 +195,13 @@
             "url": "https://www.dropbox.com/scl/fi/zwzskfnk42qaq9c1iyrah/Apk-Store_2.9.apk?rlkey=36kfma2y36hyxobb5losno2s5&dl=1",
             "name": "Apk Store",
             "version": "2.9",
+            "pinned": false
+        },
+        {
+            "id": "com.tv.nacionalcr",
+            "url": "https://www.dropbox.com/scl/fi/087khjtkjnub2zrue0njl/TV-Nacional-CR_7.04.apk?rlkey=9rpvbzxd330tr50rw18mkksee&dl=1",
+            "name": "TV Nacional CR",
+            "version": "7.04",
             "pinned": false
         }
     ]

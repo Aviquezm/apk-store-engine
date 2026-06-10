@@ -1,14 +1,5 @@
 [
   {
-    "pkg": "com.tv.nacionalcr",
-    "name": "TV Nacional CR",
-    "versionName": "7.03",
-    "versionCode": 7,
-    "apkUrl": "https://www.dropbox.com/scl/fi/yysyd6fzoqht6k2ttrcuc/TV-Nacional-CR_7.03.apk?rlkey=tz7ibehd008dpnyq3g1a13kjr&dl=1",
-    "icon": "",
-    "size": "0.3 MB"
-  },
-  {
     "pkg": "com.tv.optimizadorram",
     "name": "Optimizador de Ram",
     "versionName": "2.1",
@@ -259,5 +250,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/zwzskfnk42qaq9c1iyrah/Apk-Store_2.9.apk?rlkey=36kfma2y36hyxobb5losno2s5&dl=1",
     "icon": "",
     "size": "5.9 MB"
+  },
+  {
+    "pkg": "com.tv.nacionalcr",
+    "name": "TV Nacional CR",
+    "versionName": "7.04",
+    "versionCode": 8,
+    "apkUrl": "https://www.dropbox.com/scl/fi/087khjtkjnub2zrue0njl/TV-Nacional-CR_7.04.apk?rlkey=9rpvbzxd330tr50rw18mkksee&dl=1",
+    "icon": "",
+    "size": "0.3 MB"
   }
 ]

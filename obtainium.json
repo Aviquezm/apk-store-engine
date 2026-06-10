@@ -191,17 +191,17 @@
             "pinned": false
         },
         {
-            "id": "com.tv.nacionalcr",
-            "url": "https://www.dropbox.com/scl/fi/087khjtkjnub2zrue0njl/TV-Nacional-CR_7.04.apk?rlkey=9rpvbzxd330tr50rw18mkksee&dl=1",
-            "name": "TV Nacional CR",
-            "version": "7.04",
-            "pinned": false
-        },
-        {
             "id": "com.tv.apkstore",
             "url": "https://www.dropbox.com/scl/fi/41hy4kmmc8z81i9j9jtxm/Apk-Store_2.11.apk?rlkey=7cs6t5038izxbxdwdgrp25435&dl=1",
             "name": "Apk Store",
             "version": "2.11",
+            "pinned": false
+        },
+        {
+            "id": "com.tv.nacionalcr",
+            "url": "https://www.dropbox.com/scl/fi/j67zxj0cndtf46tr1u1ii/TV-Nacional-CR_7.5.apk?rlkey=rmmgu64m49f0ogwt1x8s1bj1i&dl=1",
+            "name": "TV Nacional CR",
+            "version": "7.5",
             "pinned": false
         }
     ]

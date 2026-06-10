@@ -243,15 +243,6 @@
     "size": "33.9 MB"
   },
   {
-    "pkg": "com.tv.nacionalcr",
-    "name": "TV Nacional CR",
-    "versionName": "7.04",
-    "versionCode": 8,
-    "apkUrl": "https://www.dropbox.com/scl/fi/087khjtkjnub2zrue0njl/TV-Nacional-CR_7.04.apk?rlkey=9rpvbzxd330tr50rw18mkksee&dl=1",
-    "icon": "",
-    "size": "0.3 MB"
-  },
-  {
     "pkg": "com.tv.apkstore",
     "name": "Apk Store",
     "versionName": "2.11",
@@ -259,5 +250,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/41hy4kmmc8z81i9j9jtxm/Apk-Store_2.11.apk?rlkey=7cs6t5038izxbxdwdgrp25435&dl=1",
     "icon": "",
     "size": "5.9 MB"
+  },
+  {
+    "pkg": "com.tv.nacionalcr",
+    "name": "TV Nacional CR",
+    "versionName": "7.5",
+    "versionCode": 9,
+    "apkUrl": "https://www.dropbox.com/scl/fi/j67zxj0cndtf46tr1u1ii/TV-Nacional-CR_7.5.apk?rlkey=rmmgu64m49f0ogwt1x8s1bj1i&dl=1",
+    "icon": "",
+    "size": "0.3 MB"
   }
 ]

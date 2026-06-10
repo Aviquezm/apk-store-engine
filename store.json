@@ -144,15 +144,6 @@
     "size": "33.2 MB"
   },
   {
-    "pkg": "com.yablio.sendfilestotv",
-    "name": "Send Files To TV",
-    "versionName": "1.4.22b",
-    "versionCode": 68,
-    "apkUrl": "https://www.dropbox.com/scl/fi/66s5gy1py554n9y2qmwlc/Send-Files-To-TV_1.4.22b.apk?rlkey=j6pon9d1xnhor7i0b56jbs69q&dl=1",
-    "icon": "",
-    "size": "10.0 MB"
-  },
-  {
     "pkg": "com.spotify.music",
     "name": "Spotify",
     "versionName": "9.1.40.1486",

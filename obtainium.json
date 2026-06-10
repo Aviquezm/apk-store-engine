@@ -192,9 +192,16 @@
         },
         {
             "id": "com.tv.nacionalcr",
-            "url": "https://www.dropbox.com/scl/fi/j67zxj0cndtf46tr1u1ii/TV-Nacional-CR_7.5.apk?rlkey=rmmgu64m49f0ogwt1x8s1bj1i&dl=1",
+            "url": "https://www.dropbox.com/scl/fi/krfw8ymjtekn78dsgps1p/TV-Nacional-CR_7.6.apk?rlkey=gom0o5tsip6oqu768d9b1a4lk&dl=1",
             "name": "TV Nacional CR",
-            "version": "7.5",
+            "version": "7.6",
+            "pinned": false
+        },
+        {
+            "id": "com.yablio.sendfilestotv",
+            "url": "https://www.dropbox.com/scl/fi/8jgmpr5t9ima4hzfa3kh7/Send-Files-To-TV_1.4.22b.apk?rlkey=lo92t9adorxmsce8z9apsm8c8&dl=1",
+            "name": "Send Files To TV",
+            "version": "1.4.22b",
             "pinned": false
         }
     ]

@@ -245,10 +245,19 @@
   {
     "pkg": "com.tv.nacionalcr",
     "name": "TV Nacional CR",
-    "versionName": "7.5",
-    "versionCode": 9,
-    "apkUrl": "https://www.dropbox.com/scl/fi/j67zxj0cndtf46tr1u1ii/TV-Nacional-CR_7.5.apk?rlkey=rmmgu64m49f0ogwt1x8s1bj1i&dl=1",
+    "versionName": "7.6",
+    "versionCode": 10,
+    "apkUrl": "https://www.dropbox.com/scl/fi/krfw8ymjtekn78dsgps1p/TV-Nacional-CR_7.6.apk?rlkey=gom0o5tsip6oqu768d9b1a4lk&dl=1",
     "icon": "",
     "size": "0.3 MB"
+  },
+  {
+    "pkg": "com.yablio.sendfilestotv",
+    "name": "Send Files To TV",
+    "versionName": "1.4.22b",
+    "versionCode": 68,
+    "apkUrl": "https://www.dropbox.com/scl/fi/8jgmpr5t9ima4hzfa3kh7/Send-Files-To-TV_1.4.22b.apk?rlkey=lo92t9adorxmsce8z9apsm8c8&dl=1",
+    "icon": "",
+    "size": "10.0 MB"
   }
 ]

@@ -99,15 +99,6 @@
     "size": "37.8 MB"
   },
   {
-    "pkg": "ipnossoft.rma.free",
-    "name": "BetterSleep",
-    "versionName": "25.18",
-    "versionCode": 24973,
-    "apkUrl": "https://www.dropbox.com/scl/fi/an4cewspz3z568ig407gz/BetterSleep_25.18.apk?rlkey=8mkwjvpq7jrul1rw7t4v6mre5&dl=1",
-    "icon": "",
-    "size": "280.0 MB"
-  },
-  {
     "pkg": "com.translate.talkingtranslator",
     "name": "Talking Translator",
     "versionName": "3.4.7",
@@ -259,14 +250,5 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/5tmuoqx1yiefqppmjfc9u/Keto-Diet-Tracker_11.6.apk?rlkey=fm1upo94b8jixicyxk2k6woc5&dl=1",
     "icon": "",
     "size": "33.9 MB"
-  },
-  {
-    "pkg": "com.tv.apkstore",
-    "name": "Apk Store",
-    "versionName": "2.8",
-    "versionCode": 10,
-    "apkUrl": "https://www.dropbox.com/scl/fi/j08zubflb31ampr0ost1r/Apk-Store_2.8.apk?rlkey=vo0gbuzmxcqheetvoprrvo144&dl=1",
-    "icon": "",
-    "size": "5.9 MB"
   }
 ]

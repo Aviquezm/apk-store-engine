@@ -259,5 +259,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/c4xjf560baja8y5agve2r/Shazam_16.45.0-260604.apk?rlkey=gaz02l333ukx659v3dfl9ghrh&dl=1",
     "icon": "",
     "size": "40.6 MB"
+  },
+  {
+    "pkg": "com.aige.hipaint",
+    "name": "HiPaint",
+    "versionName": "6.2.9",
+    "versionCode": 236,
+    "apkUrl": "https://www.dropbox.com/scl/fi/4hiqyzecajb2doqpfqq5u/HiPaint_6.2.9.apk?rlkey=qc1qfbve02i3q6y3z5yo2gppf&dl=1",
+    "icon": "",
+    "size": "113.7 MB"
   }
 ]

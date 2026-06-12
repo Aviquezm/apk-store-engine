@@ -203,6 +203,13 @@
             "name": "Shazam",
             "version": "16.45.0-260604",
             "pinned": false
+        },
+        {
+            "id": "com.aige.hipaint",
+            "url": "https://www.dropbox.com/scl/fi/4hiqyzecajb2doqpfqq5u/HiPaint_6.2.9.apk?rlkey=qc1qfbve02i3q6y3z5yo2gppf&dl=1",
+            "name": "HiPaint",
+            "version": "6.2.9",
+            "pinned": false
         }
     ]
 }

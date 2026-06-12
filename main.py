@@ -11,7 +11,7 @@ from datetime import datetime
 from dropbox.files import WriteMode
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 from pyaxmlparser import APK
 
 # --- CONFIGURACIÓN ---
@@ -51,13 +51,25 @@ def calcular_hash(file_path):
     return sha256.hexdigest()
 
 def expulsar_de_drive(drive_service, file_id, folder_id):
+    # ID de tu carpeta basurero
+    BASURERO_ID = "1-F24UWRObjg5sGRuzJX91V3oghuMYpbp"
     try:
+        # Intento 1: Borrado definitivo (por si Google lo permite)
         drive_service.files().delete(fileId=file_id).execute()
     except:
         try:
-            drive_service.files().update(fileId=file_id, removeParents=folder_id).execute()
-        except:
-            pass
+            # Intento 2: Inyectar 0 Bytes y mover al basurero
+            archivo_vacio = MediaIoBaseUpload(io.BytesIO(b""), mimetype='application/octet-stream')
+            # 1. Vaciar para ahorrar espacio
+            drive_service.files().update(fileId=file_id, media_body=archivo_vacio).execute()
+            # 2. Mover a la subcarpeta para quitar el estorbo visual
+            drive_service.files().update(
+                fileId=file_id,
+                addParents=BASURERO_ID,
+                removeParents=folder_id
+            ).execute()
+        except Exception as e:
+            print(f"Error expulsando archivo: {e}")
 
 # ---------------------------------------------------------
 # RECONCILIACIÓN TOTAL

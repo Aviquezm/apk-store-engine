@@ -65,13 +65,6 @@
             "pinned": false
         },
         {
-            "id": "com.shazam.android",
-            "url": "https://www.dropbox.com/scl/fi/5pfxe5wt5b84jbw2boyux/Shazam_16.40.0-260430.apk?rlkey=zsbeaaod5qmyga121xxxaki5o&dl=1",
-            "name": "Shazam",
-            "version": "16.40.0-260430",
-            "pinned": false
-        },
-        {
             "id": "com.translate.talkingtranslator",
             "url": "https://www.dropbox.com/scl/fi/5b0re3bf2qfqfjbumpjvk/Talking-Translator_3.4.7.apk?rlkey=cpsgms30a9c4z9uk4oo9da5gc&dl=1",
             "name": "Talking Translator",
@@ -202,6 +195,13 @@
             "url": "https://www.dropbox.com/scl/fi/bif3vo57bcxywj1y1a510/TV-Nacional-CR_7.7.apk?rlkey=ne3hv9fq374nbcc4esr4r84pv&dl=1",
             "name": "TV Nacional CR",
             "version": "7.7",
+            "pinned": false
+        },
+        {
+            "id": "com.shazam.android",
+            "url": "https://www.dropbox.com/scl/fi/c4xjf560baja8y5agve2r/Shazam_16.45.0-260604.apk?rlkey=gaz02l333ukx659v3dfl9ghrh&dl=1",
+            "name": "Shazam",
+            "version": "16.45.0-260604",
             "pinned": false
         }
     ]

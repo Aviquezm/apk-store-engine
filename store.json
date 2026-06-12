@@ -81,15 +81,6 @@
     "size": "61.0 MB"
   },
   {
-    "pkg": "com.shazam.android",
-    "name": "Shazam",
-    "versionName": "16.40.0-260430",
-    "versionCode": 1604000,
-    "apkUrl": "https://www.dropbox.com/scl/fi/5pfxe5wt5b84jbw2boyux/Shazam_16.40.0-260430.apk?rlkey=zsbeaaod5qmyga121xxxaki5o&dl=1",
-    "icon": "",
-    "size": "37.8 MB"
-  },
-  {
     "pkg": "com.translate.talkingtranslator",
     "name": "Talking Translator",
     "versionName": "3.4.7",
@@ -259,5 +250,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/bif3vo57bcxywj1y1a510/TV-Nacional-CR_7.7.apk?rlkey=ne3hv9fq374nbcc4esr4r84pv&dl=1",
     "icon": "",
     "size": "0.3 MB"
+  },
+  {
+    "pkg": "com.shazam.android",
+    "name": "Shazam",
+    "versionName": "16.45.0-260604",
+    "versionCode": 1604500,
+    "apkUrl": "https://www.dropbox.com/scl/fi/c4xjf560baja8y5agve2r/Shazam_16.45.0-260604.apk?rlkey=gaz02l333ukx659v3dfl9ghrh&dl=1",
+    "icon": "",
+    "size": "40.6 MB"
   }
 ]

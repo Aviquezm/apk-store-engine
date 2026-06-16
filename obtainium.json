@@ -205,17 +205,17 @@
             "pinned": false
         },
         {
-            "id": "com.tv.apkstore",
-            "url": "https://www.dropbox.com/scl/fi/8oavuysbwlvg670aje6so/Apk-Store_2.12.apk?rlkey=z0dic3hxf4ge08xtpt8pqkt27&dl=1",
-            "name": "Apk Store",
-            "version": "2.12",
-            "pinned": false
-        },
-        {
             "id": "com.jacksoftw.webcam",
             "url": "https://www.dropbox.com/scl/fi/ku34b4ff3my6v85j47ka3/Iriun-Webcam_2.8.10.apk?rlkey=a2x9m6sth09id2m3oc28l72j7&dl=1",
             "name": "Iriun Webcam",
             "version": "2.8.10",
+            "pinned": false
+        },
+        {
+            "id": "com.tv.apkstore",
+            "url": "https://www.dropbox.com/scl/fi/hp4xy3qhghhovhaxedc74/Apk-Store_2.13.apk?rlkey=b1c6ij0knxcmp54wvj1qbs4fx&dl=1",
+            "name": "Apk Store",
+            "version": "2.13",
             "pinned": false
         }
     ]

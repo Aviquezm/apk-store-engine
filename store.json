@@ -261,15 +261,6 @@
     "size": "113.7 MB"
   },
   {
-    "pkg": "com.tv.apkstore",
-    "name": "Apk Store",
-    "versionName": "2.12",
-    "versionCode": 13,
-    "apkUrl": "https://www.dropbox.com/scl/fi/8oavuysbwlvg670aje6so/Apk-Store_2.12.apk?rlkey=z0dic3hxf4ge08xtpt8pqkt27&dl=1",
-    "icon": "",
-    "size": "5.9 MB"
-  },
-  {
     "pkg": "com.jacksoftw.webcam",
     "name": "Iriun Webcam",
     "versionName": "2.8.10",
@@ -277,5 +268,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/ku34b4ff3my6v85j47ka3/Iriun-Webcam_2.8.10.apk?rlkey=a2x9m6sth09id2m3oc28l72j7&dl=1",
     "icon": "",
     "size": "7.5 MB"
+  },
+  {
+    "pkg": "com.tv.apkstore",
+    "name": "Apk Store",
+    "versionName": "2.13",
+    "versionCode": 14,
+    "apkUrl": "https://www.dropbox.com/scl/fi/hp4xy3qhghhovhaxedc74/Apk-Store_2.13.apk?rlkey=b1c6ij0knxcmp54wvj1qbs4fx&dl=1",
+    "icon": "",
+    "size": "5.9 MB"
   }
 ]

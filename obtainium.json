@@ -217,6 +217,13 @@
             "name": "MacroFactor",
             "version": "5.7.8",
             "pinned": false
+        },
+        {
+            "id": "com.jacksoftw.webcam",
+            "url": "https://www.dropbox.com/scl/fi/ku34b4ff3my6v85j47ka3/Iriun-Webcam_2.8.10.apk?rlkey=a2x9m6sth09id2m3oc28l72j7&dl=1",
+            "name": "Iriun Webcam",
+            "version": "2.8.10",
+            "pinned": false
         }
     ]
 }

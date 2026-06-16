@@ -210,6 +210,13 @@
             "name": "Apk Store",
             "version": "2.12",
             "pinned": false
+        },
+        {
+            "id": "com.sbs.diet",
+            "url": "https://www.dropbox.com/scl/fi/4lmdt6ycwk7x700xwajme/MacroFactor_5.7.8.apk?rlkey=qc40hn1t3at7beulcmzyh0mpy&dl=1",
+            "name": "MacroFactor",
+            "version": "5.7.8",
+            "pinned": false
         }
     ]
 }

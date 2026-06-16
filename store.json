@@ -270,15 +270,6 @@
     "size": "5.9 MB"
   },
   {
-    "pkg": "com.sbs.diet",
-    "name": "MacroFactor",
-    "versionName": "5.7.8",
-    "versionCode": 847,
-    "apkUrl": "https://www.dropbox.com/scl/fi/4lmdt6ycwk7x700xwajme/MacroFactor_5.7.8.apk?rlkey=qc40hn1t3at7beulcmzyh0mpy&dl=1",
-    "icon": "",
-    "size": "108.2 MB"
-  },
-  {
     "pkg": "com.jacksoftw.webcam",
     "name": "Iriun Webcam",
     "versionName": "2.8.10",

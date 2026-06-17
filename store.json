@@ -270,15 +270,6 @@
     "size": "5.9 MB"
   },
   {
-    "pkg": "com.tv.adsentinel",
-    "name": "AdSentinel",
-    "versionName": "1.2",
-    "versionCode": 3,
-    "apkUrl": "https://www.dropbox.com/scl/fi/k46h0ezjinebffzfzpipd/AdSentinel_1.2.apk?rlkey=mt6dkwv2h6f0i77i1lfd8x6vo&dl=1",
-    "icon": "",
-    "size": "5.8 MB"
-  },
-  {
     "pkg": "com.truecaller",
     "name": "Truecaller",
     "versionName": "26.24.5",
@@ -286,5 +277,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/ldfkratc0j2x8g1k0umif/Truecaller_26.24.5.apk?rlkey=7r5rmf6phbyid73ny49nr2uuy&dl=1",
     "icon": "",
     "size": "106.7 MB"
+  },
+  {
+    "pkg": "com.tv.adsentinel",
+    "name": "AdSentinel",
+    "versionName": "1.2",
+    "versionCode": 4,
+    "apkUrl": "https://www.dropbox.com/scl/fi/z4qkbx5u5r0zemj6yhb5i/AdSentinel_1.2.apk?rlkey=t4xatblbn3z4vomymn54ixbgk&dl=1",
+    "icon": "",
+    "size": "5.8 MB"
   }
 ]

@@ -212,17 +212,17 @@
             "pinned": false
         },
         {
-            "id": "com.tv.adsentinel",
-            "url": "https://www.dropbox.com/scl/fi/k46h0ezjinebffzfzpipd/AdSentinel_1.2.apk?rlkey=mt6dkwv2h6f0i77i1lfd8x6vo&dl=1",
-            "name": "AdSentinel",
-            "version": "1.2",
-            "pinned": false
-        },
-        {
             "id": "com.truecaller",
             "url": "https://www.dropbox.com/scl/fi/ldfkratc0j2x8g1k0umif/Truecaller_26.24.5.apk?rlkey=7r5rmf6phbyid73ny49nr2uuy&dl=1",
             "name": "Truecaller",
             "version": "26.24.5",
+            "pinned": false
+        },
+        {
+            "id": "com.tv.adsentinel",
+            "url": "https://www.dropbox.com/scl/fi/z4qkbx5u5r0zemj6yhb5i/AdSentinel_1.2.apk?rlkey=t4xatblbn3z4vomymn54ixbgk&dl=1",
+            "name": "AdSentinel",
+            "version": "1.2",
             "pinned": false
         }
     ]

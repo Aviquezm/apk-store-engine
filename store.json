@@ -171,15 +171,6 @@
     "size": "66.2 MB"
   },
   {
-    "pkg": "com.truecaller",
-    "name": "Truecaller",
-    "versionName": "26.23.5",
-    "versionCode": 2623005,
-    "apkUrl": "https://www.dropbox.com/scl/fi/0ronsniwei6xttn9rd3fg/Truecaller_26.23.5.apk?rlkey=weq77l8qwn5rt19smwy6tcpxq&dl=1",
-    "icon": "",
-    "size": "103.2 MB"
-  },
-  {
     "pkg": "com.lyfta",
     "name": "Lyfta",
     "versionName": "1.528",
@@ -286,5 +277,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/k46h0ezjinebffzfzpipd/AdSentinel_1.2.apk?rlkey=mt6dkwv2h6f0i77i1lfd8x6vo&dl=1",
     "icon": "",
     "size": "5.8 MB"
+  },
+  {
+    "pkg": "com.truecaller",
+    "name": "Truecaller",
+    "versionName": "26.24.5",
+    "versionCode": 2624005,
+    "apkUrl": "https://www.dropbox.com/scl/fi/ldfkratc0j2x8g1k0umif/Truecaller_26.24.5.apk?rlkey=7r5rmf6phbyid73ny49nr2uuy&dl=1",
+    "icon": "",
+    "size": "106.7 MB"
   }
 ]

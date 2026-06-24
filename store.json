@@ -225,15 +225,6 @@
     "size": "10.0 MB"
   },
   {
-    "pkg": "com.tv.nacionalcr",
-    "name": "TV Nacional CR",
-    "versionName": "7.7",
-    "versionCode": 11,
-    "apkUrl": "https://www.dropbox.com/scl/fi/bif3vo57bcxywj1y1a510/TV-Nacional-CR_7.7.apk?rlkey=ne3hv9fq374nbcc4esr4r84pv&dl=1",
-    "icon": "",
-    "size": "0.3 MB"
-  },
-  {
     "pkg": "com.shazam.android",
     "name": "Shazam",
     "versionName": "16.45.0-260604",
@@ -286,5 +277,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/3b3z2un88tn0io4vi3m1v/AdSentinel_2.5.apk?rlkey=gsjlo33590kzs6yd0esi9rle3&dl=1",
     "icon": "",
     "size": "8.0 MB"
+  },
+  {
+    "pkg": "com.tv.nacionalcr",
+    "name": "TV Nacional CR",
+    "versionName": "7.11",
+    "versionCode": 13,
+    "apkUrl": "https://www.dropbox.com/scl/fi/3091udo5d290zpca29ehd/TV-Nacional-CR_7.11.apk?rlkey=ppnyj6gt1q2locry5onm9hbhz&dl=1",
+    "icon": "",
+    "size": "4.7 MB"
   }
 ]

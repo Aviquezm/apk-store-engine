@@ -261,15 +261,6 @@
     "size": "5.9 MB"
   },
   {
-    "pkg": "com.truecaller",
-    "name": "Truecaller",
-    "versionName": "26.24.5",
-    "versionCode": 2624005,
-    "apkUrl": "https://www.dropbox.com/scl/fi/ldfkratc0j2x8g1k0umif/Truecaller_26.24.5.apk?rlkey=7r5rmf6phbyid73ny49nr2uuy&dl=1",
-    "icon": "",
-    "size": "106.7 MB"
-  },
-  {
     "pkg": "com.tv.adsentinel",
     "name": "AdSentinel",
     "versionName": "2.5",
@@ -286,5 +277,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/3091udo5d290zpca29ehd/TV-Nacional-CR_7.11.apk?rlkey=ppnyj6gt1q2locry5onm9hbhz&dl=1",
     "icon": "",
     "size": "4.7 MB"
+  },
+  {
+    "pkg": "com.truecaller",
+    "name": "Truecaller",
+    "versionName": "26.25.6",
+    "versionCode": 2625006,
+    "apkUrl": "https://www.dropbox.com/scl/fi/c8luq8p9dlcwk53h1s5hg/Truecaller_26.25.6.apk?rlkey=uqo6m4f3xkif3u8jizfgmkqho&dl=1",
+    "icon": "",
+    "size": "106.7 MB"
   }
 ]

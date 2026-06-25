@@ -205,13 +205,6 @@
             "pinned": false
         },
         {
-            "id": "com.truecaller",
-            "url": "https://www.dropbox.com/scl/fi/ldfkratc0j2x8g1k0umif/Truecaller_26.24.5.apk?rlkey=7r5rmf6phbyid73ny49nr2uuy&dl=1",
-            "name": "Truecaller",
-            "version": "26.24.5",
-            "pinned": false
-        },
-        {
             "id": "com.tv.adsentinel",
             "url": "https://www.dropbox.com/scl/fi/3b3z2un88tn0io4vi3m1v/AdSentinel_2.5.apk?rlkey=gsjlo33590kzs6yd0esi9rle3&dl=1",
             "name": "AdSentinel",
@@ -223,6 +216,13 @@
             "url": "https://www.dropbox.com/scl/fi/3091udo5d290zpca29ehd/TV-Nacional-CR_7.11.apk?rlkey=ppnyj6gt1q2locry5onm9hbhz&dl=1",
             "name": "TV Nacional CR",
             "version": "7.11",
+            "pinned": false
+        },
+        {
+            "id": "com.truecaller",
+            "url": "https://www.dropbox.com/scl/fi/c8luq8p9dlcwk53h1s5hg/Truecaller_26.25.6.apk?rlkey=uqo6m4f3xkif3u8jizfgmkqho&dl=1",
+            "name": "Truecaller",
+            "version": "26.25.6",
             "pinned": false
         }
     ]

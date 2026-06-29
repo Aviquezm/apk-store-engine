@@ -177,13 +177,6 @@
             "pinned": false
         },
         {
-            "id": "com.shazam.android",
-            "url": "https://www.dropbox.com/scl/fi/c4xjf560baja8y5agve2r/Shazam_16.45.0-260604.apk?rlkey=gaz02l333ukx659v3dfl9ghrh&dl=1",
-            "name": "Shazam",
-            "version": "16.45.0-260604",
-            "pinned": false
-        },
-        {
             "id": "com.aige.hipaint",
             "url": "https://www.dropbox.com/scl/fi/4hiqyzecajb2doqpfqq5u/HiPaint_6.2.9.apk?rlkey=qc1qfbve02i3q6y3z5yo2gppf&dl=1",
             "name": "HiPaint",
@@ -223,6 +216,13 @@
             "url": "https://www.dropbox.com/scl/fi/c8luq8p9dlcwk53h1s5hg/Truecaller_26.25.6.apk?rlkey=uqo6m4f3xkif3u8jizfgmkqho&dl=1",
             "name": "Truecaller",
             "version": "26.25.6",
+            "pinned": false
+        },
+        {
+            "id": "com.shazam.android",
+            "url": "https://www.dropbox.com/scl/fi/ztn0jwxvur4kzo90y2ofm/Shazam_16.47.1-260622.apk?rlkey=g7tiazwpi3tc9ufahi1az0r4v&dl=1",
+            "name": "Shazam",
+            "version": "16.47.1-260622",
             "pinned": false
         }
     ]

@@ -243,15 +243,6 @@
     "size": "7.5 MB"
   },
   {
-    "pkg": "com.tv.apkstore",
-    "name": "Apk Store",
-    "versionName": "2.13",
-    "versionCode": 14,
-    "apkUrl": "https://www.dropbox.com/scl/fi/hp4xy3qhghhovhaxedc74/Apk-Store_2.13.apk?rlkey=b1c6ij0knxcmp54wvj1qbs4fx&dl=1",
-    "icon": "",
-    "size": "5.9 MB"
-  },
-  {
     "pkg": "com.tv.adsentinel",
     "name": "AdSentinel",
     "versionName": "2.5",
@@ -286,5 +277,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/ztn0jwxvur4kzo90y2ofm/Shazam_16.47.1-260622.apk?rlkey=g7tiazwpi3tc9ufahi1az0r4v&dl=1",
     "icon": "",
     "size": "41.3 MB"
+  },
+  {
+    "pkg": "com.tv.apkstore",
+    "name": "Apk Store",
+    "versionName": "2.14",
+    "versionCode": 15,
+    "apkUrl": "https://www.dropbox.com/scl/fi/lfkqdv7tgsrp3oii0lqkv/Apk-Store_2.14.apk?rlkey=riwh9lwt6brj0xhbguofxoynm&dl=1",
+    "icon": "",
+    "size": "5.9 MB"
   }
 ]

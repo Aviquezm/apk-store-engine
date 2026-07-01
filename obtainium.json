@@ -191,13 +191,6 @@
             "pinned": false
         },
         {
-            "id": "com.tv.apkstore",
-            "url": "https://www.dropbox.com/scl/fi/hp4xy3qhghhovhaxedc74/Apk-Store_2.13.apk?rlkey=b1c6ij0knxcmp54wvj1qbs4fx&dl=1",
-            "name": "Apk Store",
-            "version": "2.13",
-            "pinned": false
-        },
-        {
             "id": "com.tv.adsentinel",
             "url": "https://www.dropbox.com/scl/fi/3b3z2un88tn0io4vi3m1v/AdSentinel_2.5.apk?rlkey=gsjlo33590kzs6yd0esi9rle3&dl=1",
             "name": "AdSentinel",
@@ -223,6 +216,13 @@
             "url": "https://www.dropbox.com/scl/fi/ztn0jwxvur4kzo90y2ofm/Shazam_16.47.1-260622.apk?rlkey=g7tiazwpi3tc9ufahi1az0r4v&dl=1",
             "name": "Shazam",
             "version": "16.47.1-260622",
+            "pinned": false
+        },
+        {
+            "id": "com.tv.apkstore",
+            "url": "https://www.dropbox.com/scl/fi/lfkqdv7tgsrp3oii0lqkv/Apk-Store_2.14.apk?rlkey=riwh9lwt6brj0xhbguofxoynm&dl=1",
+            "name": "Apk Store",
+            "version": "2.14",
             "pinned": false
         }
     ]

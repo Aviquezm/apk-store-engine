@@ -153,15 +153,6 @@
     "size": "50.1 MB"
   },
   {
-    "pkg": "com.android.mgstv",
-    "name": "Xuper TV",
-    "versionName": "5.1.5",
-    "versionCode": 50105,
-    "apkUrl": "https://www.dropbox.com/scl/fi/v1ksphbbny153j0t93b14/Xuper-TV_5.1.5.apk?rlkey=tipfqitx90de55x7n8xse2yd9&dl=1",
-    "icon": "",
-    "size": "33.7 MB"
-  },
-  {
     "pkg": "com.fitonomy.health.fitness",
     "name": "Fitonomy",
     "versionName": "7.3.4",
@@ -286,5 +277,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/v1p92fpdvzy8rkn90v9vo/Apk-Store_2.15.apk?rlkey=utz68jbpcmtpsyxj30xe8a6mz&dl=1",
     "icon": "",
     "size": "5.9 MB"
+  },
+  {
+    "pkg": "com.android.mgstv",
+    "name": "Xuper TV",
+    "versionName": "5.1.7",
+    "versionCode": 50107,
+    "apkUrl": "https://www.dropbox.com/scl/fi/n0zqqvg8e3u7cgzo6cd2i/Xuper-TV_5.1.7.apk?rlkey=55xakrswgg49mngw1mssidcex&dl=1",
+    "icon": "",
+    "size": "33.7 MB"
   }
 ]

@@ -224,6 +224,13 @@
             "name": "Xuper TV",
             "version": "5.1.7",
             "pinned": false
+        },
+        {
+            "id": "jp.nonbili.noutube",
+            "url": "https://www.dropbox.com/scl/fi/wcoc7m5ojbvw30rdrst8c/NouTube_0.5.14.apk?rlkey=vlrmuv29jay4cz7n4n22nki7g&dl=1",
+            "name": "NouTube",
+            "version": "0.5.14",
+            "pinned": false
         }
     ]
 }

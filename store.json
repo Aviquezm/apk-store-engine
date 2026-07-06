@@ -286,5 +286,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/n0zqqvg8e3u7cgzo6cd2i/Xuper-TV_5.1.7.apk?rlkey=55xakrswgg49mngw1mssidcex&dl=1",
     "icon": "",
     "size": "33.7 MB"
+  },
+  {
+    "pkg": "jp.nonbili.noutube",
+    "name": "NouTube",
+    "versionName": "0.5.14",
+    "versionCode": 6304,
+    "apkUrl": "https://www.dropbox.com/scl/fi/wcoc7m5ojbvw30rdrst8c/NouTube_0.5.14.apk?rlkey=vlrmuv29jay4cz7n4n22nki7g&dl=1",
+    "icon": "",
+    "size": "62.8 MB"
   }
 ]

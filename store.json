@@ -279,12 +279,12 @@
     "size": "33.7 MB"
   },
   {
-    "pkg": "com.biomes.vanced",
-    "name": "Vanced",
-    "versionName": "5.6.80.334",
-    "versionCode": 50680334,
-    "apkUrl": "https://www.dropbox.com/scl/fi/h8fx5tkoihdd9ri6f05xn/Vanced_5.6.80.334.apk?rlkey=t1vo76n49jluwfznhnpdlizco&dl=1",
+    "pkg": "com.hhst.litube",
+    "name": "Litube",
+    "versionName": "v2.1.4",
+    "versionCode": 214,
+    "apkUrl": "https://www.dropbox.com/scl/fi/ss8b63r7a549q4ltfzhkn/Litube_v2.1.4.apk?rlkey=xskbenctymqud22nbttfgzheo&dl=1",
     "icon": "",
-    "size": "22.4 MB"
+    "size": "6.2 MB"
   }
 ]

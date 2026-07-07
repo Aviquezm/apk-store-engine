@@ -219,10 +219,10 @@
             "pinned": false
         },
         {
-            "id": "com.biomes.vanced",
-            "url": "https://www.dropbox.com/scl/fi/h8fx5tkoihdd9ri6f05xn/Vanced_5.6.80.334.apk?rlkey=t1vo76n49jluwfznhnpdlizco&dl=1",
-            "name": "Vanced",
-            "version": "5.6.80.334",
+            "id": "com.hhst.litube",
+            "url": "https://www.dropbox.com/scl/fi/ss8b63r7a549q4ltfzhkn/Litube_v2.1.4.apk?rlkey=xskbenctymqud22nbttfgzheo&dl=1",
+            "name": "Litube",
+            "version": "v2.1.4",
             "pinned": false
         }
     ]

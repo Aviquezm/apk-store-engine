@@ -100,13 +100,6 @@
             "pinned": false
         },
         {
-            "id": "org.smarttube.stable",
-            "url": "https://www.dropbox.com/scl/fi/tyyz5ck2cufi1r6sawyyk/SmartTube-Universal_31.73.apk?rlkey=mpsiw3uxh24ecsauoclg0tur0&dl=1",
-            "name": "SmartTube",
-            "version": "31.73",
-            "pinned": false
-        },
-        {
             "id": "com.spotify.music",
             "url": "https://www.dropbox.com/scl/fi/yc8i83jves5e1pemg1b57/Spotify_9.1.40.1486.apk?rlkey=gxdszw5npvz62cqv999tg87su&dl=1",
             "name": "Spotify",
@@ -226,10 +219,10 @@
             "pinned": false
         },
         {
-            "id": "jp.nonbili.noutube",
-            "url": "https://www.dropbox.com/scl/fi/wcoc7m5ojbvw30rdrst8c/NouTube_0.5.14.apk?rlkey=vlrmuv29jay4cz7n4n22nki7g&dl=1",
-            "name": "NouTube",
-            "version": "0.5.14",
+            "id": "com.biomes.vanced",
+            "url": "https://www.dropbox.com/scl/fi/h8fx5tkoihdd9ri6f05xn/Vanced_5.6.80.334.apk?rlkey=t1vo76n49jluwfznhnpdlizco&dl=1",
+            "name": "Vanced",
+            "version": "5.6.80.334",
             "pinned": false
         }
     ]

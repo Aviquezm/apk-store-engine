@@ -126,15 +126,6 @@
     "size": "12.1 MB"
   },
   {
-    "pkg": "org.smarttube.stable",
-    "name": "SmartTube",
-    "versionName": "31.73",
-    "versionCode": 2363,
-    "apkUrl": "https://www.dropbox.com/scl/fi/tyyz5ck2cufi1r6sawyyk/SmartTube-Universal_31.73.apk?rlkey=mpsiw3uxh24ecsauoclg0tur0&dl=1",
-    "icon": "",
-    "size": "33.2 MB"
-  },
-  {
     "pkg": "com.spotify.music",
     "name": "Spotify",
     "versionName": "9.1.40.1486",
@@ -288,12 +279,12 @@
     "size": "33.7 MB"
   },
   {
-    "pkg": "jp.nonbili.noutube",
-    "name": "NouTube",
-    "versionName": "0.5.14",
-    "versionCode": 6304,
-    "apkUrl": "https://www.dropbox.com/scl/fi/wcoc7m5ojbvw30rdrst8c/NouTube_0.5.14.apk?rlkey=vlrmuv29jay4cz7n4n22nki7g&dl=1",
+    "pkg": "com.biomes.vanced",
+    "name": "Vanced",
+    "versionName": "5.6.80.334",
+    "versionCode": 50680334,
+    "apkUrl": "https://www.dropbox.com/scl/fi/h8fx5tkoihdd9ri6f05xn/Vanced_5.6.80.334.apk?rlkey=t1vo76n49jluwfznhnpdlizco&dl=1",
     "icon": "",
-    "size": "62.8 MB"
+    "size": "22.4 MB"
   }
 ]

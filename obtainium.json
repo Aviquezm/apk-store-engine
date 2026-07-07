@@ -217,13 +217,6 @@
             "name": "Xuper TV",
             "version": "5.1.7",
             "pinned": false
-        },
-        {
-            "id": "com.google.android.youtube.pro",
-            "url": "https://www.dropbox.com/scl/fi/lkll5jhkf3l6z4zuwz4bk/YouTube-Pro_3.98.apk?rlkey=bs73bckz7esqgyieoph83ype3&dl=1",
-            "name": "YouTube Pro",
-            "version": "3.98",
-            "pinned": false
         }
     ]
 }

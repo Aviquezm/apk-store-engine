@@ -277,14 +277,5 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/n0zqqvg8e3u7cgzo6cd2i/Xuper-TV_5.1.7.apk?rlkey=55xakrswgg49mngw1mssidcex&dl=1",
     "icon": "",
     "size": "33.7 MB"
-  },
-  {
-    "pkg": "com.google.android.youtube.pro",
-    "name": "YouTube Pro",
-    "versionName": "3.98",
-    "versionCode": 1,
-    "apkUrl": "https://www.dropbox.com/scl/fi/lkll5jhkf3l6z4zuwz4bk/YouTube-Pro_3.98.apk?rlkey=bs73bckz7esqgyieoph83ype3&dl=1",
-    "icon": "",
-    "size": "0.1 MB"
   }
 ]

@@ -286,5 +286,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/6klqk7yvewwux3qoi3nht/NewPipe_0.28.8.apk?rlkey=j26dxisr2eg6rfuiwo740f6qa&dl=1",
     "icon": "",
     "size": "10.4 MB"
+  },
+  {
+    "pkg": "com.github.libretube",
+    "name": "LibreTube",
+    "versionName": "31.4",
+    "versionCode": 70,
+    "apkUrl": "https://www.dropbox.com/scl/fi/6axcm6j2yerc2my5u3j4i/LibreTube_31.4.apk?rlkey=v2lp2swecqe9sesm91v9eu62v&dl=1",
+    "icon": "",
+    "size": "8.8 MB"
   }
 ]

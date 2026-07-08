@@ -224,13 +224,6 @@
             "name": "NewPipe",
             "version": "0.28.8",
             "pinned": false
-        },
-        {
-            "id": "com.github.libretube",
-            "url": "https://www.dropbox.com/scl/fi/6axcm6j2yerc2my5u3j4i/LibreTube_31.4.apk?rlkey=v2lp2swecqe9sesm91v9eu62v&dl=1",
-            "name": "LibreTube",
-            "version": "31.4",
-            "pinned": false
         }
     ]
 }

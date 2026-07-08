@@ -217,6 +217,13 @@
             "name": "Xuper TV",
             "version": "5.1.7",
             "pinned": false
+        },
+        {
+            "id": "org.schabi.newpipe",
+            "url": "https://www.dropbox.com/scl/fi/6klqk7yvewwux3qoi3nht/NewPipe_0.28.8.apk?rlkey=j26dxisr2eg6rfuiwo740f6qa&dl=1",
+            "name": "NewPipe",
+            "version": "0.28.8",
+            "pinned": false
         }
     ]
 }

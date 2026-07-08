@@ -277,5 +277,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/n0zqqvg8e3u7cgzo6cd2i/Xuper-TV_5.1.7.apk?rlkey=55xakrswgg49mngw1mssidcex&dl=1",
     "icon": "",
     "size": "33.7 MB"
+  },
+  {
+    "pkg": "org.schabi.newpipe",
+    "name": "NewPipe",
+    "versionName": "0.28.8",
+    "versionCode": 1013,
+    "apkUrl": "https://www.dropbox.com/scl/fi/6klqk7yvewwux3qoi3nht/NewPipe_0.28.8.apk?rlkey=j26dxisr2eg6rfuiwo740f6qa&dl=1",
+    "icon": "",
+    "size": "10.4 MB"
   }
 ]

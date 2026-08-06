@@ -191,20 +191,6 @@
             "pinned": false
         },
         {
-            "id": "com.truecaller",
-            "url": "https://www.dropbox.com/scl/fi/c8luq8p9dlcwk53h1s5hg/Truecaller_26.25.6.apk?rlkey=uqo6m4f3xkif3u8jizfgmkqho&dl=1",
-            "name": "Truecaller",
-            "version": "26.25.6",
-            "pinned": false
-        },
-        {
-            "id": "com.shazam.android",
-            "url": "https://www.dropbox.com/scl/fi/ztn0jwxvur4kzo90y2ofm/Shazam_16.47.1-260622.apk?rlkey=g7tiazwpi3tc9ufahi1az0r4v&dl=1",
-            "name": "Shazam",
-            "version": "16.47.1-260622",
-            "pinned": false
-        },
-        {
             "id": "com.tv.apkstore",
             "url": "https://www.dropbox.com/scl/fi/v1p92fpdvzy8rkn90v9vo/Apk-Store_2.15.apk?rlkey=utz68jbpcmtpsyxj30xe8a6mz&dl=1",
             "name": "Apk Store",
@@ -223,6 +209,20 @@
             "url": "https://www.dropbox.com/scl/fi/6klqk7yvewwux3qoi3nht/NewPipe_0.28.8.apk?rlkey=j26dxisr2eg6rfuiwo740f6qa&dl=1",
             "name": "NewPipe",
             "version": "0.28.8",
+            "pinned": false
+        },
+        {
+            "id": "com.shazam.android",
+            "url": "https://www.dropbox.com/scl/fi/7hc7rwrs79hcf5d6a7yek/Shazam_16.52.0-260724.apk?rlkey=ww53j1kv5nwr6rnctn3qcfll3&dl=1",
+            "name": "Shazam",
+            "version": "16.52.0-260724",
+            "pinned": false
+        },
+        {
+            "id": "com.truecaller",
+            "url": "https://www.dropbox.com/scl/fi/o2pwjajwmzi5ec393xqku/Truecaller_26.30.5.apk?rlkey=9t7sa2ugqrxib552r6k9zlm9f&dl=1",
+            "name": "Truecaller",
+            "version": "26.30.5",
             "pinned": false
         }
     ]

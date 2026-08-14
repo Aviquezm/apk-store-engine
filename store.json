@@ -126,15 +126,6 @@
     "size": "12.1 MB"
   },
   {
-    "pkg": "com.spotify.music",
-    "name": "Spotify",
-    "versionName": "9.1.40.1486",
-    "versionCode": 140519586,
-    "apkUrl": "https://www.dropbox.com/scl/fi/yc8i83jves5e1pemg1b57/Spotify_9.1.40.1486.apk?rlkey=gxdszw5npvz62cqv999tg87su&dl=1",
-    "icon": "",
-    "size": "101.6 MB"
-  },
-  {
     "pkg": "com.flightradar24free",
     "name": "Flightradar24",
     "versionName": "11.4.0",
@@ -160,15 +151,6 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/f8m1qjh0f7i7yroleje17/Lyfta_1.528.apk?rlkey=mmsouni46p7yygwi8scvmdwg7&dl=1",
     "icon": "",
     "size": "41.5 MB"
-  },
-  {
-    "pkg": "com.dreamstudio.naturesounds",
-    "name": "Nature Sounds",
-    "versionName": "18.0",
-    "versionCode": 120,
-    "apkUrl": "https://www.dropbox.com/scl/fi/1gm0xy9ackaaurs7qb5b0/Nature-Sounds_18.0.apk?rlkey=cnz25omsg6dd1ficxiyxyanaq&dl=1",
-    "icon": "",
-    "size": "48.2 MB"
   },
   {
     "pkg": "pilatesworkout.yogaworkout.loseweight.workoutapps",
@@ -279,12 +261,39 @@
     "size": "41.2 MB"
   },
   {
+    "pkg": "hiddencamdetector.futureapps.com.hiddencamdetectoradsfree",
+    "name": "Hidden Camera Detector",
+    "versionName": "23",
+    "versionCode": 36,
+    "apkUrl": "https://www.dropbox.com/scl/fi/pd42vlwatoh4nfkn21euj/Hidden-Camera-Detector-Gold_23.apk?rlkey=uxubfer152y7wvtfi4vjwjfgp&dl=1",
+    "icon": "",
+    "size": "18.4 MB"
+  },
+  {
     "pkg": "com.truecaller",
     "name": "Truecaller",
-    "versionName": "26.30.5",
-    "versionCode": 2630005,
-    "apkUrl": "https://www.dropbox.com/scl/fi/o2pwjajwmzi5ec393xqku/Truecaller_26.30.5.apk?rlkey=9t7sa2ugqrxib552r6k9zlm9f&dl=1",
+    "versionName": "26.32.7",
+    "versionCode": 2632007,
+    "apkUrl": "https://www.dropbox.com/scl/fi/uzj4v04n1jq45udwufunf/Truecaller_26.32.7.apk?rlkey=uuxanm16xr6alnfba57eajenr&dl=1",
     "icon": "",
-    "size": "105.5 MB"
+    "size": "105.1 MB"
+  },
+  {
+    "pkg": "com.dreamstudio.naturesounds",
+    "name": "Nature Sounds",
+    "versionName": "18.4",
+    "versionCode": 125,
+    "apkUrl": "https://www.dropbox.com/scl/fi/xsxkjjhw2dh0zb3izjtup/Nature-Sounds_18.4.apk?rlkey=5h5ds14q60do4gp3p6kajmatr&dl=1",
+    "icon": "",
+    "size": "48.0 MB"
+  },
+  {
+    "pkg": "com.spotify.music",
+    "name": "Spotify",
+    "versionName": "9.1.60.1970",
+    "versionCode": 143144414,
+    "apkUrl": "https://www.dropbox.com/scl/fi/ouiuj97s9mfrj1jsp65ab/Spotify_9.1.60.1970.apk?rlkey=qzepsdu304jzm8imrvo9yr5n0&dl=1",
+    "icon": "",
+    "size": "115.1 MB"
   }
 ]

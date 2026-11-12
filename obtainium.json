@@ -231,13 +231,6 @@
             "name": "TV Nacional CR",
             "version": "8.1",
             "pinned": false
-        },
-        {
-            "id": "com.cocoplay.yorch",
-            "url": "https://www.dropbox.com/scl/fi/r5d4ql5fauasn35ievy9t/CocoPlay_1.20.apk?rlkey=jkiwiwxxpq19jhir1bpipql5k&dl=1",
-            "name": "CocoPlay",
-            "version": "1.2",
-            "pinned": false
         }
     ]
 }

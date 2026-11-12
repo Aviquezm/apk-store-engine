@@ -295,5 +295,14 @@
     "apkUrl": "https://www.dropbox.com/scl/fi/47l8zbomm593gw0z97rwp/TV-Nacional-CR_8.1.apk?rlkey=ctauly3e7d3jgcihzx0yn7h7n&dl=1",
     "icon": "",
     "size": "8.7 MB"
+  },
+  {
+    "pkg": "com.cocoplay.yorch",
+    "name": "CocoPlay",
+    "versionName": "1.2",
+    "versionCode": 35,
+    "apkUrl": "https://www.dropbox.com/scl/fi/r5d4ql5fauasn35ievy9t/CocoPlay_1.20.apk?rlkey=jkiwiwxxpq19jhir1bpipql5k&dl=1",
+    "icon": "",
+    "size": "15.9 MB"
   }
 ]
